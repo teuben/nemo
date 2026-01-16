@@ -9,8 +9,10 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 nbody4 - input parameter file for nbody4 
+<p> 
 <h2><a name='sect1' href='#toc1'>Description</a></h2>
 <br>
 <pre>*
@@ -349,20 +351,38 @@ lines).
 *      15       Massless supernova remnant.
 *       ---------------------------------------------------------------------
 </pre>
-<h2><a name='sect2' href='#toc2'>Author</a></h2>
+<p> 
+<h2><a name='sect2' href='#toc2'>Imf</a></h2>
+As described in Sverre&rsquo;s imf.f, the KZ(20) parameter controls the IMF:
+<br>
+<pre>*     0,1 Salpeter power-law with exponent ALPHA.
+*       2 Scalo (see Eggleton, Fitchett &amp; Tout, Ap.J. 347, 998)
+*      -3 Eggleton book (but w/ Sverre&rsquo;s typo: 0.3 u / (1-u)**0.5) )
+*       3 Eggleton book (corrected: 0.3 (u / (1-u))**0.55 = eq. (1.17) )
+*       4 KTG 93
+*       5 KTG93 and binary masses from KTG91
+*       6 Pavel99 extending to Brown-dwarf regime
+</pre>
+<p> 
+<p> 
+<h2><a name='sect3' href='#toc3'>Author</a></h2>
 Sverre Aarseth 
-<h2><a name='sect3' href='#toc3'>See Also</a></h2>
+<p> 
+<h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='runbody4.1.html'>runbody4(1NEMO)</a>
  
-<h2><a name='sect4' href='#toc4'>Files</a></h2>
+<p> 
+<h2><a name='sect5' href='#toc5'>Files</a></h2>
 <br>
 <pre>define.f  - dummy, but is the actual text in the DESCRIPTION part of this
 man page!
 </pre>
-<h2><a name='sect5' href='#toc5'>History</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>History</a></h2>
 <br>
 <pre>1-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;minor updates via Sverre<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT/SJA
+26-aug-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed up KZ(20) options<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT/SAV
 </pre><p>
 
 <hr><p>
@@ -370,10 +390,11 @@ man page!
 <ul>
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
-<li><a name='toc2' href='#sect2'>Author</a></li>
-<li><a name='toc3' href='#sect3'>See Also</a></li>
-<li><a name='toc4' href='#sect4'>Files</a></li>
-<li><a name='toc5' href='#sect5'>History</a></li>
+<li><a name='toc2' href='#sect2'>Imf</a></li>
+<li><a name='toc3' href='#sect3'>Author</a></li>
+<li><a name='toc4' href='#sect4'>See Also</a></li>
+<li><a name='toc5' href='#sect5'>Files</a></li>
+<li><a name='toc6' href='#sect6'>History</a></li>
 </ul>
 </body>
 </html>

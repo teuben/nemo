@@ -68,19 +68,19 @@ output (default: 1) </dd>
 
 <dt>-d <i>float</i> </dt>
 <dd>timestep
-(default: 0.015625) </dd>
+(default: 0.015625 = 1/64) </dd>
 
 <dt>-e <i>float</i> </dt>
 <dd>softening parameter (default: 0.025) </dd>
 
-<dt>-t <i>float</i>
-</dt>
+<dt>-t
+<i>float</i> </dt>
 <dd>opening angle theta               (default: 0.75) </dd>
 
 <dt>-n <i>int</i> </dt>
-<dd>ncrit for Barnes&rsquo;
-vectorization  = maximum number of particles sharing an interaction list
-(default: 1024) (ONLY used with GRAPE/HARP implementation) - AMUSE::ncrit_for_tree
+<dd>ncrit for
+Barnes&rsquo; vectorization  = maximum number of particles sharing an interaction
+list (default: 1024) (ONLY used with GRAPE/HARP implementation) - AMUSE::ncrit_for_tree
 </dd>
 
 <dt>-N <i>int</i> </dt>
@@ -140,14 +140,14 @@ passed to the command.<br>
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
 Files are silently appended to. <p>
 BHTC
+is only available within AMUSE, has to be manually copied to $NEMOBIN 
+<p>
 
-<p>is only available 
-<p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-An example of integrating a 1024 body Plummer
-sphere to time 10, and plotting the Lagrangian radii 0.1..0.9 as function of
-time:  
-<p>   mkplummer - 1024 | stoa - p1024<br>
+An example of integrating a 1024 body Plummer sphere to time 10,
+and plotting the Lagrangian radii 0.1..0.9 as function of time:  
+<p>   mkplummer
+- 1024 | stoa - p1024<br>
    rm -f p1024.out p1024.snap<br>
    bhtree -i p1024 -o p1024.out -D 0.1 -T 10 &gt; p1024.log 2&gt;&amp;1 <br>
    atos p1024.out p1024.snap mass,phase,phi <br>
@@ -160,36 +160,42 @@ time:
 <p> To compare the original hackcode1 with bhtree, the following
 example is part of the Benchfile, integrating a 1024 body Plummer model
 for 1280 steps. 
-<p>    rm -f p1k.1 p1k.2<br>
+<p>    rm -f p1k.1 p1k.2 p1k.3<br>
    mkplummer p1k.1 1024 seed=123<br>
    stoa p1k.1 p1k.2<br>
    time=/usr/bin/time<br>
    $time hackcode1 p1k.1 . tstop=20 tol=0.75 freq=64     eps=0.025  &gt; p1.log
 2&gt;&amp;1<br>
    $time bhtree -i p1k.2   -T 20    -t 0.75  -d 0.015625 -e 0.025   &gt; p2.log 2&gt;&amp;1<br>
+   plumsnap p1k.3 2048<br>
+   $time treecode_dp p1k p1k.out dtime=1/64 theta=0.75 usequad=false tstop=10
+&gt; p3.log<br>
   
-<p> here are some results: 
+<p> here are some results, including the equivalent treecode from ZENO in
+double precision. 
 <p> <br>
-<pre>CPU<tt> </tt>&nbsp;<tt> </tt>&nbsp;hackcode1<tt> </tt>&nbsp;<tt> </tt>&nbsp;bhtree<tt> </tt>&nbsp;<tt> </tt>&nbsp;BHTC
-Ultra 7 155H<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.44<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.69<tt> </tt>&nbsp;<tt> </tt>&nbsp;5.51
-i7-1260P<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.75<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.85<tt> </tt>&nbsp;<tt> </tt>&nbsp;5.43
-i5-10210U      <tt> </tt>&nbsp;<tt> </tt>&nbsp;5.79<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.99<tt> </tt>&nbsp;<tt> </tt>&nbsp;?
+<pre>CPU<tt> </tt>&nbsp;<tt> </tt>&nbsp;hackcode1<tt> </tt>&nbsp;<tt> </tt>&nbsp;bhtree<tt> </tt>&nbsp;<tt> </tt>&nbsp;BHTC<tt> </tt>&nbsp;<tt> </tt>&nbsp;ZENO/treecode
+Ultra 7 155H<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.44<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.69<tt> </tt>&nbsp;<tt> </tt>&nbsp;5.51<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.85
+i7-1260P<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.75<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.85<tt> </tt>&nbsp;<tt> </tt>&nbsp;5.43<tt> </tt>&nbsp;<tt> </tt>&nbsp;?
+i5-10210U      <tt> </tt>&nbsp;<tt> </tt>&nbsp;5.79<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.99<tt> </tt>&nbsp;<tt> </tt>&nbsp;?<tt> </tt>&nbsp;<tt> </tt>&nbsp;?
 </pre>
 <p> 
-<h2><a name='sect7' href='#toc7'>Amuse</a></h2>
-Since <b>bhcode</b> is also absorbed in <i>amuse</i>, we can compare a typical
- integration in both NEMO and AMUSE. 
+<h2><a name='sect7' href='#toc7'>Install</a></h2>
+Can be done using <b>mknemo -a bhtree</b>. 
 <p> 
-<h2><a name='sect8' href='#toc8'>Run</a></h2>
+<h2><a name='sect8' href='#toc8'>Caveats</a></h2>
 There is no <a href='run.3.html'><i>run(3NEMO)</i></a>
- interface
-for bhtree. 
+
+interface for bhtree. 
+<p> 
 <p> 
 <h2><a name='sect9' href='#toc9'>See Also</a></h2>
 <a href='hackcode1.1.html'>hackcode1(1NEMO)</a>
 , <a href='atos.1.html'>atos(1NEMO)</a>
 , <a href='stoa.1.html'>stoa(1NEMO)</a>
- <br>
+
+<p>
+<br>
 <pre>Barnes, J. &amp; Hut, P. 1986. Nature 324, 446.
 http://jun.artcompsci.org//softwares/C++tree/index.html (now deprecated)
 </pre>
@@ -200,8 +206,7 @@ http://jun.artcompsci.org//softwares/C++tree/index.html (now deprecated)
 <h2><a name='sect11' href='#toc11'>Files</a></h2>
 <br>
 <pre>$NEMO/usr/kawai/nbody   (this is historic)
-$AMUSE_DIR/src/amuse/community/bhtree/src  
-$AMUSE_DIR/src/amuse_bhtree (new 2025 version)
+$AMUSE_DIR/src/amuse_bhtree/src  (including BHTC.C)
 </pre>Note if amuse is installed with <a href='mknemo.1.html'><b>mknemo(1NEMO)</b></a>
 , AMUSE_DIR=$NEMO/local/amuse
 
@@ -227,8 +232,8 @@ Jun Makino
 <li><a name='toc4' href='#sect4'>Caveats</a></li>
 <li><a name='toc5' href='#sect5'>Examples</a></li>
 <li><a name='toc6' href='#sect6'>Benchmark</a></li>
-<li><a name='toc7' href='#sect7'>Amuse</a></li>
-<li><a name='toc8' href='#sect8'>Run</a></li>
+<li><a name='toc7' href='#sect7'>Install</a></li>
+<li><a name='toc8' href='#sect8'>Caveats</a></li>
 <li><a name='toc9' href='#sect9'>See Also</a></li>
 <li><a name='toc10' href='#sect10'>Ads</a></li>
 <li><a name='toc11' href='#sect11'>Files</a></li>

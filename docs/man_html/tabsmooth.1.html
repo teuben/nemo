@@ -28,16 +28,17 @@ the filter, for example a Hanning, Boxcar, Gaussian and a Savitzky-Golay
 filter (and some of their derivates) can be selected.   A pass-through is
 also allowed. Some of the filters need additional argument(s), given by
 <b>pars=</b> and are described below. <p>
-Optionally the smoothing kernel can be shown
-using show=t without the need to read a table. 
+The default is a Hanning smoothing. <p>
+Optionally
+the smoothing kernel can be shown using show=t without the need to read
+a table. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+The following parameters are recognized in any order
+if the keyword is also given: 
 <dl>
 
-<dt><b>in=</b>
-</dt>
+<dt><b>in=</b> </dt>
 <dd>Input file name. <br>
 No default </dd>
 
@@ -51,7 +52,7 @@ only those  columns are output to stdout. <br>
 this is work in progress.  Either a number value can be given, or a minimum
 match to the filter name, as shown in the first column: <br>
 <pre>   -1   passthrough, the column(s) not modified
-   0,h  hanning (1,2,1)
+   0,h  hanning (1,2,1)  [default]
    1    SK2 5pt smooth
    2    SK2 1st derivative with h=1 (sum=0)
    3    SK2 2nd derivative with h=1 (sum=0)

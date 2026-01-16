@@ -51,7 +51,10 @@ This should contain a reference to files
 needed to be included at compilation or linked at linking time. Note that
 a &lt;TAB&gt; must be included for proper  allignment at 2.5 inches <br>
 <pre>/usr/lib/tmac/tmac.an   <tt> </tt>&nbsp;<tt> </tt>&nbsp;This file contains the MAN macros
-</pre>
+</pre>The script <b>mkman</b> in $NEMO/usr/scripts can create a template man page based
+on an existing NEMO program with the NEMO user interface. For example  
+      $NEMO/src/scripts/mkman tsf  &gt; $NEMO/man/man1/tsf_bogus.1<br>
+  
 <p> 
 <h2><a name='sect6' href='#toc6'>Description</a></h2>
 This is a simple skeleton file for authors of manual pages

@@ -23,7 +23,7 @@ tabplot2 - compare two tables
 for binning, which is not implemented here. Instead there are two input
 tables, and each table needs an X column and Y column. This can also mean
 the two input tables are the same, but different X or Y columns are compared,
-or two different tables, with the same X and Y column (which is the default)
+or two different tables, with the same X and Y column (which is the default).
 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -33,11 +33,11 @@ this man page is up to date.
 <dl>
 
 <dt><b>in1=</b> </dt>
-<dd>Input first table [???]     </dd>
+<dd>Input first table. No default. </dd>
 
 <dt><b>in2=</b> </dt>
 <dd>Input
-second table [???]     </dd>
+second table. No default </dd>
 
 <dt><b>xcol=</b> </dt>
 <dd>x coordinate column(s(). Up to two columns
@@ -141,22 +141,32 @@ backtrack in line= option [t]   </dd>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
 Here is
-an example comparing column 2 and 3 from the same file: <br>
-<pre>    tabgen - 20 3 | sort -n &gt; random.tab
-    tabplot2 random.tab random.tab 1 2,3 line=1,1 color=2,4 point=2,0.1
-</pre>
+an example comparing column 2 and 3 from the same file:      tabgen - 20
+3 seed=1 | sort -n &gt; random1.tab<br>
+     tabgen - 20 3 seed=2 | sort -n &gt; random2.tab<br>
+     tabplot2 random1.tab random2.tab 1,1 2,3 line=1,1 color=2,4 point=2,0.1<br>
+  where the <a href='paste.1.html'><i>paste(1)</i></a>
+ program can achieve the same as follows:  
+<p> paste random1.tab
+random2.tab |\ <tt> </tt>&nbsp;<tt> </tt>&nbsp;tabplot - 1,4 2,6 line=1,1 color=2,4 point=2,0.1 yapp=2/xs<br>
+ 
+<p>  except it is harder to keep track of column numbers in he 2nd file. 
+<p>
+
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='tabplot.1.html'>tabplot(1NEMO)</a>
 , <a href='table.5.html'>table(5NEMO)</a>
+, <a href='paste.1.html'>paste(1)</a>
  
 <p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<h2><a name='sect7' href='#toc7'>Update
+History</a></h2>
 <br>
-<pre>15-feb-2024m<tt> </tt>&nbsp;<tt> </tt>&nbsp;Quick and Dirty conversion from tabplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>15-feb-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;Quick and Dirty conversion from tabplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

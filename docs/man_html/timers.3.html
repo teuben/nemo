@@ -11,8 +11,9 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-init_timers, stamp_timers, diff_timers - routines to time your code
+init_timers, stamp_timers, diff_timers - routines to time sections
 
+<p>of your code 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
@@ -37,22 +38,19 @@ proccesing cores and multi-tasking operating systems how to translate this
 to a CPU usage.  For long term stability routines such as <a href='cputime.3.html'><i>cputime(3NEMO)</i></a>
 
 should be used,for short fine grained understanding, these routines could
-be useful. 
+be useful. <p>
+This timers method approached something called <i>Frame based profiling</i>
+
 <p> 
 <h2><a name='sect3' href='#toc3'>Example</a></h2>
-<br>
-<pre>    init_timers(n+1);
-    for (i=0; i&lt;n; i++)
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;stamp_timers(i);
-    stamp_timers(n);
-    for (i=0; i&lt;n; i++)
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;printf("Method-1: %Ld\n",diff_timers(i,i+1));
-    stamp_timers(0);
-    for (i=0; i&lt;n; i++) {
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;stamp_timers(i+1);
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;printf("Method-2: %Ld\n",diff_timers(i,i+1));
-    }
-</pre>
+ init_timers(n+1); for (i=0; i&lt;n; i++) <tt> </tt>&nbsp;<tt> </tt>&nbsp;stamp_timers(i);<br>
+ <a href='stamp_timers.n.html'>stamp_timers(n)</a>
+; for (i=0; i&lt;n; i++) <tt> </tt>&nbsp;<tt> </tt>&nbsp;printf("Method-1: %Ld\n",diff_timers(i,i+1));<br>
+ 
+<p> stamp_timers(0); for (i=0; i&lt;n; i++) { <tt> </tt>&nbsp;<tt> </tt>&nbsp;stamp_timers(i+1);<br>
+ <tt> </tt>&nbsp;<tt> </tt>&nbsp;printf("Method-2: %Ld\n",diff_timers(i,i+1));<br>
+ } 
+<p>  
 <p> 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
 Currently this function is only implemented on Intel hardware,

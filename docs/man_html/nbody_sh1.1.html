@@ -25,6 +25,9 @@ scheme. <p>
 Related is the <b>nbody0h4</b> program written by Aarseth. See <a href='nbody0.1.html'><i>nbody0(1NEMO)</i></a>
 .
 
+<p> <p>
+This program is also known as <b>hermite</b> in <a href='amuse.1.html'><i>amuse(1)</i></a>
+ 
 <p> 
 <h2><a name='sect3' href='#toc3'>Usage</a></h2>
 <br>
@@ -32,15 +35,15 @@ Related is the <b>nbody0h4</b> program written by Aarseth. See <a href='nbody0.1
                   [-e diagnostics_interval] [-o output_interval]
                   [-t total_duration] [-i (start output at t = 0)]
                   [-x (extra debugging diagnostics)]
-</pre><i>"step_size_control_parameter"</i> is a coefficient determining the the size
+</pre><i>-d "step_size_control_parameter"</i> is a coefficient determining the the size
 of the shared but variable time step for all particles <p>
-<i>"diagnostics_interval"</i>
+<i>-e "diagnostics_interval"</i>
 is the time between output of diagnostics, in the form of kinetic, potential,
 and total energy; with the -x option, a dump of the internal particle data
 is made as well <p>
-<i>"output_interval"</i> is the time between successive snapshot
+<i>-o "output_interval"</i> is the time between successive snapshot
 outputs <p>
-<i>"total_duration"</i> is the integration time, until the program stops
+<i>-t "total_duration"</i> is the integration time, until the program stops
 <p>
 Input/output are read/written from/to the standard i/o streams. Since all
 options have sensible defaults, the simplest way to run the code is by
@@ -48,8 +51,9 @@ only specifying the i/o files for the N-body snapshots: <br>
 <pre>            nbody_sh1 &lt; data.in &gt; data.out
 </pre>The diagnostics information will then appear on the screen. To capture the
 diagnostics information in a file, capture the standard error stream as
-follows: <br>
+follows in csh and bash <br>
 <pre>            (nbody_sh1 &lt; data.in &gt; data.out) &gt;&amp; data.err
+            nbody_sh1 &lt; data.in &gt; data.out  2&gt; data.err
 </pre>Note: if any of the times specified in the -e, -o, or -t options are not an
 an integer multiple of "step", output will occur slightly later than predicted,
 after a full time step has been taken.  And even if they are integer multiples,
@@ -59,9 +63,9 @@ round-off error may induce one extra step.
 The program
 expects input of a single snapshot of an N-body system, in the following
 format: the number of particles in the snapshot n; the time t; mass mi,
-position (x,y,z) and velocity (vx,vy,vz) for each particle i,  with position
-and velocity given through their three Cartesian coordinates, divided over
-separate lines as follows:  
+position (xi,yi,zi) and velocity (vxi,vyi,vzi) for each particle i,  with
+position and velocity given through their three Cartesian coordinates,
+divided over separate lines as follows:  
 <p>                       n<br>
                        t<br>
                        m1 x1 y1 x1 vx1 vy1 vz1<br>
@@ -86,12 +90,13 @@ format using <a href='tabtos.1.html'><i>tabtos(1NEMO)</i></a>
 , as shown in the following example:  
 <p> <tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer
 p100 nbody=100<br>
- <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapprint p100 m,x,y,z,vx,vy,vz header=t newline=t &gt; p100.tab<br>
+ <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapprint p100 m,x,y,z,vx,vy,vz header=nbody,time newline=t &gt; p100.tab<br>
  <tt> </tt>&nbsp;<tt> </tt>&nbsp;nbody_sh1 &lt; p100.tab | tabtos - nbody,time m,x,y,z,vx,vy,vz nbody=100<br>
  
 <p>  or here in more traditional unix pipe example the famous figure 8 orbit:
  
-<p> <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapprint $NEMODAT/figure8.dat m,x,y,z,vx,vy,vz header=t newline=t |\<br>
+<p> <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapprint $NEMODAT/figure8.dat m,x,y,z,vx,vy,vz header=nbody,time newline=t
+|\<br>
  <tt> </tt>&nbsp;<tt> </tt>&nbsp;      nbody_sh1 -i -o 0.01 -t 20 |\<br>
  <tt> </tt>&nbsp;<tt> </tt>&nbsp;      tabtos - figure8.out nbody,time m,x,y,z,vx,vy,vz nbody=3<br>
  <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapplot figure8.out trak=t<br>
@@ -117,16 +122,18 @@ src/nbody/evolve/ACS
 ,
 <a href='tabtos.1.html'>tabtos(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
- <br>
-Hut, P., Makino, J. &amp; McMillan, S., 1995, Astrophysical Journal Letters 443,
-L93-L96. <br>
+ <p>
 <br>
-<pre>http://www.ids.ias.edu/~piet/act/comp/algorithms/starter/index.html (seems
+<pre>Hut, P., Makino, J. &amp; McMillan, S., 1995, Astrophysical Journal Letters 443,
+L93-L96.
+http://www.ids.ias.edu/~piet/act/comp/algorithms/starter/index.html (seems
 gone)
 </pre>
+<p> 
 <h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>jan-2002<tt> </tt>&nbsp;<tt> </tt>&nbsp;Version 1:<tt> </tt>&nbsp;<tt> </tt>&nbsp;Piet Hut, Jun Makino
+jun-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;updated examples for new snapprint<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

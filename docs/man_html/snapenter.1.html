@@ -9,82 +9,109 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 snapenter - enter an N-body snapshot interactively into a file 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>snapenter</b>
 [<b>out=</b>snapfile] [<b>nbody=</b>nbody] [<b>time=</b>time] [<b>headline=</b>string] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapenter</i>
-prompts for input from the screen of the basic data describing a snapshot
-file: masses, positions and velocities of each particle in an N-body system.
- The data are written into a file <i>snap-file</i>, in a standard N-body snapshot
-format.  If not provided on the command line, <i>snapenter</i> will prompt for
-the name of <i>snap-file</i> and <i>nbody</i>, the number of particles. <p>
-To still enter
-snapshots interactively, but for a larger amount of bodies, the &lsquo;&lsquo;205&rsquo;&rsquo; format
-(see <a href='atos.1.html'><i>atos(1NEMO)</i></a>
-) can be used. An ascii file with masses, positions and
-velocities can be created with an editor, and <a href='atos.1.html'><i>atos(1NEMO)</i></a>
- is used to convert
-this file to a proper <a href='snapshot.5NEM0.html'>snapshot(5NEM0)</a>
- file. <p>
-Coordinates are not transformated
-to the center-of-mass coordinate system, for this the program <i>snapcenter</i>
-needs to be used. 
+interactively prompts the user for the basic data describing an N-body snapshot:
+masses, positions and velocities of each particles. The data are written
+into a file <i>snap-file</i>, in standard N-body <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+ format.  If not
+provided on the command line, <i>snapenter</i> will prompt for the name of <i>snap-file</i>
+and <i>nbody</i>, the number of particles. <p>
+To still enter snapshots interactively,
+but for a larger amount of bodies, the &lsquo;&lsquo;205&rsquo;&rsquo; format (see <a href='atos.1.html'><i>atos(1NEMO)</i></a>
+) can
+be used. An ascii file with masses, positions and velocities can be created
+with an editor, and <a href='atos.1.html'><i>atos(1NEMO)</i></a>
+ is used to convert this file to a proper
+<a href='snapshot.5NEM0.html'>snapshot(5NEM0)</a>
+ file.  <p>
+The program <a href='tabtos.1.html'><i>tabtos(1NEMO)</i></a>
+ is probably more flexible
+even. <p>
+Coordinates are not transformed to the center-of-mass coordinate system,
+for this the program <a href='snapcenter.1.html'><i>snapcenter(1NEMO)</i></a>
+ needs to be used. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized; they
-may be given in any order. 
+ The
+following parameters are recognized in order; they may be given in any
+order if the keyword is also given. Use <b>--help</b> to confirm this man page is
+up to date.  
 <dl>
 
 <dt><b>out=</b><i>snap-file</i> </dt>
-<dd>Output data is written into <i>snap-file</i>,
-in standard snapshot format. </dd>
+<dd>Output data is written into <i>snap-file</i>, in standard
+snapshot format. <br>
+By default the user is prompted for the filename. </dd>
 
 <dt><b>nbody=</b><i>nbody</i> </dt>
-<dd>Number of particles <i>nbody</i> in Nbody
-snapshot.  </dd>
+<dd>Number of
+particles <i>nbody</i> in Nbody snapshot.  <br>
+By default the user is prompted for the number of bodies.q </dd>
 
 <dt><b>time=</b><i>time</i> </dt>
-<dd>Time at which the snapshot applies (default: <i>time</i>=0.0).
-</dd>
+<dd>Time
+at which the snapshot applies <br>
+Default: <i>time</i>=0.0. </dd>
 
 <dt><b>headline=</b><i>string</i> </dt>
-<dd>Optional headline, which is written as the first item in
-the snapshot file, the next item being the snapshot itself. </dd>
+<dd>Optional headline, which is written as
+the first item in the snapshot file, the next item being the snapshot itself.
+<br>
+Default: no headline </dd>
 
 <dt><b>verbose=t|f</b> </dt>
-<dd>In
-interactive mode you should set this to <b>true</b>, but in a case  <b>snapenter</b>
-was used in a pipe (see EXAMPLE below), it cuts down a large number of
-messages. [Default: <b>false</b>]. </dd>
+<dd>In interactive mode you should set this
+to <b>true</b>, but in a case  <b>snapenter</b> was used in a pipe (see EXAMPLE below),
+it cuts down a large number of messages. <br>
+Default: <b>false</b>] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>
-A cleverly formatted ASCII table can also
-be piped into snapenter, if they only contain masses, positions and velocities
-in the following format: <br>
-<pre>  N
-  m1 x1 y1 z1 vx1 vy1 vz1
-  m2 x2 y2 z2 vx2 vy2 vz2
-  ...
-  mN xN yN zN vxN vyN vzN
-</pre>where the first number, N, is the number of particles. If that is not available
-in the file, specify it via the commandline. 
+A cleverly formatted ASCII table can also be piped
+into snapenter, if they only contain masses, positions and velocities in
+the following format:  
+<p>   N<br>
+   m1 x1 y1 z1 vx1 vy1 vz1<br>
+   m2 x2 y2 z2 vx2 vy2 vz2<br>
+   ...<br>
+   mN xN yN zN vxN vyN vzN<br>
+ 
+<p>  where the first number, N, is the number of particles. If that is not
+available in the file, specify it via the commandline as <b>nbody=</b>. <p>
+This also
+happens to be the output of <a href='snapprint.1.html'><i>snapprint(1NEMO)</i></a>
+ with the following options
+      snapprint options=m,x,y,z,vx,vy,vz header=nbody<br>
+  
+<p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='atos.1.html'>atos(1NEMO)</a>
+, <a href='tabtos.1.html'>tabtos(1NEMO)</a>
 , <a href='snapprint.1.html'>snapprint(1NEMO)</a>
+, <a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
 ,
-<a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
-, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
-. 
+<a href='snapshot.5.html'>snapshot(5NEMO)</a>
+ 
+<p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Piet Hut 
+<p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
 <pre>~/src/nbody/init<tt> </tt>&nbsp;<tt> </tt>&nbsp;snapenter.c
 </pre>
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
 <pre>28-Nov-86<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: created         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PIET
 23-Apr-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: created         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PIET
@@ -105,7 +132,7 @@ Piet Hut
 <li><a name='toc5' href='#sect5'>See Also</a></li>
 <li><a name='toc6' href='#sect6'>Author</a></li>
 <li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>

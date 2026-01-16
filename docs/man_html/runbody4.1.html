@@ -9,13 +9,16 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 runbody4 - Hermite N-body code with optional stellar evolution 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>runbody4 [parameter=value]
 nbody4   &lt; nbody4.in
 </pre>
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>runbody4</b> is a frontend to Aarseth&rsquo; NBODY4 program. It creates
 a run directory, prepares a parameter input file, and optionally input
@@ -28,9 +31,11 @@ All of the input parameter names are the same as their counterpart in <b>nbody4<
 Note that this front-end is not designed to run every possible way in which
 NBODY4 can be run, but it most useful to run initial conditions from a
 snapshot file. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any
-order if the keyword is also given:  
+ The following parameters are recognized in order;
+they may be given in any order if the keyword is also given. Use <b>--help</b> to
+confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
@@ -113,6 +118,7 @@ of the crossing time. [Default: 5] </dd>
 19<tt> </tt>&nbsp;<tt> </tt>&nbsp;Stellar evolution and mass loss (=1: old supernova scheme;
       <tt> </tt>&nbsp;<tt> </tt>&nbsp;            =3: Eggleton, Tout &amp; Hurley; &gt;4: Chernoff--Weinberg).
 20<tt> </tt>&nbsp;<tt> </tt>&nbsp;Initial mass function (=0,1: Salpeter; &gt;1: various, see IMF).
+                    -3=Eggleton w/ original typo    3=Eggleton book version
 21<tt> </tt>&nbsp;<tt> </tt>&nbsp;Extra output (&gt;0: model, etc; &gt;1: CENTRE; &gt;2: MTRACE; &gt;3: GLOBAL).
 22<tt> </tt>&nbsp;<tt> </tt>&nbsp;Initial conditions on unit 10 (=1: output; =2,3(unscaled): input).
 23<tt> </tt>&nbsp;<tt> </tt>&nbsp;Escaper removal (&gt;1: diagnostics in file ESC; =2: angles unit #6;
@@ -199,7 +205,8 @@ keyword. This way the user can override single elements of the kz= vector,
 and using a default for the long kz= vector. For example "kz=@kz.def KZ22=2
 KZ5=2". See <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
  for a description of indexed keywords.  No default.
-</dd>
+
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
@@ -214,10 +221,12 @@ sphere in run2. <br>
 You can also supply existing NEMO snapshots as initial conditions <br>
 <pre>    % runbody4 run2/run2.snap run3 tcrit=1
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 Scaling can cause output to become out of bounds. <p>
 It appears to just
 create small systems, like nbody=10 tcrit=0, will hang the program. 
+<p> 
 <h2><a name='sect6' href='#toc6'>See
 Also</a></h2>
 <a href='nbody4.1.html'>nbody4(1NEMO)</a>
@@ -228,6 +237,7 @@ Also</a></h2>
 ,
 <a href='nbody4.5.html'>nbody4(5NEMO)</a>
  
+<p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
 <pre>$NEMO/src/nbody/evolve/aarseth/tools<tt> </tt>&nbsp;<tt> </tt>&nbsp;code
@@ -249,10 +259,11 @@ $outdir/ESC<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> 
 $outdir/OUT3                        <tt> </tt>&nbsp;<tt> </tt>&nbsp;particle dump (see u3tos(1NEMO))
 HIDAT
 OUT9
-AuthorPeter Teuben Update History
+AuthorPeter Teuben  History
 28-feb-2006<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created in Cambridge<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 10-mar-2006<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 for a more formal version in NEMO, include Brut4&rsquo;s nbody4 version<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-mar-2006<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 minor updated via Sverre (fixing small N initialization)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT/SJA
+26-aug-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 fixed IMF equation typo info for KZ(20)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT/SAV
 </pre><p>
 
 <hr><p>
@@ -267,7 +278,7 @@ AuthorPeter Teuben Update History
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Files</a></li>
 <li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>

@@ -11,103 +11,208 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-lineid - Identify peaks in a spectrum and optionally find lines 
+lineid - identify peaks in a spectrum and optionally identify lines
+
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>lineid</b>
-[parameter=value] 
+<b>lineid</b> in=file [parameter=value] 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>lineid</b> identifies peaks in a spectrum, and
-attempts to identify spectral lines. The units of the frequency axis will
-need to be specified (the default is GHz) in order for the line identification
-to work. <p>
+<b>lineid</b> identifies
+peaks in a spectrum (or peaks can be directly given),  and attempts to
+identify spectral lines. The units of the frequency axis will need to be
+specified (the default is GHz) in order for the line identification to
+work. <p>
+It will also inter-operate between sky-freq, rest-freq and doppler velocity.
+<p>
 Operation can occur in several modes. <br>
-1. If the VLSR is given, a LineID is attempted. Either from a given restfreq,
+1. If the VEL is given, a LineID is attempted. Either from a given restfreq,
 or from a linelist. <br>
-2. If the RESTFREQ is given, a VLSR is determined from the frequency of
-the fitted peak. <br>
-3. If neither is given, just the peak(s) are reported. <p>
+2. If the RESTFREQ is given, a VEL is determined from the frequency of the
+fitted peak. <br>
+3. If neither is given, just the peak(s) are reported. <br>
+4. A special case can be made when both RESTFREQ and VEL are given, and
+the x-axis is given in km/s.  The VEL was computed from that given (possibly
+wrong) RESTFREQ, it will then re-compute the sky frequency axis, and compute
+rest frequencies and following up with a line ID. <br>
+5. The input table can also be a list of already identified peaks (<b>mode=0</b>).
+The first line is the one associated with the restfreq, if that&rsquo;s relevant.
+Appropriate values (depending on if <b>restfreq=</b> or <b>vel=</b> is given) are returned
+for the other lines, essentially following the 4 cases described in 1-4.
+<p>
 See also <a href='tablsqfit.1.html'><i>tablsqfit(1NEMO)</i></a>
-
-with the option <b>fit=peak</b>, and <a href='ccdmom.1.html'><i>ccdmom(1NEMO)</i></a>
- has an algorithm to find (properties
-of) the Nth peak using mom=3,30,31,32,33,34 <p>
-More sophisticated algorithms
-can be find in for example ADMIT&rsquo;s LineID task. 
+ with the option <b>fit=peak</b>, and <a href='ccdmom.1.html'><i>ccdmom(1NEMO)</i></a>
+ has
+an algorithm to find (properties of) the Nth peak using mom=3,30,31,32,33,34
+<p>
+More sophisticated algorithms can be fond in for example ADMIT&rsquo;s LineID
+task, in particular dealing with multiple "spectra" derived from a fits
+cube. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following
-parameters are recognized in order; they may be given in any order if the
-keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
-
+ The following parameters are recognized in order; they
+may be given in any order if the keyword is also given. Use <b>--help</b> to confirm
+this man page is up to date.  
 <dl>
 
-<dt><b>in=</b> </dt>
-<dd>Input (table) file name. No default. </dd>
+<dt><b>in=</b><i>file</i> </dt>
+<dd>Input (table) file name. Should have
+two columns, but see below for single column files. <br>
+No default. </dd>
 
-<dt><b>xcol=</b> </dt>
-<dd>X coordinate column, representing
-the frequency or wavelength axis. Units are GHz, unless specified with the
-<b>xunit</b> keyword. [1] </dd>
+<dt><b>xcol=</b><i>x-column</i> </dt>
+<dd>X coordinate column, representing the frequency
+or wavelength axis. Units are GHz, unless specified with the <b>xunit</b> keyword.
+Column 1 is the first column. <br>
+[1] </dd>
 
-<dt><b>ycol=</b> </dt>
-<dd>Y coordinate column, reprepenting an intensity.
+<dt><b>ycol=</b><i>y-column</i> </dt>
+<dd>Y coordinate column, reprepenting an intensity. For mode=0
+this column is not used. <br>
 [2]  </dd>
 
 <dt><b>xunit=</b> </dt>
-<dd>X axis unit (GHz, MHz, A, nm) -- not implemented yet. [GHz] </dd>
+<dd>X axis unit (GHz, MHz, A, nm, km/s, z) -- not all are implemented
+yet. <br>
+[GHz] </dd>
 
-<dt><b>minchan=</b>
-</dt>
+<dt><b>minchan=</b> </dt>
 <dd>Minimum channels for a peak [3]   - not used yet  </dd>
 
-<dt><b>maxchan=</b> </dt>
-<dd>Maximum channels
-for a peak []     - not used yet  </dd>
+<dt><b>maxchan=</b>
+</dt>
+<dd>Maximum channels for a peak []     - not used yet  </dd>
 
-<dt><b>vlsr=</b> </dt>
-<dd>VLSR of object. Not set by default.
-</dd>
+<dt><b>vel=</b> </dt>
+<dd>VEL of object, in
+km/s, independent of <b>xunit</b>.q <br>
+Not set by default. </dd>
 
 <dt><b>restfreq=</b> </dt>
-<dd>If line is known, give restfreq in xunits. Not set by default.
-</dd>
+<dd>If line is known, give rest frequency in <b>xunit</b>.
+<br>
+Not set by default. </dd>
 
 <dt><b>linelist=</b> </dt>
-<dd>Table with frequencies and lines. Not set by default. 
+<dd>Table with frequencies and lines. There is
+a simple list in $NEMODAT/z_lines.list with some common high-Z lines. <br>
+Not set by default. </dd>
+
+<dt><b>dv=</b> </dt>
+<dd>Slop (in km/s) allowed in identifying lines. Negative
+values will use nearest neighbor and report the dv. <br>
+[10] </dd>
+
+<dt><b>clip=</b> </dt>
+<dd>Do not fit peaks below this clip level. <br>
+Default: not used </dd>
+
+<dt><b>mode=0|1</b> </dt>
+<dd>Fitting mode:  0=no fit needed, the xcol already
+contains the frequencies (or doppler velocities) of the lines. No ycol is
+needed (0 can be used)   1=peak fit (see also <a href='tabpeak.1.html'><i>tabpeak(1NEMO)</i></a>
+ for more options).
+<br>
+[1] </dd>
+
+<dt><b>velmode=REL|OPT|RAD</b> </dt>
+<dd>Mode of velocity axis. Relativistic, Optical or Radio.
+<br>
+Not implemented yet. 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+
+<p> Currently frequency conversions are done using
+the <i>(1+z)</i> formula with <i>z=VEL/c</i>. 
+<p> The code was developed with frequency in
+mind, only GHz and km/s are supported. Wavelength is planned. 
+<p> Looks for
+emission lines in mode=1. May not work for absorption lines yet. 
+<p> 
+<p> 
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
 The
-following example smoothes a set of random values by 10 channels to create
-a handful of peaks and investigates the strongest peak:  
-<p>   tabgen - 115
-1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 <br>
+following example generates a random table of 115 values, smoothes by 10
+channels to create a handful of peaks and investigates the strongest peak,
+which happens to be near 40 "GHz". These all use the default <b>mode=1</b>:  
+<p> 
+ tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 <br>
    ### nemo Debug Info: Peak: 40.1222 0.169591<br>
  
-<p>   tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 vlsr=10000<br>
-   ### nemo Debug Info: Line at 40.1222, Look near freq = 41.5067 for a line<br>
+<p>   tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 vel=10000<br>
+   ### nemo Debug[1]: 1b: Line at 40.122154, Look near freq = 41.460485 GHz
+for a lineid; vel=10000<br>
  
-<p>   tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 restfreq=115<br>
-   ### nemo Debug Info: Line at 40.1222 has z=0.651112 or vlsr=...<br>
+<p>   tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 restfreq=115<br>
+   ### nemo Debug[1]: 1a: Line at 40.122154 GHz has z=1.86625 or vel=559487
+km/s (cz)<br>
+ 
+<p>   ?<br>
+ 
+<p>   tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | tabpeak -  0 1 | lineid - 0
+1 mode=0<br>
+   ### nemo Debug[1]: 0: 29.913977 0.126778 <br>
+   ### nemo Debug[1]: 1: 40.122154 0.169591 <br>
+   ### nemo Debug[1]: 2: 72.135190 0.144635 <br>
+ 
+<p>  
+<p> and some <b>mode=0</b> examples specifying either velocity or frequency in
+various modes: 
+<p>    echo 5000 | lineid - mode=0 restfreq=1.420405751786 xunit=km/s<br>
+   Line at 5000.000000 km/s has skyfreq 1.397105 restfreq 1.420406<br>
+ 
+<p>   echo 1.420405751786 | lineid - mode=0 vlsr=5000 xunit=GHz<br>
+   Line at 1.420406 GHz has skyfreq 1.397105<br>
+ 
+<p>   echo 1.397105 | lineid - mode=0 restfreq=1.420405751786 xunit=GHz<br>
+   Line at 1.397105 GHz has z 0.016678 vlsr 4999.903122 km/s<br>
+  
+<p> and here a mode=0 example on a the CO(1-0) and CO(2-1) lines from the
+CO ladder, deliberately doppler shifted a bit by 300 km/s (give or take):
+
+<p>    nemoinp 110.092,115.155,220.179,230.308  |\<br>
+       lineid - mode=0 linelist=$NEMODAT/z_lines.list vel=300 dv=2.5<br>
+ 
+<p>   ### nemo Debug[0]: Found 23 lines in the listlist /home/teuben/NEMO/nemo/data/z_lines.list<br>
+   # There are 4 restfreq&rsquo;s to identify:<br>
+   #    guess    ID    LINE     dFreq    deltaV   NAME<br>
+     110.202168   1 110.201354 0.000814 -2.21418  13CO(1-0)<br>
+   # 115.270235   2 115.271202 0.000967  2.51514  CO(1-0)<br>
+     220.399331   3 220.398680 0.000651 -0.886089 13CO(2-1)<br>
+     230.538467   4 230.538000 0.000467 -0.607859 CO(2-1)<br>
   
 <p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect6' href='#toc6'>Linelist</a></h2>
+The input linelist is a very simple ascii table of (frequency,name).
+There are many sources for a linelist, we mention a few: <br>
+<pre>1. $NEMO/data/z_lines.list : common high-Z lines, from HI at 1.4GHz upwards
+2. ADMIT&rsquo;S has a few in $ADMIT/etc/*list
+3. Splatalogue at https://www.splatalogue.online/
+4. Astroquery based:   https://astroquery.readthedocs.io/en/latest/nist/nist.html
+and
+   https://astroquery.readthedocs.io/en/latest/atomic/atomic.html
+</pre>
+<p> 
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
+, <a href='tabpeak.1.html'>tabpeak(1NEMO)</a>
+, <a href='tabpp.1.html'>tabpp(1NEMO)</a>
 , <a href='table.5.html'>table(5NEMO)</a>
  <p>
-admit::LineID_AT() 
-<p> 
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
-Peter
+admit::LineID_AT()
 
-<p>Teuben 
 <p> 
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Peter Teuben 
+<p> 
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>13-dec-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.1 Draft created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+3-jul-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.3 add mode=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+15-jan-2026<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.4 added simple nearest neighbor line_id<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -117,10 +222,12 @@ Peter
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>Linelist</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>
