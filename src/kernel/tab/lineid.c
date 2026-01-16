@@ -72,7 +72,7 @@ local real restfreq;
 local real dv;
 local string linelist = NULL;
 
-#define MAXL 100
+#define MAXL 1000
 local real   lfreq[MAXL];
 local string lname[MAXL];
 local int    lnum = 0;
@@ -175,6 +175,10 @@ void read_data()
       lfreq[lnum] = atof(words[0]);
       lname[lnum] = strdup(words[1]);
       lnum++;
+      if (lnum==MAXL) {
+	warning("Could only read %d lines, increase MAXL in the code", lnum);
+	break;
+      }
     }
     strclose(instr);
     dprintf(0,"Found %d lines in the listlist %s\n",lnum,linelist);
