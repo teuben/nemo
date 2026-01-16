@@ -3,13 +3,20 @@
  *
  *    13-dec-2024   0.2 simple brightest peak finder.
  *     3-jul-2025   0.3 add mode=
- *    15-jan-206    0.4 all modes now work, added simple nearest neighbor ID
+ *    15-jan-206    0.4 all modes now work, added simple nearest neighbor line_id
+ *
+ *
+ *  Here's a contrived example of taking some lines, rounding them to 2 digits, and fitting them to the same linelist
+ 
+ tabcols $NEMODAT/z_lines.list 1 | tabmath - - '%1/(1+0.001)' all format=%.2f | lineid - mode=0 linelist=$NEMODAT/z_lines.list vel=300 dv=2.5
+
  */
 
 /**************** INCLUDE FILES ********************************/ 
  
 #include <stdinc.h>
 #include <getparam.h>
+#include <extstring.h>
 #include <axis.h>
 #include <table.h>
 #include <mdarray.h>
@@ -25,7 +32,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "in=???\n            Input (table) file name",
   "xcol=1\n		 x coordinate column", 
   "ycol=2\n		 y coordinate column",
-  "xunit=GHz\n           X axis unit (GHz, km/s)",
+  "xunit=GHz\n           x-axis unit (GHz, km/s)",
   "minchan=3\n           Minimum channels for a peak (not implemented)",
   "maxchan=\n            Maximum channels for a peak (not implemented)",
   "vel=\n                VEL of object, if known (km/s)",
@@ -33,7 +40,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "linelist=\n           ASCII linelist (freq,label)",
   "dv=10\n               Slop in velocity to allow in line_id (km/s)",
   "clip=\n               Do not fit peaks below this clip level",
-  "mode=1\n              0: peaks already given  1: fit peak(s)",
+  "mode=1\n              0: peaks given in xcol  1: fit peak(s) in (xcol,ycol)",
   "velmode=OPT\n         OPT, RAD or REL (not implemented)",
   "VERSION=0.4\n	 15-jan-2026 PJT",
   NULL
@@ -80,22 +87,21 @@ local int xunit_mode = 0;
 #define UNIT_KMS 6
 #define UNIT_Z   7
 
-void setparams(void);
+void set_params(void);
 void read_data(void); 
-void peak_data(void);
+void peak_data(void); 
 void line_id(void);
 void do_peak(real *xpeak, real *xerr, real *ypeak);
   
 void nemo_main()
 {
-  //warning("version %s in draft stage, don't expect it to be correct",getparam("VERSION"));
-  setparams();
+  set_params();
   read_data();
   peak_data();
   line_id();
 }
 
-void setparams()
+void set_params()
 {
   mode = getiparam("mode");
   input = getparam("in");             /* input table file */
@@ -108,12 +114,6 @@ void setparams()
   else
     ycol = getiparam("ycol");
 
-  Qvlsr = hasvalue("vel");
-  Qrest = hasvalue("restfreq");
-  if (Qvlsr) vlsr = getdparam("vel");
-  if (Qrest) restfreq = getdparam("restfreq");
-  if (Qvlsr && Qrest) error("Cannot give both vel= and restfreq=");
-
   dv = getdparam("dv");
 
   if (hasvalue("linelist"))
@@ -123,12 +123,22 @@ void setparams()
   if (streq(xunit,"GHz"))  xunit_mode = UNIT_GHZ;
   if (streq(xunit,"km/s")) xunit_mode = UNIT_KMS;
   if (xunit_mode == 0) error("xunit %s not supported yet",xunit);
+
+  Qvlsr = hasvalue("vel");
+  Qrest = hasvalue("restfreq");
+  if (Qvlsr) vlsr = getdparam("vel");
+  if (Qrest) restfreq = getdparam("restfreq");
+  if (Qvlsr && Qrest) {
+    if (xunit_mode == UNIT_KMS) {
+      warning("Mode not implemented yet");
+    } else
+      error("Cannot give both vel= and restfreq=");
+  }
+
+  
 }
 
-#define MVAL 		 64
-#define MLINELEN	512
-
-void read_data(void)
+void read_data()
 {
   int colnr[1+MAXCOL];
 		
@@ -148,6 +158,8 @@ void read_data(void)
   rfreq = (real *) allocate(npt * sizeof(real));
   nrfreq = 0;
 
+  // manually parse the linelist, only look at first and second column
+  // (freq,name)
 
   if (linelist != NULL) {
     char line[MAX_LINELEN];
@@ -157,10 +169,9 @@ void read_data(void)
     instr = stropen(linelist,"r");
     while (fgets(line, MAX_LINELEN, instr) != NULL) {
       if (line[0] == '#') continue;
-      //printf("LINE: %s", line);
       words = burststring(line," \n");
       nw = xstrlen(words,sizeof(string))-1;
-      printf("%d: %g %s\n", nw, atof(words[0]), words[1]);
+      dprintf(1,"%d: %g %s\n", nw, atof(words[0]), words[1]);
       lfreq[lnum] = atof(words[0]);
       lname[lnum] = strdup(words[1]);
       lnum++;
@@ -170,10 +181,10 @@ void read_data(void)
   }
 }
 
-void peak_data(void)
+void peak_data()
 {
   real xpeak, xerr, ypeak;
-  real v, z, z1, z2, f2, rf2, sf2;
+  real v, z, z2, rf2, sf2;
   int i;
   
   dprintf(1,"C(mks)=%g\n",c_MKS);
@@ -181,7 +192,7 @@ void peak_data(void)
 
   if (mode == 1 ) {
     //warning("Lines from peak fits in table:");    
-    // simple brightest peak finder
+    // for now: simple brightest peak finder
     do_peak(&xpeak, &xerr, &ypeak);
   } else if (mode == 0) {
     //warning("Direct line from table:");
@@ -194,11 +205,11 @@ void peak_data(void)
     if (Qrest) {
       z = restfreq/xpeak - 1;
       v = z*c_MKS/1000.0;
-      dprintf(0,"1a: Line at %f %s has z=%g or vel=%g km/s (cz)\n",xpeak,xunit,z,v);
+      dprintf(1,"1a: Line at %f %s has z=%g or vel=%g km/s (cz)\n",xpeak,xunit,z,v);
     } else if (Qvlsr) {
       z = vlsr/c_MKS*1000.0;
       restfreq = xpeak * (1+z);
-      dprintf(0,"1b: Line at %f, Look near freq = %f %s for a lineid; vel=%g\n", xpeak, restfreq, xunit,vlsr);
+      dprintf(1,"1b: Line at %f, Look near freq = %f %s for a lineid; vel=%g\n", xpeak, restfreq, xunit,vlsr);
       // add
       rfreq[nrfreq++] = restfreq;
     } else {
@@ -210,7 +221,7 @@ void peak_data(void)
 	for (i=0; i<npt; i++) {
 	  z2 = x[i]*1000/c_MKS;
 	  sf2 = restfreq/(1+z2);
-	  dprintf(0,"0a: Line at %f %s has skyfreq %f   (z=%f)\n",x[i],xunit,sf2,z2);
+	  dprintf(1,"0a: Line at %f %s has skyfreq %f   (z=%f)\n",x[i],xunit,sf2,z2);
 	}
       } else if (Qvlsr) {
 	error("not implementable");
@@ -219,13 +230,13 @@ void peak_data(void)
       if (Qrest) {
 	for (i=0; i<npt; i++) {
 	  z2 = restfreq/x[i] - 1.0;
-	  dprintf(0,"0b: Line at %f %s has z=%f or vel=%f km/s (cz)\n",x[i],xunit,z2,z2*c_MKS/1000.0);
+	  dprintf(1,"0b: Line at %f %s has z=%f or vel=%f km/s (cz)\n",x[i],xunit,z2,z2*c_MKS/1000.0);
 	}
       } else if (Qvlsr) {
 	for (i=0; i<npt; i++) {
 	  z2 = vlsr*1000/c_MKS;
 	  rf2 = x[i] * (1+z2);
-	  dprintf(0,"0c: Line at %f %s has restfreq %f %s z=%g\n",x[i],xunit,rf2,xunit,z2);
+	  dprintf(1,"0c: Line at %f %s has restfreq %f %s z=%g\n",x[i],xunit,rf2,xunit,z2);
 	  // add
 	  rfreq[nrfreq++] = rf2;
 	}
@@ -234,17 +245,31 @@ void peak_data(void)
   }
 }
 
-void line_id(void)
+void line_id()
 {
-  int i, j, lmin;
-  real dfmin, df;
+  int i, j, lmin=0;
+  real dfmin, df, delta;
+  char comment[3];
   
-  if (nrfreq==0) return;
+  if (nrfreq==0) {
+    printf("# There are no lines to identify:\n");
+    return;
+  }
+  
   printf("# There are %d restfreq's to identify:\n",nrfreq);
-  printf("guess    ID  LINE    dFreq    NAME\n");
-  for (i=0; i<nrfreq; i++) {
+
+  if (lnum > 0) {
+    printf("# Commented lines do not fall within dv=%g km/s\n",dv);
+    printf("#    guess    ID    LINE     dFreq    deltaV  NAME\n");
+  }
+
+  for (i=0; i<nrfreq; i++) {   // loop over all frequencies found
+    if (lnum == 0) {
+      printf("%f\n",rfreq[i]);
+      continue;
+    }
     dfmin = -1.0;
-    for (j=0; j<lnum; j++) {
+    for (j=0; j<lnum; j++) {   // loop over linelist and find nearest match
       if (dfmin < 0) {
 	dfmin = ABS(lfreq[j] - rfreq[i]);
 	lmin = j;
@@ -256,7 +281,13 @@ void line_id(void)
 	lmin = j;
       }
     }
-    printf("%f   %d %f %f %s\n",rfreq[i], lmin, lfreq[lmin], dfmin, lname[lmin]);
+    delta = (1-rfreq[i]/lfreq[lmin])*c_MKS/1000.0;
+    if (ABS(delta) > dv)
+      strcpy(comment,"#");
+    else
+      strcpy(comment," ");
+    
+    printf("%s %f   %d %f %f %g %s\n",comment,rfreq[i], lmin, lfreq[lmin], dfmin, delta, lname[lmin]);
   }
 }
 
@@ -299,7 +330,8 @@ void do_peak(real *xpeak, real *xerr, real *ypeak)
     *ypeak = sol[0]-sol[1]*sol[1]/(4*sol[2]);
 }
 
-// below here routines from ccdmom which we need for multiple peaks
+// code below is not used yet
+// below here routines from ccdmom which we will eventually need for multiple peaks
 
 
 /*
