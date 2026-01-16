@@ -1,13 +1,13 @@
-.TH LINEID 1NEMO "3 July 2025"
+.TH LINEID 1NEMO "15 January 2026"
 
 .SH "NAME"
-lineid \- Identify peaks in a spectrum and optionally find lines
+lineid \- identify peaks in a spectrum and optionally identify lines
 
 .SH "SYNOPSIS"
 \fBlineid\fP in=file [parameter=value]
 
 .SH "DESCRIPTION"
-\fBlineid\fP identifies peaks in a spectrum (or can be directly given), 
+\fBlineid\fP identifies peaks in a spectrum (or peaks can be directly given), 
 and attempts to identify spectral lines. The units of the frequency
 axis will need to be specified (the default is GHz) in order for the line identification to work.
 .PP
@@ -15,32 +15,43 @@ It will also inter-operate between sky-freq, rest-freq and doppler velocity.
 .PP
 Operation can occur in several modes.
 .br
-1. If the VLSR is given, a LineID is attempted. Either from a given
+1. If the VEL is given, a LineID is attempted. Either from a given
 restfreq, or from a linelist.
 .br
-2. If the RESTFREQ is given, a VLSR is determined from the frequency of the
+2. If the RESTFREQ is given, a VEL is determined from the frequency of the
 fitted peak.
 .br
 3. If neither is given, just the peak(s) are reported.
 .br
-4. The input table can also be a list of already identified peaks (mode=0). The first
+4. A special case can be made when both RESTFREQ and VEL are given, and the x-axis
+is given in km/s.  The VEL was computed
+from that given (possibly wrong) RESTFREQ, it will then re-compute the sky frequency axis,
+and compute rest frequencies and following up with a line ID.
+.br
+5. The input table can also be a list of already identified peaks (\fBmode=0\fP). The first
 line is the one associated with the restfreq, if that's relevant. Appropriate values
-(depending on if restfreq= or vlsr= is given) are returned for the other lines.
+(depending on if \fBrestfreq=\fP or \fBvel=\fP is given) are returned for the other lines,
+essentially following the 4 cases described in 1-4.
 .PP
 See also \fItablsqfit(1NEMO)\fP with the option \fBfit=peak\fP, and \fIccdmom(1NEMO)\fP has
 an algorithm to find (properties of) the Nth peak using mom=3,30,31,32,33,34
 .PP
-More sophisticated algorithms can be find in for example ADMIT's LineID task.
+More sophisticated algorithms can be fond in for example ADMIT's LineID task, in particular
+dealing with multiple "spectra" derived from a fits cube.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
-\fBin=\fP\fIfile\fPq
-Input (table) file name. Should have two columns. See below. No default.
+\fBin=\fP\fIfile\fP
+Input (table) file name. Should have two columns, but see below for single column
+files.
+.br
+No default.
 .TP
 \fBxcol=\fP\fIx-column\fP
 X coordinate column, representing the frequency or wavelength axis.
-Units are GHz, unless specified with the \fBxunit\fP keyword.
+Units are GHz, unless specified with the \fBxunit\fP keyword. Column 1 is the first
+column.
 .br
 [1]
 .TP
@@ -60,13 +71,13 @@ Minimum channels for a peak [3]   - not used yet
 \fBmaxchan=\fP
 Maximum channels for a peak []     - not used yet 
 .TP
-\fBvlsr=\fP
-VLSR of object, in km/s, independent of \fBxunit\fP.q
+\fBvel=\fP
+VEL of object, in km/s, independent of \fBxunit\fP.q
 .br
 Not set by default.
 .TP
 \fBrestfreq=\fP
-If line is known, give restfreq in \fBxunit\fP.
+If line is known, give rest frequency in \fBxunit\fP.
 .br
 Not set by default.
 .TP
@@ -76,32 +87,63 @@ with some common high-Z lines.
 .br
 Not set by default.
 .TP
-\fBrms=\fP
-Do not fit peaks when this RMS is reached
+\fBdv=\fP
+Slop (in km/s) allowed in identifying lines.
+Negative values will use nearest neighbor and report the dv.
+.br
+[10]
+.TP
+\fBclip=\fP
+Do not fit peaks below this clip level.
+.br
+Default: not used
 .TP
 \fBmode=0|1\fP
-Fitting mode:  0=no fit, the table contains the frequencies (or doppler velocities)
-of the lines.    1=peak fit
+Fitting mode:  0=no fit needed, the xcol already contains the frequencies (or doppler velocities)
+of the lines. No ycol is needed (0 can be used)   1=peak fit (see also \fItabpeak(1NEMO)\fP
+for more options).
 .br
 [1]
+.TP
+\fBvelmode=REL|OPT|RAD\fP
+Mode of velocity axis. Relativistic, Optical or Radio.
+.br
+Not implemented yet.
 
 .SH "CAVEATS"
+
 Currently frequency conversions are done using the \fI(1+z)\fP formula
-with \fIz=VLSR/c\fP
+with \fIz=VEL/c\fP.
+
+The code was developed with frequency in mind, only GHz and km/s are supported. Wavelength
+is planned.
+
+Looks for emission lines in mode=1. May not work for absorption lines yet.
+
+
 
 .SH "EXAMPLES"
-The following example smoothes a set of random values by 10 channels to create a handful
-of peaks and investigates the strongest peak:
+The following example generates a random table of 115 values, smoothes by 10 channels to create a handful
+of peaks and investigates the strongest peak, which happens to be near 40 "GHz". These all use the default
+\fBmode=1\fP:
 .EX
 
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 
   ### nemo Debug Info: Peak: 40.1222 0.169591
 
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 vlsr=10000
-  ### nemo Debug Info: Line at 40.1222, Look near freq = 41.5067 for a line
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 vel=10000
+  ### nemo Debug[1]: 1b: Line at 40.122154, Look near freq = 41.460485 GHz for a lineid; vel=10000
 
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 restfreq=115
-  ### nemo Debug Info: Line at 40.1222 has z=0.651112 or vlsr=...
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 restfreq=115
+  ### nemo Debug[1]: 1a: Line at 40.122154 GHz has z=1.86625 or vel=559487 km/s (cz)
+
+  ?
+
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | tabpeak -  0 1 | lineid - 0 1 mode=0
+  ### nemo Debug[1]: 0: 29.913977 0.126778 
+  ### nemo Debug[1]: 1: 40.122154 0.169591 
+  ### nemo Debug[1]: 2: 72.135190 0.144635 
+
 .EE
 
 and some \fBmode=0\fP examples specifying either velocity or frequency in various modes:
@@ -117,8 +159,41 @@ and some \fBmode=0\fP examples specifying either velocity or frequency in variou
   Line at 1.397105 GHz has z 0.016678 vlsr 4999.903122 km/s
 .EE
 
+and here a mode=0 example on a the CO(1-0) and CO(2-1) lines from the CO ladder, deliberately
+doppler shifted a bit by 300 km/s (give or take):
+
+.EX
+  nemoinp 110.092,115.155,220.179,230.308  |\\
+      lineid - mode=0 linelist=$NEMODAT/z_lines.list vel=300 dv=2.5
+
+  ### nemo Debug[0]: Found 23 lines in the listlist /home/teuben/NEMO/nemo/data/z_lines.list
+  # There are 4 restfreq's to identify:
+  #    guess    ID    LINE     dFreq    deltaV   NAME
+    110.202168   1 110.201354 0.000814 -2.21418  13CO(1-0)
+  # 115.270235   2 115.271202 0.000967  2.51514  CO(1-0)
+    220.399331   3 220.398680 0.000651 -0.886089 13CO(2-1)
+    230.538467   4 230.538000 0.000467 -0.607859 CO(2-1)
+.EE
+
+.SH "LINELIST"
+The input linelist is a very simple ascii table of (frequency,name).
+There are many sources for a linelist, we mention a few:
+.nf
+
+1. $NEMO/data/z_lines.list : common high-Z lines, from HI at 1.4GHz upwards
+
+2. ADMIT'S has a few in $ADMIT/etc/*list
+
+3. Splatalogue at https://www.splatalogue.online/
+
+4. Astroquery based:   https://astroquery.readthedocs.io/en/latest/nist/nist.html and
+   https://astroquery.readthedocs.io/en/latest/atomic/atomic.html
+
+
+.fi
+
 .SH "SEE ALSO"
-tablsqfit(1NEMO), table(5NEMO)
+tablsqfit(1NEMO), tabpeak(1NEMO), tabpp(1NEMO), table(5NEMO)
 .PP
 admit::LineID_AT()
 
@@ -130,4 +205,5 @@ Peter Teuben
 .ta +1.25i +4.5i
 13-dec-2024	0.1 Draft created	PJT
 3-jul-2025	0.3 add mode=	PJT
+15-jan-2026	0.4 added simple nearest neighbor line_id	PJT
 .fi
