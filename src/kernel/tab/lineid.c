@@ -24,7 +24,6 @@
 #include <mks.h>
 #include <lsq.h>
 
-#define MAXCOL    2
 
 /**************** COMMAND LINE PARAMETERS **********************/
 
@@ -32,17 +31,18 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "in=???\n            Input (table) file name",
   "xcol=1\n		 x coordinate column", 
   "ycol=2\n		 y coordinate column",
+  "dxcol=\n              If used, columns with errors in the x coordinate [not implemented]",
   "xunit=GHz\n           x-axis unit (GHz, km/s)",
   "minchan=3\n           Minimum channels for a peak (not implemented)",
   "maxchan=\n            Maximum channels for a peak (not implemented)",
   "vel=\n                VEL of object, if known (km/s)",
   "restfreq=\n           RESTFREQ (or RESTWAVE?) in xunits, if known",
-  "linelist=\n           ASCII linelist (freq,label)",
+  "linelist=\n           ASCII linelist (freq,label), e.g. $NEMODAT/z_lines.list",
   "dv=10\n               Slop in velocity to allow in line_id (km/s)",
   "clip=\n               Do not fit peaks below this clip level",
   "mode=1\n              0: peaks given in xcol  1: fit peak(s) in (xcol,ycol)",
-  "velmode=OPT\n         OPT, RAD or REL (not implemented)",
-  "VERSION=0.4\n	 15-jan-2026 PJT",
+  "veldef=OPT\n          doppler_convention: OPT, RAD or REL",
+  "VERSION=0.5\n	 16-jan-2026 PJT",
   NULL
 };
 
@@ -56,10 +56,12 @@ local stream instr;				/* input file */
 local table *tptr;                              /* table */
 local mdarray2 d2;                              /* data[col][row] */
 
-local int xcol, ycol;
+local int xcol, ycol, dxcol;
 
 local real *rfreq;                              /* restfreq estimated go here */
 local int nrfreq;                               /* active length of this array */
+local real *dvel ;                              /* doppler velocity estimates */
+local int ndvel;                                /* active length of this array */
 
 local real  *x, *y;    			        /* data from file */
 local int    npt;				/* actual number of data points */
@@ -77,8 +79,16 @@ local real   lfreq[MAXL];
 local string lname[MAXL];
 local int    lnum = 0;
 
+#define MAXU 64
 local string xunit;
 local int xunit_mode = 0;
+local char vlsr_unit[MAXU];
+local string veldef_s;
+local int veldef;
+
+#define MAXCOL    2
+#define ckms 299792.458
+
 
 #define UNIT_MHZ 1
 #define UNIT_GHZ 2
@@ -87,11 +97,17 @@ local int xunit_mode = 0;
 #define UNIT_KMS 6
 #define UNIT_Z   7
 
+#define VEL_RAD  1
+#define VEL_REL  2
+#define VEL_OPT  3
+
+
 void set_params(void);
 void read_data(void); 
 void peak_data(void); 
 void line_id(void);
 void do_peak(real *xpeak, real *xerr, real *ypeak);
+void get_nu(string kv, real *value, string unit, string defunit);
   
 void nemo_main()
 {
@@ -100,6 +116,53 @@ void nemo_main()
   peak_data();
   line_id();
 }
+
+/*
+ *     get_nu :   parse a   NUMBER,UNIT    string
+ *     input:   kv         e.g.   "1,pc"
+ *              defunit    e.g.   "pc"
+ *     output:  value      
+ *              unit
+ *
+ */
+
+void get_nu(string kv, real *value, string unit, string defunit)
+{
+  string *sp = burststring(kv,",");
+  int nsp = xstrlen(sp,sizeof(string)) - 1;
+  int nv;
+
+  *value = 1.0;
+  strcpy(unit,defunit);
+  if (nsp == 0) return;
+
+  nv = nemoinpr(sp[0],value,1);
+  if (nv != 1) error("error parsing %s",sp[0]);
+  if (nsp == 1) return;
+
+  strcpy(unit,sp[1]);
+}
+
+// radio to optical
+inline real vrad2vopt(real vrad) {    return vrad/(1-vrad/ckms); }
+// optical to radio
+inline real vopt2vrad(real vopt) {    return vopt/(1+vopt/ckms); }
+// optical to z
+inline real vopt2z(real vopt) {       return vopt/ckms; }
+// z to optical
+inline real z2vopt(real z) {          return ckms*z; }
+// z to radio
+inline real z2vrad(real z) {          return vopt2vrad( z2vopt(z) ); }
+// radio to z
+inline real vrad2z(real vrad) {       return vopt2z( vrad2vopt(vrad) ); }
+// relativistic to z
+inline real vrel2z(real vrel) {       real b = vrel/ckms;          return sqrt((1+b)/(1-b)) - 1.0; }
+// z to beta
+inline real z2beta(real z) {          real z1=1.0+z;   z1=z1*z1;   return (z1-1)/(z1+1); }
+// z to relativistic
+inline real z2vrel(real z) {          return z2beta(z) * ckms; }
+
+
 
 void set_params()
 {
@@ -113,6 +176,8 @@ void set_params()
     ycol = 0;
   else
     ycol = getiparam("ycol");
+  if (hasvalue("dxcol"))
+    warning("dxcol= not supported yet");
 
   dv = getdparam("dv");
 
@@ -124,9 +189,31 @@ void set_params()
   if (streq(xunit,"km/s")) xunit_mode = UNIT_KMS;
   if (xunit_mode == 0) error("xunit %s not supported yet",xunit);
 
+  veldef_s = getparam("veldef");
+  veldef = 0;
+  if (strncmp(veldef_s, "opt", 1) == 0) veldef = VEL_OPT;
+  if (strncmp(veldef_s, "rad", 2) == 0) veldef = VEL_RAD;
+  if (strncmp(veldef_s, "rel", 2) == 0) veldef = VEL_REL;
+  if (strncmp(veldef_s, "OPT", 1) == 0) veldef = VEL_OPT;
+  if (strncmp(veldef_s, "RAD", 2) == 0) veldef = VEL_RAD;
+  if (strncmp(veldef_s, "REL", 2) == 0) veldef = VEL_REL;
+  if (veldef==0) error("veldef=%s not a valid option",veldef_s);
+  dprintf(1,"veldef=%d\n",veldef);
+
   Qvlsr = hasvalue("vel");
   Qrest = hasvalue("restfreq");
-  if (Qvlsr) vlsr = getdparam("vel");
+  if (Qvlsr) {
+    get_nu(getparam("vel"), &vlsr, vlsr_unit, "km/s");
+    if (streq(vlsr_unit,"z")) {
+      if (veldef != VEL_OPT) warning("You used z=%g, but did not specify optical convention",vlsr);
+      vlsr *= c_MKS/1000;
+    }
+    if (veldef == VEL_REL) vlsr = z2vopt(vrel2z(vlsr));
+    if (veldef == VEL_RAD) vlsr = vrad2vopt(vlsr);    
+    
+    dprintf(0,"Vrad=%g Vrel=%g Vopt=%g\n",vopt2vrad(vlsr),z2vrel(vopt2z(vlsr)),vlsr);
+    
+  }
   if (Qrest) restfreq = getdparam("restfreq");
   if (Qvlsr && Qrest) {
     if (xunit_mode == UNIT_KMS) {
@@ -135,7 +222,6 @@ void set_params()
       error("Cannot give both vel= and restfreq=");
   }
 
-  
 }
 
 void read_data()
@@ -155,8 +241,11 @@ void read_data()
 
   // get minmax in X and Y
 
-  rfreq = (real *) allocate(npt * sizeof(real));
+  // code will populate either of these two arrays
+  rfreq  = (real *) allocate(npt * sizeof(real));
+  dvel   = (real *) allocate(npt * sizeof(real));
   nrfreq = 0;
+  ndvel  = 0;
 
   // manually parse the linelist, only look at first and second column
   // (freq,name)
@@ -181,7 +270,7 @@ void read_data()
       }
     }
     strclose(instr);
-    dprintf(0,"Found %d lines in the listlist %s\n",lnum,linelist);
+    dprintf(0,"Found %d lines in the linelist=%s\n",lnum,linelist);
   }
 }
 
@@ -210,11 +299,13 @@ void peak_data()
       z = restfreq/xpeak - 1;
       v = z*c_MKS/1000.0;
       dprintf(1,"1a: Line at %f %s has z=%g or vel=%g km/s (cz)\n",xpeak,xunit,z,v);
+      // add vel
+      dvel[ndvel++] = v;
     } else if (Qvlsr) {
       z = vlsr/c_MKS*1000.0;
       restfreq = xpeak * (1+z);
       dprintf(1,"1b: Line at %f, Look near freq = %f %s for a lineid; vel=%g\n", xpeak, restfreq, xunit,vlsr);
-      // add
+      // add freq
       rfreq[nrfreq++] = restfreq;
     } else {
       dprintf(0,"Peak: %g %g\n", xpeak, ypeak);
@@ -228,20 +319,24 @@ void peak_data()
 	  dprintf(1,"0a: Line at %f %s has skyfreq %f   (z=%f)\n",x[i],xunit,sf2,z2);
 	}
       } else if (Qvlsr) {
-	error("not implementable");
+	//warning("not implementable");
+	return;
       }
     } else if (xunit_mode == UNIT_GHZ) {
       if (Qrest) {
 	for (i=0; i<npt; i++) {
 	  z2 = restfreq/x[i] - 1.0;
-	  dprintf(1,"0b: Line at %f %s has z=%f or vel=%f km/s (cz)\n",x[i],xunit,z2,z2*c_MKS/1000.0);
+	  v = z2*c_MKS/1000.0;
+	  dprintf(1,"0b: Line at %f %s has z=%f or vel=%f km/s (cz)\n",x[i],xunit,z2,v);
+	  // add vel
+	  dvel[ndvel++] = v;
 	}
       } else if (Qvlsr) {
 	for (i=0; i<npt; i++) {
 	  z2 = vlsr*1000/c_MKS;
 	  rf2 = x[i] * (1+z2);
 	  dprintf(1,"0c: Line at %f %s has restfreq %f %s z=%g\n",x[i],xunit,rf2,xunit,z2);
-	  // add
+	  // add freq
 	  rfreq[nrfreq++] = rf2;
 	}
       }
@@ -254,13 +349,25 @@ void line_id()
   int i, j, lmin=0;
   real dfmin, df, delta;
   char comment[3];
+
+  if (ndvel > 0) {
+    printf("# restfreq=%g\n",restfreq);
+    printf("# SkyFreq Vrad  Vrel   Vopt\n");
+    for (i=0; i<ndvel; i++) {
+      real v = dvel[i];
+      printf("%g  %g %g %g\n", x[i], vopt2vrad(v), z2vrel(vopt2z(v)), v);
+    }
+    // should never happen, but lets check anyways
+    if (nrfreq > 0) warning("Unexpected #freq and #vel obtained???");
+  }
   
   if (nrfreq==0) {
     printf("# There are no lines to identify:\n");
     return;
   }
   
-  printf("# There are %d restfreq's to identify:\n",nrfreq);
+  printf("# There are %d restfreq's to identify:%s\n",
+	 nrfreq, lnum==0 ? "(use linelist=)" : "");
 
   if (lnum > 0) {
     printf("# Commented lines do not fall within dv=%g km/s\n",dv);
