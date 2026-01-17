@@ -1,4 +1,4 @@
-.TH LINEID 1NEMO "15 January 2026"
+.TH LINEID 1NEMO "16 January 2026"
 
 .SH "NAME"
 lineid \- identify peaks in a spectrum and optionally identify lines
@@ -32,6 +32,8 @@ and compute rest frequencies and following up with a line ID.
 line is the one associated with the restfreq, if that's relevant. Appropriate values
 (depending on if \fBrestfreq=\fP or \fBvel=\fP is given) are returned for the other lines,
 essentially following the 4 cases described in 1-4.
+.br
+6. Compare dopper conventions
 .PP
 See also \fItablsqfit(1NEMO)\fP with the option \fBfit=peak\fP, and \fIccdmom(1NEMO)\fP has
 an algorithm to find (properties of) the Nth peak using mom=3,30,31,32,33,34
@@ -71,10 +73,11 @@ Minimum channels for a peak [3]   - not used yet
 \fBmaxchan=\fP
 Maximum channels for a peak []     - not used yet 
 .TP
-\fBvel=\fP
-VEL of object, in km/s, independent of \fBxunit\fP.q
+\fBvel=[#[,unit]]\fP
+VEL of object, in km/s, independent of \fBxunit\fP. Optionally can have a unit added, e.g. \fIvel=1.2,z\fP.
+As for unit, only \fIkm/s\fP and the dimensionless \fIz\fP are allowed.
 .br
-Not set by default.
+Not set by default. If a value is given, the unit is \fIkm/s\fP.
 .TP
 \fBrestfreq=\fP
 If line is known, give rest frequency in \fBxunit\fP.
@@ -105,22 +108,22 @@ for more options).
 .br
 [1]
 .TP
-\fBvelmode=REL|OPT|RAD\fP
-Mode of velocity axis. Relativistic, Optical or Radio.
+\fBveldef=RAD|OPT|REL\fP
+Mode of velocity axis. Radio, Relativistic, or Optical are supported.
 .br
-Not implemented yet.
+[OPT]
 
 .SH "CAVEATS"
 
 Currently frequency conversions are done using the \fI(1+z)\fP formula
-with \fIz=VEL/c\fP.
+with \fIz=VEL/c\fP, i.e. the optical convention.
 
 The code was developed with frequency in mind, only GHz and km/s are supported. Wavelength
 is planned.
 
 Looks for emission lines in mode=1. May not work for absorption lines yet.
 
-
+Although different doppler conventions are supported, coordinate frames are ignored.
 
 .SH "EXAMPLES"
 The following example generates a random table of 115 values, smoothes by 10 channels to create a handful
@@ -175,6 +178,12 @@ doppler shifted a bit by 300 km/s (give or take):
     230.538467   4 230.538000 0.000467 -0.607859 CO(2-1)
 .EE
 
+Compare different doppler conventions (veldef)
+.EX
+  echo 0 | lineid - mode=0 vel=5000 veldef=rel
+  ### nemo Debug[0]: rad=4958.99 rel=5000 opt=5042.4
+.EE
+
 .SH "LINELIST"
 The input linelist is a very simple ascii table of (frequency,name).
 There are many sources for a linelist, we mention a few:
@@ -193,7 +202,7 @@ There are many sources for a linelist, we mention a few:
 .fi
 
 .SH "SEE ALSO"
-tablsqfit(1NEMO), tabpeak(1NEMO), tabpp(1NEMO), table(5NEMO)
+tablsqfit(1NEMO), tabpeak(1NEMO), tabpp(1NEMO), ccdsky(1NEMO), table(5NEMO)
 .PP
 admit::LineID_AT()
 
@@ -206,4 +215,5 @@ Peter Teuben
 13-dec-2024	0.1 Draft created	PJT
 3-jul-2025	0.3 add mode=	PJT
 15-jan-2026	0.4 added simple nearest neighbor line_id	PJT
+16-jan-2026	0.5 implemented veldef=		PJT
 .fi
