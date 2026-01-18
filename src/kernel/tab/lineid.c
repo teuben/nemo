@@ -29,8 +29,8 @@
 
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "in=???\n            Input (table) file name",
-  "xcol=1\n		 x coordinate column", 
-  "ycol=2\n		 y coordinate column",
+  "xcol=1\n		 x coordinate column of spectrum or linesq", 
+  "ycol=\n		 y coordinate column of spectrum",
   "dxcol=\n              If used, columns with errors in the x coordinate [not implemented]",
   "xunit=GHz\n           x-axis unit (GHz, km/s)",
   "minchan=3\n           Minimum channels for a peak (not implemented)",
@@ -40,9 +40,9 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "linelist=\n           ASCII linelist (freq,label), e.g. $NEMODAT/z_lines.list",
   "dv=10\n               Slop in velocity to allow in line_id (km/s)",
   "clip=\n               Do not fit peaks below this clip level",
-  "mode=1\n              0: peaks given in xcol  1: fit peak(s) in (xcol,ycol)",
+  "mode=\n               0: peaks given in xcol  1: fit peak(s) in (xcol,ycol)   [deprecated]",
   "veldef=OPT\n          doppler_convention: OPT, RAD or REL",
-  "VERSION=0.5\n	 16-jan-2026 PJT",
+  "VERSION=0.6\n	 16-jan-2026 PJT",
   NULL
 };
 
@@ -166,16 +166,22 @@ inline real z2vrel(real z) {          return z2beta(z) * ckms; }
 
 void set_params()
 {
-  mode = getiparam("mode");
   input = getparam("in");             /* input table file */
   instr = stropen (input,"r");
   tptr = table_open(instr,0);
+
+  if (hasvalue("mode"))
+    warning("mode= is deprecated; the use of ycol= determines the mode");
+
   
   xcol = getiparam("xcol");
-  if (mode==0)
-    ycol = 0;
-  else
+  if (hasvalue("ycol")) {
     ycol = getiparam("ycol");
+    mode = 1;
+  } else {
+    mode = 0;
+  }
+
   if (hasvalue("dxcol"))
     warning("dxcol= not supported yet");
 
@@ -219,7 +225,7 @@ void set_params()
     if (xunit_mode == UNIT_KMS) {
       warning("Mode not implemented yet");
     } else
-      error("Cannot give both vel= and restfreq=");
+      error("Cannot give both vel= and restfreq= yet");
   }
 
 }
@@ -277,7 +283,7 @@ void read_data()
 void peak_data()
 {
   real xpeak, xerr, ypeak;
-  real v, z, z2, rf2, sf2;
+  real v, v1, z, z1, z2, rf2, sf2;
   int i;
   
   dprintf(1,"C(mks)=%g\n",c_MKS);
@@ -309,6 +315,7 @@ void peak_data()
       rfreq[nrfreq++] = restfreq;
     } else {
       dprintf(0,"Peak: %g %g\n", xpeak, ypeak);
+      //rfreq[nrfreq++] = xpeak;
     }
   } else { // mode=0:    (xcol has freq/vel; ycol not used)
     if (xunit_mode == UNIT_KMS) {
@@ -316,7 +323,12 @@ void peak_data()
 	for (i=0; i<npt; i++) {
 	  z2 = x[i]*1000/c_MKS;
 	  sf2 = restfreq/(1+z2);
-	  dprintf(1,"0a: Line at %f %s has skyfreq %f   (z=%f)\n",x[i],xunit,sf2,z2);
+	  if (i==0) // first one is reference 
+	    z1 = z2;
+	  rf2 = sf2 * (1+z1);
+	  dprintf(1,"0a: Line at %f %s has skyfreq %f  restfreq %f\n",x[i],xunit,sf2,rf2);
+	  // add freq
+	  rfreq[nrfreq++] = rf2;
 	}
       } else if (Qvlsr) {
 	//warning("not implementable");
@@ -367,7 +379,7 @@ void line_id()
   }
   
   printf("# There are %d restfreq's to identify:%s\n",
-	 nrfreq, lnum==0 ? "(use linelist=)" : "");
+	 nrfreq, lnum==0 ? " (use linelist= to find their names)" : "");
 
   if (lnum > 0) {
     printf("# Commented lines do not fall within dv=%g km/s\n",dv);
