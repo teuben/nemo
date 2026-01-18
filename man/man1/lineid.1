@@ -134,21 +134,17 @@ Although different doppler conventions are supported, coordinate frames are igno
 
 .SH "EXAMPLES"
 The following example generates a random table of 115 values, smoothes by 10 channels to create a handful
-of peaks and investigates the strongest peak, which happens to be near 40 "GHz". These all use the default
-\fBmode=1\fP:
+of peaks and investigates the strongest peak, which happens to be near 40 "GHz". 
 .EX
 
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 
-  ### nemo Debug[0]: Peak: 40.1222 0.169591
-
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 vel=1.87,z
-  ### nemo Debug[1]: 1b: Line at 40.122154, Look near freq = 115.150582 GHz for a lineid; vel=560612  
-
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 vel=1.87,z linelist=$NEMODAT/z_lines.list
-  ### nemo Debug[1]: 1b: Line at 40.122154, Look near freq = 115.150582 GHz for a lineid; vel=560612
-  # Commented lines do not fall within dv=10 km/s
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 vel=1.827,z dv=200 linelist=$NEMODAT/z_lines.list
+  ### nemo Debug[0]: Vrad=193746 Vrel=233112 Vopt=547721 z=1.827
+  ### nemo Debug[0]: Found 23 lines in the linelist=/home/teuben/teunix/nemo/data/z_lines.list
+  # There are 1 restfreq's to identify:
+  # Commented lines do not fall within dv=200 km/s
   #    guess    ID    LINE     dFreq    deltaV  NAME
-  # 115.150582   2 115.271202 0.120619 313.702 CO(1-0)
+  #    GHz            Ghz      GHz      km/s
+  # 113.425330   2 115.271202 1.845872 4800.67 CO(1-0)
 
 ?
   tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 restfreq=115
@@ -176,12 +172,12 @@ and some \fBmode=0\fP examples specifying either velocity or frequency in variou
 
   echo 1.420405751786 | lineid - vel=5000 xunit=GHz
   ### nemo Debug[1]: 0c: Line at 1.420406 GHz has restfreq 1.444096 GHz z=0.0166782
+  ### nemo Debug[0]: Vrad=4917.98 Vrel=4958.31 Vopt=5000 z=0.0166782
 
   echo 1.397105 | lineid - restfreq=1.420405751786 xunit=GHz
-  ### nemo Debug[1]: 0b: Line at 1.397105 GHz has z=0.016678 or vel=4999.903122 km/s (cz)
   # restfreq=1.42041
-  # SkyFreq Vrad  Vrel   Vopt
-  1.39711  4917.88 4958.21 4999.9
+  # SkyFreq Vrad  Vrel   Vopt   z
+  1.39711  4917.88 4958.21 4999.9  0.0166779
 
 
 .EE
