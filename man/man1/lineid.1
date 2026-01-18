@@ -1,4 +1,4 @@
-.TH LINEID 1NEMO "17 January 2026"
+.TH LINEID 1NEMO "18 January 2026"
 
 .SH "NAME"
 lineid \- identify peaks in a spectrum and optionally identify lines
@@ -7,11 +7,12 @@ lineid \- identify peaks in a spectrum and optionally identify lines
 \fBlineid\fP in=file [parameter=value]
 
 .SH "DESCRIPTION"
-\fBlineid\fP identifies peaks in a spectrum (or peaks can be directly given), 
+\fBlineid\fP identifies peaks in a spectrum (or directly given), 
 and attempts to identify spectral lines. The units of the frequency
 axis will need to be specified (the default is GHz) in order for the line identification to work.
 .PP
-It will also inter-operate between sky-freq, rest-freq and doppler velocity, in different doppler conventions.
+It will also inter-operate between sky-freq, rest-freq and doppler velocity, in different doppler conventions:
+radio, optical or relativistic.
 .PP
 Operation can occur in several modes.
 .br
@@ -28,7 +29,7 @@ is given in km/s.  The VEL was computed
 from that given (possibly wrong) RESTFREQ, it will then re-compute the sky frequency axis,
 and compute rest frequencies and following up with a line ID.
 .br
-5. The input table can also be a list of already identified peaks (\fBmode=0\fP). The first
+5. The input table can also be a list of already identified peaks. The first
 line is the one associated with the restfreq, if that's relevant. Appropriate values
 (depending on if \fBrestfreq=\fP or \fBvel=\fP is given) are returned for the other lines,
 essentially following the 4 cases described in 1-4.
@@ -73,12 +74,6 @@ By default not used.
 X axis unit (GHz, MHz, A, nm, km/s, z) -- not all are implemented yet.
 .br
 [GHz]
-.TP
-\fBminchan=\fP
-Minimum channels for a peak [3]   - not used yet 
-.TP
-\fBmaxchan=\fP
-Maximum channels for a peak []     - not used yet 
 .TP
 \fBvel=[#[,unit]]\fP
 VEL of object, in km/s, independent of \fBxunit\fP. Optionally can have a unit added, e.g. \fIvel=1.2,z\fP.
@@ -164,7 +159,7 @@ of peaks and investigates the strongest peak, which happens to be near 40 "GHz".
 
 .EE
 
-and some \fBmode=0\fP examples specifying either velocity or frequency in various modes:
+and some examples specifying either velocity or frequency of the line(s) directly
 
 .EX
   echo 5000 | lineid - restfreq=1.420405751786 xunit=km/s
@@ -201,15 +196,16 @@ doppler shifted a bit by 300 km/s (give or take):
 
 
 Here an example of known lines in velocity space and deriving their restfreq's. The first line
+in the list
 will be the one belonging to the known restfreq of CO(1-0), and was detected at -20 km/s. But
 there was a weak line at -312 km/s. What line is this? We need to find the restfrquency
-and do a lineid.
+and then a lineid.
 
 .EE
-  nemoinp -20,-312 | lineid - restfreq=115.271204 xunit=km/s
+  nemoinp -20,-310 | lineid - restfreq=115.2712018 xunit=km/s
   # There are 2 restfreq's to identify: (use linelist= to find names)
-  115.271204
-  115.383596
+  115.271202
+  115.382823
 .EX
 
 Indeed, the SiC2,v=0 line at 115.382367 had been previously detected in IRC+10216 in 1986 
@@ -256,4 +252,5 @@ Peter Teuben
 15-jan-2026	0.4 added simple nearest neighbor line_id	PJT
 16-jan-2026	0.5 implemented veldef=		PJT
 17-jan-2026	0.6 mode= deprecated	PJT
+18-jan-2026	0.7 ...
 .fi
