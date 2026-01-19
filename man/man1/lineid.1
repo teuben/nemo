@@ -1,53 +1,60 @@
 .TH LINEID 1NEMO "18 January 2026"
 
 .SH "NAME"
-lineid \- identify peaks in a spectrum and optionally identify lines
+lineid \- spectral line ID tool
 
 .SH "SYNOPSIS"
 \fBlineid\fP in=file [parameter=value]
 
 .SH "DESCRIPTION"
-\fBlineid\fP identifies peaks in a spectrum (or directly given), 
-and attempts to identify spectral lines. The units of the frequency
-axis will need to be specified (the default is GHz) in order for the line identification to work.
+\fBlineid\fP is a tool that helps with converting between frequencies and doppler velocities, as well
+as identifying lines when the rest frequency can be derived.
+
 .PP
-It will also inter-operate between sky-freq, rest-freq and doppler velocity, in different doppler conventions:
-radio, optical or relativistic.
+\fBlineid\fP currently operates in three modes:
+
+.br
+1. For a given doppler velocity (\fBvel=\fP) and an input list of sky
+frequencies , the rest frequencies are calculated, and if a linelist
+is given, a lineid is attempted. This will be useful for multiple
+spectral lines in a given object.
+
+.br
+2. For a given rest frequency (\fBrestfreq=\fP) and an input list of
+sky frequencies, their doppler shifts are calculated in a variety of
+conventions (radio, relativistic, optical, and z). This will be useful
+for a large field of view where always the same line (e.g. HI) is
+detected in many sources at different cosmological distances.
+
+.br
+3. For a given \fBrestfreq=\fP and an input list of velocities
+(now with \fBxunit=km/s\fP), the rest frequencies of the other lines are
+computed. The first velocity in the list needs to match the given
+rest frequency
+This is probably a rare case, as spectra typically originate
+in frequency, not doppler velocity.
+
+.br
+4. For given \fBvel=\fP and list of velocities there is no
+practical application.
+
 .PP
-Operation can occur in several modes.
-.br
-1. If the VEL is given, a LineID is attempted. Either from a given
-restfreq, or from a linelist.
-.br
-2. If the RESTFREQ is given, a VEL is determined from the frequency of the
-fitted peak.
-.br
-3. If neither is given, just the peak(s) are reported.
-.br
-4. A special case can be made when both RESTFREQ and VEL are given, and the x-axis
-is given in km/s.  The VEL was computed
-from that given (possibly wrong) RESTFREQ, it will then re-compute the sky frequency axis,
-and compute rest frequencies and following up with a line ID.
-.br
-5. The input table can also be a list of already identified peaks. The first
-line is the one associated with the restfreq, if that's relevant. Appropriate values
-(depending on if \fBrestfreq=\fP or \fBvel=\fP is given) are returned for the other lines,
-essentially following the 4 cases described in 1-4.
-.br
-6. Compare dopper conventions
+In cases 1. and 3. a lineid can be attempted if a line list is supplied using \fBlinelist=\fP.
+See LINELIST below for examples of line lists.
+
 .PP
-See also \fItablsqfit(1NEMO)\fP with the option \fBfit=peak\fP, and \fIccdmom(1NEMO)\fP has
-an algorithm to find (properties of) the Nth peak using mom=3,30,31,32,33,34
+\fBlineid\fP can also attempt to find peaks in a spectrum if both the X and Y columns are given.
+
 .PP
-More sophisticated algorithms can be fond in for example ADMIT's LineID task, in particular
+More sophisticated algorithms for lineid can be fond in ADMIT's LineID task, in particular
 dealing with multiple "spectra" derived from a fits cube.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fP\fIfile\fP
-Input (table) file name. Should have two columns, but see below for single column
-files.
+Input (ascii \fItable(5NEMO)\fP) file name.  The number of columns will depend
+on which of the xcol,ycol,dycol is used.
 .br
 No default.
 .TP
@@ -66,28 +73,28 @@ converted to doppler velocities.
 By default not used.
 .TP
 \fBdxcol=\fP\fIx-err-column\fP
-Errors in the X coordnates. Only makes sense if no ycol is given
+Errors in the X coordnates. Only makes sense if no ycol is given.  Not implemented yet.
 .br
 By default not used.
 .TP
 \fBxunit=\fP
-X axis unit (GHz, MHz, A, nm, km/s, z) -- not all are implemented yet.
+X axis unit. Currently only GHz, km/s, and z are supported.
 .br
 [GHz]
 .TP
 \fBvel=[#[,unit]]\fP
-VEL of object, in km/s, independent of \fBxunit\fP. Optionally can have a unit added, e.g. \fIvel=1.2,z\fP.
+Redshift of object, in km/s. Optional unit added, e.g. \fIvel=1.2,z\fP.
 As for unit, only \fIkm/s\fP and the dimensionless \fIz\fP are allowed.
 .br
-Not set by default. If a value is given, the unit is \fIkm/s\fP.
+Not set by default. If a value is given, the unit defaults to \fIkm/s\fP.
 .TP
 \fBrestfreq=\fP
-If line is known, give rest frequency in \fBxunit\fP.
+If line is known, give rest frequency in \fBxunit\fP (only GHz supported now).
 .br
 Not set by default.
 .TP
 \fBlinelist=\fP
-Table with frequencies and lines. There is a simple list in $NEMODAT/z_lines.list
+Table with frequencies and line names. There is a simple list in $NEMODAT/z_lines.list
 with some common high-Z lines.
 .br
 Not set by default.
@@ -99,16 +106,9 @@ Negative values will use nearest neighbor and report the dv.
 [10]
 .TP
 \fBclip=\fP
-Do not fit peaks below this clip level.
+Do not fit peaks in the spectrum below this clip level.
 .br
 Default: not used
-.TP
-\fBmode=0|1\fP
-Fitting mode:  0=no fit needed, the xcol already contains the frequencies (or doppler velocities)
-of the lines. No ycol is needed (0 can be used)   1=peak fit (see also \fItabpeak(1NEMO)\fP
-for more options).
-.br
-[1]
 .TP
 \fBveldef=RAD|OPT|REL\fP
 Mode of velocity axis. Radio, Relativistic, or Optical are supported.
@@ -123,100 +123,127 @@ with \fIz=VEL/c\fP, i.e. the optical convention.
 The code was developed with frequency in mind, only GHz and km/s are supported. Wavelength
 is planned.
 
-Looks for emission lines in mode=1. May not work for absorption lines yet, or use \fItabpeak(1NEMO)\fP.
+Looks for a single emission line in the strongest peak.. May not work for absorption lines yet, or
+use \fItabpeak(1NEMO)\fP if multiple lines are needed. See EXAMPLES below.
 
 Although different doppler conventions are supported, coordinate frames are ignored.
 
 .SH "EXAMPLES"
-The following example generates a random table of 115 values, smoothes by 10 channels to create a handful
-of peaks and investigates the strongest peak, which happens to be near 40 "GHz". 
+The following three example generates a spectrum from a random table of 115 values,
+smoothes by 10 channels to create a handful
+of peaks and investigates the strongest peak, which happens to be near 40 "GHz".  The frequencies
+are labeled 0 to 114 in steps of 1 GHz.
 .EX
 
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 vel=1.827,z dv=200 linelist=$NEMODAT/z_lines.list
-  ### nemo Debug[0]: Vrad=193746 Vrel=233112 Vopt=547721 z=1.827
+  #> mode 1.
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 |\\
+        lineid - 0 1 vel=1.872,z dv=200 linelist=$NEMODAT/z_lines.list
+  ### nemo Debug[0]: Vrad=195408 Vrel=234961 Vopt=561211 z=1.872
   ### nemo Debug[0]: Found 23 lines in the linelist=/home/teuben/teunix/nemo/data/z_lines.list
   # There are 1 restfreq's to identify:
   # Commented lines do not fall within dv=200 km/s
   #    guess    ID    LINE     dFreq    deltaV  NAME
   #    GHz            Ghz      GHz      km/s
-  # 113.425330   2 115.271202 1.845872 4800.67 CO(1-0)
+    115.230827   2 115.271202 0.040375 105.006 CO(1-0)
 
-?
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 restfreq=115
+
+  #> mode 2.
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | tabpeak -  0 1 |\\
+        lineid - restfreq=115
+  # restfreq=115
+  # SkyFreq Vrad  Vrel   Vopt    z
+  # GHz     km/s  km/s  km/s    
+  29.914   221810 261794 852717  2.84436
+  40.1222  195198 234729 559487  1.86625
+  72.1352  111744 130493 178145  0.594229
+
+
+  #> mode 3.
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 |\\
+        lineid - 0 1 restfreq=115
   ### nemo Debug[1]: 1a: Line at 40.122154 GHz has z=1.86625 or vel=559487 km/s (cz)
   # restfreq=115
-  # SkyFreq Vrad  Vrel   Vopt
-  1  195198 234729 559487
-
-
-
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | tabpeak -  0 1 | lineid - 1 restfreq=115
-  # restfreq=115
-  # SkyFreq Vrad  Vrel   Vopt
-  29.914  221810 261794 852717
-  40.1222  195198 234729 559487
-  72.1352  111744 130493 178145
+  # SkyFreq Vrad  Vrel   Vopt    z
+  40.1222  195198 234729 559487  1.86625
 
 .EE
 
-and some examples specifying either velocity or frequency of the line(s) directly
+and here some examples specifying either velocity or frequency of the line(s) directly,
+no input spectrum. Only xcol= is needed:
 
 .EX
-  echo 5000 | lineid - restfreq=1.420405751786 xunit=km/s
-  ### nemo Debug[1]: 0a: Line at 5000.000000 km/s has skyfreq 1.397105   (z=0.016678)
 
-  echo 1.420405751786 | lineid - vel=5000 xunit=GHz
-  ### nemo Debug[1]: 0c: Line at 1.420406 GHz has restfreq 1.444096 GHz z=0.0166782
+  #> mode 1.
+  echo 1.397105 | lineid - vel=5000 
   ### nemo Debug[0]: Vrad=4917.98 Vrel=4958.31 Vopt=5000 z=0.0166782
+  # There are 1 restfreq's to identify: (use linelist= to find their names)
+  1.420406
+  
 
-  echo 1.397105 | lineid - restfreq=1.420405751786 xunit=GHz
+  #> mode 2.
+  nemoinp 1.397105,1.1 | lineid - restfreq=1.420405751786 
   # restfreq=1.42041
-  # SkyFreq Vrad  Vrel   Vopt   z
-  1.39711  4917.88 4958.21 4999.9  0.0166779
+  # SkyFreq Vrad    Vrel     Vopt     z
+  # GHz     km/s    km/s     km/s
+  1.39711  4916.83  4957.14  4998.81  0.0166742
+  1.1     67625.2  75009.8  87322.9   0.291278
 
+
+  #> mode 3.
+  echo 5000 | lineid - restfreq=1.420405751786 xunit=km/s
+  ### nemo Debug[1]: 0a: Line at 5000.000000 km/s has skyfreq 1.397105  restfreq 1.420406
+  # There are 1 restfreq's to identify: (use linelist= to find their names)
+  1.420406
 
 .EE
 
-and here an example of the CO(1-0) and CO(2-1) lines from the CO ladder, deliberately
-doppler shifted a bit by 300 km/s (give or take):
+An contrived example of the CO(1-0) and CO(2-1) lines from the CO
+ladder, deliberately doppler shifted a bit by 300 km/s (give or take):
 
 .EX
+
+  #> mode 1.
   nemoinp 110.092,115.155,220.179,230.308  |\\
       lineid - linelist=$NEMODAT/z_lines.list vel=300 dv=2.5
-
+  ### nemo Debug[0]: Vrad=299.7 Vrel=299.85 Vopt=300 z=0.00100069
   ### nemo Debug[0]: Found 23 lines in the listlist /home/teuben/NEMO/nemo/data/z_lines.list
   # There are 4 restfreq's to identify:
   #    guess    ID    LINE     dFreq    deltaV   NAME
+  #    GHz            Ghz      GHz      km/s
     110.202168   1 110.201354 0.000814 -2.21418  13CO(1-0)
   # 115.270235   2 115.271202 0.000967  2.51514  CO(1-0)
     220.399331   3 220.398680 0.000651 -0.886089 13CO(2-1)
     230.538467   4 230.538000 0.000467 -0.607859 CO(2-1)
+    
 .EE
-
-
 
 Here an example of known lines in velocity space and deriving their restfreq's. The first line
 in the list
 will be the one belonging to the known restfreq of CO(1-0), and was detected at -20 km/s. But
-there was a weak line at -312 km/s. What line is this? We need to find the restfrquency
-and then a lineid.
+there was a weak line at -312 km/s. To find what line this is, We need to find the restfrequency
+and then a lineid. In the example we only grab the restrfreq's.
 
 .EE
+
+  #> mode 3.
   nemoinp -20,-310 | lineid - restfreq=115.2712018 xunit=km/s
   # There are 2 restfreq's to identify: (use linelist= to find names)
   115.271202
   115.382823
+  
 .EX
 
-Indeed, the SiC2,v=0 line at 115.382367 had been previously detected in IRC+10216 in 1986 
-by the NRAO 11m (Thadeus).
+There is a known SiC2,v=0 line at 115.382367.
 
 .PP
 
 Compare different doppler conventions (veldef)
 .EX
+
+  #> mode 1.
   echo 0 | lineid - vel=5000 veldef=rel
-  ### nemo Debug[0]: rad=4958.99 rel=5000 opt=5042.4
+  ### nemo Debug[0]: rad=4958.99 rel=5000 opt=5042.4 z=0.0168196
+
 .EE
 
 .SH "LINELIST"
@@ -230,7 +257,7 @@ There are many sources for a linelist, we mention a few:
 
 3. Splatalogue at https://www.splatalogue.online/
 
-4. Astroquery based:   https://astroquery.readthedocs.io/en/latest/nist/nist.html and
+4. Astroquery:   https://astroquery.readthedocs.io/en/latest/nist/nist.html and
    https://astroquery.readthedocs.io/en/latest/atomic/atomic.html
 
 
@@ -252,5 +279,5 @@ Peter Teuben
 15-jan-2026	0.4 added simple nearest neighbor line_id	PJT
 16-jan-2026	0.5 implemented veldef=		PJT
 17-jan-2026	0.6 mode= deprecated	PJT
-18-jan-2026	0.7 ...
+18-jan-2026	0.7 removed never used keywords		PJT
 .fi
