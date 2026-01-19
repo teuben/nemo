@@ -28,21 +28,18 @@
 /**************** COMMAND LINE PARAMETERS **********************/
 
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
-  "in=???\n            Input (table) file name",
-  "xcol=1\n		 x coordinate column", 
-  "ycol=2\n		 y coordinate column",
+  "in=???\n              Input (table) file name",
+  "xcol=1\n		 x coordinate column of spectrum or linesq", 
+  "ycol=\n		 y coordinate column of spectrum",
   "dxcol=\n              If used, columns with errors in the x coordinate [not implemented]",
   "xunit=GHz\n           x-axis unit (GHz, km/s)",
-  "minchan=3\n           Minimum channels for a peak (not implemented)",
-  "maxchan=\n            Maximum channels for a peak (not implemented)",
   "vel=\n                VEL of object, if known (km/s)",
   "restfreq=\n           RESTFREQ (or RESTWAVE?) in xunits, if known",
   "linelist=\n           ASCII linelist (freq,label), e.g. $NEMODAT/z_lines.list",
   "dv=10\n               Slop in velocity to allow in line_id (km/s)",
   "clip=\n               Do not fit peaks below this clip level",
-  "mode=1\n              0: peaks given in xcol  1: fit peak(s) in (xcol,ycol)",
   "veldef=OPT\n          doppler_convention: OPT, RAD or REL",
-  "VERSION=0.5\n	 16-jan-2026 PJT",
+  "VERSION=0.7\n	 18-jan-2026 PJT",
   NULL
 };
 
@@ -57,6 +54,7 @@ local table *tptr;                              /* table */
 local mdarray2 d2;                              /* data[col][row] */
 
 local int xcol, ycol, dxcol;
+local int mode = -1;                            /* 0: lines known, just need to ID   1: spectrum given */
 
 local real *rfreq;                              /* restfreq estimated go here */
 local int nrfreq;                               /* active length of this array */
@@ -65,8 +63,6 @@ local int ndvel;                                /* active length of this array *
 
 local real  *x, *y;    			        /* data from file */
 local int    npt;				/* actual number of data points */
-
-local int mode;
 
 local bool Qvlsr, Qrest;
 local real vlsr;
@@ -166,16 +162,18 @@ inline real z2vrel(real z) {          return z2beta(z) * ckms; }
 
 void set_params()
 {
-  mode = getiparam("mode");
   input = getparam("in");             /* input table file */
   instr = stropen (input,"r");
   tptr = table_open(instr,0);
-  
+
   xcol = getiparam("xcol");
-  if (mode==0)
-    ycol = 0;
-  else
+  if (hasvalue("ycol")) {
     ycol = getiparam("ycol");
+    mode = 1;
+  } else {
+    mode = 0;
+  }
+
   if (hasvalue("dxcol"))
     warning("dxcol= not supported yet");
 
@@ -205,21 +203,25 @@ void set_params()
   if (Qvlsr) {
     get_nu(getparam("vel"), &vlsr, vlsr_unit, "km/s");
     if (streq(vlsr_unit,"z")) {
-      if (veldef != VEL_OPT) warning("You used z=%g, but did not specify optical convention",vlsr);
+      if (veldef != VEL_OPT) warning("You used z=%g, but did not specify veldef=optical convention",vlsr);
       vlsr *= c_MKS/1000;
     }
-    if (veldef == VEL_REL) vlsr = z2vopt(vrel2z(vlsr));
-    if (veldef == VEL_RAD) vlsr = vrad2vopt(vlsr);    
-    
-    dprintf(0,"Vrad=%g Vrel=%g Vopt=%g\n",vopt2vrad(vlsr),z2vrel(vopt2z(vlsr)),vlsr);
-    
+    if (veldef == VEL_REL) {
+      if (vlsr > ckms) error("Bad vlsr for veldef=RELATIVISTIC");
+      vlsr = z2vopt(vrel2z(vlsr));
+    }
+    if (veldef == VEL_RAD) {
+      if (vlsr > ckms) error("Bad vlsr for veldef=RADIO");      
+      vlsr = vrad2vopt(vlsr);
+    }
+    dprintf(0,"Vrad=%g Vrel=%g Vopt=%g z=%g\n",vopt2vrad(vlsr),z2vrel(vopt2z(vlsr)),vlsr,vopt2z(vlsr));
   }
   if (Qrest) restfreq = getdparam("restfreq");
   if (Qvlsr && Qrest) {
     if (xunit_mode == UNIT_KMS) {
       warning("Mode not implemented yet");
     } else
-      error("Cannot give both vel= and restfreq=");
+      error("Cannot give both vel= and restfreq= yet");
   }
 
 }
@@ -277,10 +279,9 @@ void read_data()
 void peak_data()
 {
   real xpeak, xerr, ypeak;
-  real v, z, z2, rf2, sf2;
+  real v, z, z1, z2, rf2, sf2;
   int i;
   
-  dprintf(1,"C(mks)=%g\n",c_MKS);
   dprintf(1,"xunit=%s\n",xunit);
 
   if (mode == 1 ) {
@@ -301,6 +302,8 @@ void peak_data()
       dprintf(1,"1a: Line at %f %s has z=%g or vel=%g km/s (cz)\n",xpeak,xunit,z,v);
       // add vel
       dvel[ndvel++] = v;
+      // add skyfreq in the restfreq slot
+      rfreq[nrfreq++] = xpeak;
     } else if (Qvlsr) {
       z = vlsr/c_MKS*1000.0;
       restfreq = xpeak * (1+z);
@@ -309,14 +312,25 @@ void peak_data()
       rfreq[nrfreq++] = restfreq;
     } else {
       dprintf(0,"Peak: %g %g\n", xpeak, ypeak);
+      //rfreq[nrfreq++] = xpeak;
     }
   } else { // mode=0:    (xcol has freq/vel; ycol not used)
     if (xunit_mode == UNIT_KMS) {
       if (Qrest) {
 	for (i=0; i<npt; i++) {
-	  z2 = x[i]*1000/c_MKS;
+	  if (veldef == VEL_OPT)
+	    z2 = x[i]*1000/c_MKS;
+	  else if (veldef == VEL_RAD)
+	    z2 =  vrad2z(x[i]);
+	  else if (veldef == VEL_REL)
+	    z2 =  vrel2z(x[i]);
 	  sf2 = restfreq/(1+z2);
-	  dprintf(1,"0a: Line at %f %s has skyfreq %f   (z=%f)\n",x[i],xunit,sf2,z2);
+	  if (i==0) // first one is reference 
+	    z1 = z2;
+	  rf2 = sf2 * (1+z1);
+	  dprintf(1,"0a: Line at %f %s has skyfreq %f  restfreq %f\n",x[i],xunit,sf2,rf2);
+	  // add freq
+	  rfreq[nrfreq++] = rf2;
 	}
       } else if (Qvlsr) {
 	//warning("not implementable");
@@ -333,7 +347,13 @@ void peak_data()
 	}
       } else if (Qvlsr) {
 	for (i=0; i<npt; i++) {
-	  z2 = vlsr*1000/c_MKS;
+	  // convert to opt if not opt
+	  if (veldef == VEL_OPT)
+	    z2 = vlsr*1000/c_MKS;
+	  else if (veldef == VEL_RAD)
+	    z2 = vrad2z(vlsr);
+	  else if (veldef == VEL_REL)
+	    z2 = vrel2z(vlsr);
 	  rf2 = x[i] * (1+z2);
 	  dprintf(1,"0c: Line at %f %s has restfreq %f %s z=%g\n",x[i],xunit,rf2,xunit,z2);
 	  // add freq
@@ -351,14 +371,15 @@ void line_id()
   char comment[3];
 
   if (ndvel > 0) {
+    // need to check ndvel first, since skyfreq is hidden in rfreq for spectra
     printf("# restfreq=%g\n",restfreq);
-    printf("# SkyFreq Vrad  Vrel   Vopt\n");
+    printf("# SkyFreq Vrad  Vrel   Vopt   z\n");
+    printf("# GHz     km/s  km/s   km/s\n");
     for (i=0; i<ndvel; i++) {
       real v = dvel[i];
-      printf("%g  %g %g %g\n", x[i], vopt2vrad(v), z2vrel(vopt2z(v)), v);
+      printf("%g  %g %g %g  %g\n", mode==0? x[i] : rfreq[i], vopt2vrad(v), z2vrel(vopt2z(v)), v, vopt2z(v));
     }
-    // should never happen, but lets check anyways
-    if (nrfreq > 0) warning("Unexpected #freq and #vel obtained???");
+    return;
   }
   
   if (nrfreq==0) {
@@ -367,11 +388,12 @@ void line_id()
   }
   
   printf("# There are %d restfreq's to identify:%s\n",
-	 nrfreq, lnum==0 ? "(use linelist=)" : "");
+	 nrfreq, lnum==0 ? " (use linelist= to find their names)" : "");
 
   if (lnum > 0) {
     printf("# Commented lines do not fall within dv=%g km/s\n",dv);
     printf("#    guess    ID    LINE     dFreq    deltaV  NAME\n");
+    printf("#    GHz            Ghz      GHz      km/s\n");
   }
 
   for (i=0; i<nrfreq; i++) {   // loop over all frequencies found
@@ -441,204 +463,9 @@ void do_peak(real *xpeak, real *xerr, real *ypeak)
     *ypeak = sol[0]-sol[1]*sol[1]/(4*sol[2]);
 }
 
-// code below is not used yet
-// below here routines from ccdmom which we will eventually need for multiple peaks
-
-
-/*
- * peak_spectrum:
- * return location of peak for (-1,y1) (0,y2) (1,y3)
- * as determined from the 2nd order polynomial going through
- * these 3 points.
- * (also finds valleys)
- *
- * Returns a number between -0.5 and 0.5 from the center
- * because it is guarenteed y2 is a local extremum
- * (though this is NOT checked here)
- *
- * It returns an exact fit, because of the 2nd order poly,
- * could try 5 points and do a lsqfit or gaussfit....
- */
-
-local real peak_spectrum(int n, real *spec, int p)
-{
-  real y1, y2, y3;
-
-  y1 = spec[p-1];
-  y2 = spec[p];
-  y3 = spec[p+1];
-  if (y1+y3 == 2*y2) return 0.0;
-  return 0.5*(y1-y3)/(y1+y3-2*y2);
-}
-
-/*
- * @todo:    have an option to use abs() for mom2 calculations,
- *           but this assumes Qcontsub has been applied
- */
-
-local real peak_mom(int n, real *spec, int *smask, int peak, int mom, bool Qcontsub, bool Qabs, bool Qzero)
-{
-  int i;
-  Moment m;
-  bool Qfirst = TRUE;
-  real cont = 0.0;
-
-  if (Qzero) {
-    for (i=0; i<n; i++) {
-      if (smask[i] && spec[i] < 0.0) smask[i] = 0;
-    }
-  }
-
-  ini_moment(&m, mom, n);
-  if (Qcontsub) {
-    for (i=0; i<n; i++) {
-      if (smask[i]==peak) {
-	if (Qfirst) {
-	  cont = spec[i];
-	  Qfirst = FALSE;
-	}
-	if (spec[i] < cont) cont = spec[i];
-      }
-    }
-  }
-  dprintf(1,"peak_mom %d %d %g\n",peak,mom,cont);
-  for (i=0; i<n; i++)
-    if (smask[i]==peak)
-      accum_moment(&m, i, spec[i]-cont);
-  if (mom==0)
-    return sum_moment(&m);
-  else if (mom==1)
-    return mean_moment(&m);
-  else if (mom==2)
-    return sigma_moment(&m);
-  else if (mom==3)
-    //return skewness_moment(&m); 
-    return h3_moment(&m); 
-  else if (mom==4)
-    //return kurtosis_moment(&m); 
-    return h4_moment(&m); 
-  else
-    return 0.0;
-}
-
-/* 
- * this routine can be called multiple times
- * each time it will find a peak, and then walk down the peak
- * mask[] contains 0 if not part of a peak, 1 for the first peak
- * 2 for the 2nd etc.
- *
- * During the first call, the mask[] array is set to all 0's.
- * i.e. unassigned to a peak, you will need npeak=0
- *
- * Returns: peak location (an integer)  and mask[] was modified
- *
- * TODO:    after all peaks have been find, need to resolve the issue
- *          of possibly re-assigning membership to the neighbor peak
- */
-
-
-local int peak_find(int n, real *data, int *mask, int npeak)
-{
-  int i, ipeak=0, apeak=-1;
-  real peakvalue=0, oldvalue=0;  // fool compiler
-
-  dprintf(1,"peak_find %d\n",n);
-  if (npeak==0) {               /* initialize by resetting the mask */
-    for(i=0; i<n; i++)
-      mask[i] = 0;              /* 0 means no peak assigned */
-    return -1;
-  }
-
-  while (1) {                   /* iterate until a good peak found ? */
-    ipeak++;
-    dprintf(1,"iter ipeak=%d npeak=%d\n",ipeak,npeak);
-    if (ipeak > npeak+3) break;
-
-    for(i=0; i<n; i++) {        /* go over all good points and find the peak */
-      if (mask[i]==0) {         /* for all good data not yet assigned to a peak */
-	if (apeak<0) {          /* make sure we initialize first good value as peak */
-	  peakvalue = data[i];   
-	  apeak = i; 
-	  continue;
-	}
-	if (data[i] > peakvalue) {   /* find largest values and remember where it was */
-	  peakvalue = data[i];
-	  apeak = i;
-	}
-      }
-    }
-    dprintf(1,"apeak=%d\n",apeak);
-    if (apeak==0) {             /* never allow first point to be the peak ... */
-      mask[apeak] = 0;
-      apeak = -1;
-      for (i=1, oldvalue=peakvalue; mask[i]==0 && i<n; i++) {   /* walk down, and mask out */
-	if (data[i] > oldvalue) break;                         /* util data increase again */
-	oldvalue = data[i];
-	mask[i] = npeak;
-      }
-      continue;
-    }
-    if (apeak==(n-1)) {         /* ...or last point, since they have no neighbors */
-      mask[apeak]= 0;
-      apeak = -1;
-      // compiler: peakvalue may be used uninitialized
-      for (i=n-2; oldvalue=peakvalue, mask[i]==0 && i>0; i--) {  /* walk down, and mask out */
-	if (data[i] > oldvalue) break;                        /* until data increase again */
-	oldvalue = data[i];
-	mask[i] = npeak;
-      }
-      // break;
-      continue;
-    }
-    if (apeak > 0) {            /* done, found a peak, but mask down the peak */
-      mask[apeak] = npeak;
-      for (i=apeak+1, oldvalue=peakvalue; mask[i]==0 && i<n;  i++) {
-	if (data[i] > oldvalue) break;
-	oldvalue = data[i];
-	mask[i] = npeak;
-      }
-      for (i=apeak-1, oldvalue=peakvalue; mask[i]==0 && i>=0; i-- ) {
-	if (data[i] > oldvalue) break;
-	oldvalue = data[i];
-	mask[i] = npeak;
-      }
-      break;
-    }
-
-  } /* while() */
-  return apeak;
-}
-
-static inline int outside(real x,int i0,int i1) {
-  if(x<i0) return 0;
-  if(x>i1) return 0;
-  return 1;
-}
-
-local void peak_assign(int n, real *d, int *s)
-{
-  int i;
-  real p;
-
-  for (i=1; i<n-1; i++) {
-    if (s[i] && s[i-1] && s[i]!=s[i-1]) {      /* look for neighbor peaks */
-      if (d[i] < d[i-1]) {
-	p = peak_spectrum(n,d,i);
-	//dprintf(0,"assign-1: %d %d %d   %g   %g %g\n",i,s[i],s[i-1],p,d[i-1],d[i]);
-	if (p>0) {
-	  dprintf(1,"re-assign-1 @%d from %d to %d\n",i,s[i],s[i-1]);
-	  s[i] = s[i-1];                       /* re-assign */
-	}
-      } else {
-	p = peak_spectrum(n,d,i-1);
-	//dprintf(0,"assign-2: %d %d %d   %g   %g %g\n",i,s[i],s[i-1],p,d[i-1],d[i]);	
-	if (p<0) {
-	  dprintf(1,"re-assign-2 @%d from %d to %d\n",i,s[i-1],s[i]);
-	  s[i-1] = s[i];                       /* re-assign */
-	}
-      } 
-    }
-  }
-}
-
-
+// Possible routines from other codes if fancier peak detection is needed
+// see tabpeak and ccdmom
+//  peak_spectrum
+//  peak_mom
+//  peak_find
+//  peak_assign
