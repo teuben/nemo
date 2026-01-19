@@ -209,7 +209,7 @@ void deriv_data2(int nf)
     if (d[i] > clip && d[i+1] > clip && d[i+3] < clip) {
       /*         y[i+1]-y[i-1]> clip          */
       //if (nf<2) continue;
-      ok[i] = FALSE;
+      ok[i]   = FALSE;
       ok[i+1] = FALSE;
       i += 3;
       continue;
@@ -217,14 +217,14 @@ void deriv_data2(int nf)
     if (d[i] > clip && d[i+1] > clip && d[i+2] > clip && d[i+4] < clip) {
       /*         y[i+1]-y[i-1]> clip  y[i+2]-y[i-1]>clip             */
       //if (nf<3) continue;
-      ok[i] = FALSE;
+      ok[i]   = FALSE;
       ok[i+1] = FALSE;
       ok[i+2] = FALSE;
       i += 4;
       continue;
     }
     if (d[i] > clip && d[i+1] > clip && d[i+2] > clip && d[i+3] > clip && d[i+5] < clip) {
-      ok[i] = FALSE;
+      ok[i]   = FALSE;
       ok[i+1] = FALSE;
       ok[i+2] = FALSE;
       ok[i+3] = FALSE;

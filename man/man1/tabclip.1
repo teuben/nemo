@@ -1,4 +1,4 @@
-.TH TABCLIP 1NEMO "28 December 2025"
+.TH TABCLIP 1NEMO "4 January 2026"
 
 .SH "NAME"
 tabclip \- clip a table
@@ -31,9 +31,9 @@ Output table
 No default
 .TP
 \fBxcol=\fP
-x coordinate column
+x coordinate column. Column 0 can be used for values 0,1,2,...
 .br
-[1]    
+[1]
 .TP
 \fBycol=\fP
 y coordinate column
@@ -41,7 +41,7 @@ y coordinate column
 [2]    
 .TP
 \fBclip=\fP
-Clipping if abs(derivative) exceeds this value
+Clipping value.  e.g. abs(derivative) exceeds this value
 .TP
 \fBeta=\fP
 Clipping if the value predicted from a 2nd order polynomial value exceeds
