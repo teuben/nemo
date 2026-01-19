@@ -217,13 +217,14 @@ ladder, deliberately doppler shifted a bit by 300 km/s (give or take):
     
 .EE
 
-Here an example of known lines in velocity space and deriving their restfreq's. The first line
-in the list
-will be the one belonging to the known restfreq of CO(1-0), and was detected at -20 km/s. But
-there was a weak line at -312 km/s. To find what line this is, We need to find the restfrequency
-and then a lineid. In the example we only grab the restrfreq's.
+Here an example of detected lines in velocity space and deriving their
+restfreq's.  The first line in the list will be the one belonging to
+the known restfreq of CO(1-0), and was detected at -20 km/s. But there
+was a weak line at -312 km/s with unknown identification. To find what
+line this is, We need to find the rest frequency and then a lineid. In
+the example we only grab the restfreq's.
 
-.EE
+.EX
 
   #> mode 3.
   nemoinp -20,-310 | lineid - restfreq=115.2712018 xunit=km/s
@@ -231,9 +232,9 @@ and then a lineid. In the example we only grab the restrfreq's.
   115.271202
   115.382823
   
-.EX
+.EE
 
-There is a known SiC2,v=0 line at 115.382367.
+There is indeed a known SiC2,v=0 line at 115.382367 GHz.
 
 .PP
 
