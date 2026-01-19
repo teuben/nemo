@@ -39,25 +39,27 @@ rest frequencies and following up with a line ID. <br>
 The first line is the one associated with the restfreq, if that&rsquo;s relevant.
 Appropriate values (depending on if <b>restfreq=</b> or <b>vel=</b> is given) are returned
 for the other lines, essentially following the 4 cases described in 1-4.
-<p>
+<br>
+6. Compare dopper conventions <p>
 See also <a href='tablsqfit.1.html'><i>tablsqfit(1NEMO)</i></a>
- with the option <b>fit=peak</b>, and <a href='ccdmom.1.html'><i>ccdmom(1NEMO)</i></a>
- has
-an algorithm to find (properties of) the Nth peak using mom=3,30,31,32,33,34
-<p>
-More sophisticated algorithms can be fond in for example ADMIT&rsquo;s LineID
-task, in particular dealing with multiple "spectra" derived from a fits
-cube. 
+ with the option
+<b>fit=peak</b>, and <a href='ccdmom.1.html'><i>ccdmom(1NEMO)</i></a>
+ has an algorithm to find (properties of) the
+Nth peak using mom=3,30,31,32,33,34 <p>
+More sophisticated algorithms can be
+fond in for example ADMIT&rsquo;s LineID task, in particular dealing with multiple
+"spectra" derived from a fits cube. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized in order; they
-may be given in any order if the keyword is also given. Use <b>--help</b> to confirm
-this man page is up to date.  
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
-<dt><b>in=</b><i>file</i> </dt>
-<dd>Input (table) file name. Should have
-two columns, but see below for single column files. <br>
+<dt><b>in=</b><i>file</i>
+</dt>
+<dd>Input (table) file name. Should have two columns, but see below for single
+column files. <br>
 No default. </dd>
 
 <dt><b>xcol=</b><i>x-column</i> </dt>
@@ -83,14 +85,16 @@ yet. <br>
 </dt>
 <dd>Maximum channels for a peak []     - not used yet  </dd>
 
-<dt><b>vel=</b> </dt>
-<dd>VEL of object, in
-km/s, independent of <b>xunit</b>.q <br>
-Not set by default. </dd>
+<dt><b>vel=[#[,unit]]</b> </dt>
+<dd>VEL of
+object, in km/s, independent of <b>xunit</b>. Optionally can have a unit added,
+e.g. <i>vel=1.2,z</i>. As for unit, only <i>km/s</i> and the dimensionless <i>z</i> are allowed.
+<br>
+Not set by default. If a value is given, the unit is <i>km/s</i>. </dd>
 
 <dt><b>restfreq=</b> </dt>
-<dd>If line is known, give rest frequency in <b>xunit</b>.
-<br>
+<dd>If line
+is known, give rest frequency in <b>xunit</b>. <br>
 Not set by default. </dd>
 
 <dt><b>linelist=</b> </dt>
@@ -115,31 +119,32 @@ needed (0 can be used)   1=peak fit (see also <a href='tabpeak.1.html'><i>tabpea
 <br>
 [1] </dd>
 
-<dt><b>velmode=REL|OPT|RAD</b> </dt>
-<dd>Mode of velocity axis. Relativistic, Optical or Radio.
-<br>
-Not implemented yet. 
+<dt><b>veldef=RAD|OPT|REL</b> </dt>
+<dd>Mode of velocity axis. Radio, Relativistic, or Optical
+are supported. <br>
+[OPT] 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
 
-<p> Currently frequency conversions are done using
-the <i>(1+z)</i> formula with <i>z=VEL/c</i>. 
-<p> The code was developed with frequency in
-mind, only GHz and km/s are supported. Wavelength is planned. 
-<p> Looks for
-emission lines in mode=1. May not work for absorption lines yet. 
-<p> 
-<p> 
+<p> Currently frequency conversions are done using the <i>(1+z)</i>
+formula with <i>z=VEL/c</i>, i.e. the optical convention. 
+<p> The code was developed
+with frequency in mind, only GHz and km/s are supported. Wavelength is planned.
+
+<p> Looks for emission lines in mode=1. May not work for absorption lines yet.
+
+<p> Although different doppler conventions are supported, coordinate frames
+are ignored. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-The
-following example generates a random table of 115 values, smoothes by 10
-channels to create a handful of peaks and investigates the strongest peak,
-which happens to be near 40 "GHz". These all use the default <b>mode=1</b>:  
-<p> 
- tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 <br>
+The following example generates a random table of
+115 values, smoothes by 10 channels to create a handful of peaks and investigates
+the strongest peak, which happens to be near 40 "GHz". These all use the
+default <b>mode=1</b>:  
+<p>   tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid -
+0 1 <br>
    ### nemo Debug Info: Peak: 40.1222 0.169591<br>
  
 <p>   tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | lineid - 0 1 vel=10000<br>
@@ -184,6 +189,10 @@ CO ladder, deliberately doppler shifted a bit by 300 km/s (give or take):
      220.399331   3 220.398680 0.000651 -0.886089 13CO(2-1)<br>
      230.538467   4 230.538000 0.000467 -0.607859 CO(2-1)<br>
   
+<p> Compare different doppler conventions (veldef)    echo 0 | lineid - mode=0
+vel=5000 veldef=rel<br>
+   ### nemo Debug[0]: rad=4958.99 rel=5000 opt=5042.4<br>
+  
 <p> 
 <h2><a name='sect6' href='#toc6'>Linelist</a></h2>
 The input linelist is a very simple ascii table of (frequency,name).
@@ -200,10 +209,11 @@ and
 <a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
 , <a href='tabpeak.1.html'>tabpeak(1NEMO)</a>
 , <a href='tabpp.1.html'>tabpp(1NEMO)</a>
-, <a href='table.5.html'>table(5NEMO)</a>
+, <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
+,
+<a href='table.5.html'>table(5NEMO)</a>
  <p>
-admit::LineID_AT()
-
+admit::LineID_AT() 
 <p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
@@ -213,6 +223,7 @@ Peter Teuben
 <pre>13-dec-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.1 Draft created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 3-jul-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.3 add mode=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-jan-2026<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.4 added simple nearest neighbor line_id<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+16-jan-2026<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.5 implemented veldef=<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
