@@ -1,4 +1,4 @@
-.TH LINEID 1NEMO "18 January 2026"
+.TH LINEID 1NEMO "19 January 2026"
 
 .SH "NAME"
 lineid \- spectral line ID tool
@@ -15,7 +15,7 @@ as identifying lines when the rest frequency can be derived.
 
 .br
 1. For a given doppler velocity (\fBvel=\fP) and an input list of sky
-frequencies , the rest frequencies are calculated, and if a linelist
+frequencies, the rest frequencies are calculated, and if a linelist
 is given, a lineid is attempted. This will be useful for multiple
 spectral lines in a given object.
 
@@ -27,41 +27,43 @@ for a large field of view where always the same line (e.g. HI) is
 detected in many sources at different cosmological distances.
 
 .br
-3. For a given \fBrestfreq=\fP and an input list of velocities
-(now with \fBxunit=km/s\fP), the rest frequencies of the other lines are
-computed. The first velocity in the list needs to match the given
-rest frequency
-This is probably a rare case, as spectra typically originate
-in frequency, not doppler velocity.
+3. For a given \fBrestfreq=\fP and an input list of velocities (now
+with \fBxunit=km/s\fP), the rest frequencies of the other lines are
+computed, and a lineid can be attempted. The first velocity in the
+list needs to match the given rest frequency This is probably a rare
+case, as spectra typically originate in frequency, not doppler
+velocity.
 
 .br
 4. For given \fBvel=\fP and list of velocities there is no
-practical application.
+practical application? It can probably be run as mode 3.
 
 .PP
 In cases 1. and 3. a lineid can be attempted if a line list is supplied using \fBlinelist=\fP.
 See LINELIST below for examples of line lists.
 
 .PP
-\fBlineid\fP can also attempt to find peaks in a spectrum if both the X and Y columns are given.
+\fBlineid\fP can also attempt to find the strongest peak
+in a spectrum if both the X and Y columns are given, but
+\fItabpeak(1NEMO)\fP is probably a better feed into \fBlineid\fP.
 
 .PP
-More sophisticated algorithms for lineid can be fond in ADMIT's LineID task, in particular
+More sophisticated algorithms for lineid can be found in ADMIT's LineID task, in particular
 dealing with multiple "spectra" derived from a fits cube.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fP\fIfile\fP
-Input (ascii \fItable(5NEMO)\fP) file name.  The number of columns will depend
+Input file name, in ASCII \fItable(5NEMO)\fP format.  The number of columns will depend
 on which of the xcol,ycol,dycol is used.
 .br
 No default.
 .TP
 \fBxcol=\fP\fIx-column\fP
 X coordinate column, representing the frequency or wavelength axis.
-Units are GHz, unless specified with the \fBxunit\fP keyword. Column 1 is the first
-column.
+Units are GHz, unless specified with the \fBxunit\fP keyword. The X column
+is always required.
 .br
 [1]
 .TP
@@ -78,7 +80,7 @@ Errors in the X coordnates. Only makes sense if no ycol is given.  Not implement
 By default not used.
 .TP
 \fBxunit=\fP
-X axis unit. Currently only GHz, km/s, and z are supported.
+X axis unit. Currently only GHz and km/s are supported.
 .br
 [GHz]
 .TP
@@ -90,6 +92,7 @@ Not set by default. If a value is given, the unit defaults to \fIkm/s\fP.
 .TP
 \fBrestfreq=\fP
 If line is known, give rest frequency in \fBxunit\fP (only GHz supported now).
+In a future version \fIrestwave=\fP might be supported.
 .br
 Not set by default.
 .TP
@@ -116,9 +119,6 @@ Mode of velocity axis. Radio, Relativistic, or Optical are supported.
 [OPT]
 
 .SH "CAVEATS"
-
-Currently frequency conversions are done using the \fI(1+z)\fP formula
-with \fIz=VEL/c\fP, i.e. the optical convention.
 
 The code was developed with frequency in mind, only GHz and km/s are supported. Wavelength
 is planned.
@@ -159,17 +159,17 @@ are labeled 0 to 114 in steps of 1 GHz.
 
 
   #> mode 3.
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 |\\
-        lineid - 0 1 restfreq=115
-  ### nemo Debug[1]: 1a: Line at 40.122154 GHz has z=1.86625 or vel=559487 km/s (cz)
-  # restfreq=115
-  # SkyFreq Vrad  Vrel   Vopt    z
-  40.1222  195198 234729 559487  1.86625
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5 | tabpeak -  0 1 |\\
+        lineid - restfreq=115 xunit=km/s
+  ### nemo Debug[0]: Reading 2 column(s)
+  # There are 3 restfreq's to identify: (use linelist= to find their names)
+  115.000000
+  114.996085
+  114.983808
 
 .EE
 
-and here some examples specifying either velocity or frequency of the line(s) directly,
-no input spectrum. Only xcol= is needed:
+and here some examples with no input spectrum. Only \fBxcol=\fP is needed:
 
 .EX
 
