@@ -1,37 +1,61 @@
-.TH TABTAB 1NEMO "26 April 2022"
+.TH TABTAB 1NEMO "19 January 2026"
 
 .SH "NAME"
-tabtab \- 
+tabtab \- concatenate or paste conformant tables, or add line numbers
 
 .SH "SYNOPSIS"
 \fBtabtab\fP [parameter=value]
 
 .SH "DESCRIPTION"
-concatenate or paste conformant tables.
+\fBtabtab\fP will concatenate or paste conformant tables.
 .PP
 In \fBpaste\fP mode the number of rows need to be the same.  In \fBconcat\fP mode
 the number of columns need to be same.   Although these mimic
 the standard \fIpaste(1)\fP and \fIcat(1)\fP programs, the tables need to be
 conformant, though the input tables can have their own header/comment files.
+.PP
+If only one input file is given, a line number is added as the first column, with
+an optional offset. This option is equivalent to the
+unix \fInl(1)\fP program, although "cat -n" also achieves the same result.
 
 .SH "PARAMETERS"
-The following parameters are recognized in any order if the keyword
-is also given:
+.so man1/parameters
 .TP 20
 \fBin=\fP
-Input files. At least 2 need to be given.
+Input files.
+.br
+No default. If only one file is given, line numbers are added.
 .TP
-\fBout=\fP
+\fBout=-\fP
 Output file, must not exist yet.
+.br
+Default: stdout
 .TP
 \fBmode=p|c\fP
-Paste or Concat mode. [p].
+Paste or Concat mode.
+.br
+[p].
+.TP
+\fBspace=t|f\fP
+todo
+.br
+[t]
+.TP
+\fBoffset=\fP
+Offset counter from 0 if line numbers are added.
+.br
+[1]
+
+.SH "CAVEATS"
+Table headers are lost
 
 .SH "EXAMPLES"
 
-.nf
-% tabtab tab1,tab2  tab2
-.fi
+.EX
+% nemoinp 10:15 > tab1
+% tabtab tab1,tab1  > tab2
+% tabtab tab1 > tab3
+.EE
 
 .SH "SEE ALSO"
 tabcols(1NEMO), tabrows(1NEMO), table(5NEMO)
@@ -42,8 +66,9 @@ src/kernel/tab/tabtab.c
 .SH "AUTHOR"
 Peter Teuben
 
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
-.ta +1.5i +5.5i
+.ta +1.25i +4.5i
 26-apr-2022	Created		PJT
+19-jan-2026	0.4 add offset= and allow single file numbering		PJT
 .fi
