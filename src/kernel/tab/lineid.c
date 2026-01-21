@@ -36,10 +36,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "vel=\n                VEL of object, if known (km/s)",
   "restfreq=\n           RESTFREQ (or RESTWAVE?) in xunits, if known",
   "linelist=\n           ASCII linelist (freq,label), e.g. $NEMODAT/z_lines.list",
-  "dv=10\n               Slop in velocity to allow in line_id (km/s)",
+  "dv=-1\n               Slop in velocity to allow in line_id (km/s)  -1 means nearest match",
   "clip=\n               Do not fit peaks below this clip level",
   "veldef=OPT\n          doppler_convention: OPT, RAD or REL",
-  "VERSION=0.7\n	 18-jan-2026 PJT",
+  "VERSION=0.8\n	 19-jan-2026 PJT",
   NULL
 };
 
@@ -68,12 +68,11 @@ local bool Qvlsr, Qrest;
 local real vlsr;
 local real restfreq;
 local real dv;
-local string linelist = NULL;
 
-#define MAXL 1000
-local real   lfreq[MAXL];
-local string lname[MAXL];
-local int    lnum = 0;
+local string linelist = NULL;                   /* linelist (must be file, cannot be pipe) */
+local real   *lfreq;                            /* linelist freqs */
+local string *lname;                            /* linelist names */
+local int    lnum = 0;                          /* #lines in linelist */
 
 #define MAXU 64
 local string xunit;
@@ -204,7 +203,7 @@ void set_params()
     get_nu(getparam("vel"), &vlsr, vlsr_unit, "km/s");
     if (streq(vlsr_unit,"z")) {
       if (veldef != VEL_OPT) warning("You used z=%g, but did not specify veldef=optical convention",vlsr);
-      vlsr *= c_MKS/1000;
+      vlsr *= ckms;
     }
     if (veldef == VEL_REL) {
       if (vlsr > ckms) error("Bad vlsr for veldef=RELATIVISTIC");
@@ -254,25 +253,32 @@ void read_data()
 
   if (linelist != NULL) {
     char line[MAX_LINELEN];
+    real fmin, fmax;
     string *words;
     int nw;
+    int nmax = nemo_file_lines(linelist, 0);
+    dprintf(1,"nemo_file_lines: %d\n",nmax);
+    lfreq = (real *) allocate(nmax*sizeof(real));
+    lname = (string *) allocate(nmax*sizeof(string));
 
     instr = stropen(linelist,"r");
     while (fgets(line, MAX_LINELEN, instr) != NULL) {
       if (line[0] == '#') continue;
       words = burststring(line," \n");
       nw = xstrlen(words,sizeof(string))-1;
-      dprintf(1,"%d: %g %s\n", nw, atof(words[0]), words[1]);
+      dprintf(1,"%d  %f %s %d\n", lnum, atof(words[0]), words[1], nw);
       lfreq[lnum] = atof(words[0]);
       lname[lnum] = strdup(words[1]);
-      lnum++;
-      if (lnum==MAXL) {
-	warning("Could only read %d lines, increase MAXL in the code", lnum);
-	break;
+      if (lnum==0) {
+	fmin = fmax = lfreq[0];
+      } else {
+	fmin = MIN(fmin, lfreq[lnum]);
+	fmax = MAX(fmax, lfreq[lnum]);
       }
+      lnum++;
     }
     strclose(instr);
-    dprintf(0,"Found %d lines in the linelist=%s\n",lnum,linelist);
+    dprintf(0,"Found %d lines in the linelist=%s; range %f to %f\n",lnum,linelist,fmin,fmax);
   }
 }
 
@@ -298,14 +304,14 @@ void peak_data()
   if (mode == 1) {  // peak fit to (xcol,ycol)
     if (Qrest) {
       z = restfreq/xpeak - 1;
-      v = z*c_MKS/1000.0;
+      v = z*ckms;
       dprintf(1,"1a: Line at %f %s has z=%g or vel=%g km/s (cz)\n",xpeak,xunit,z,v);
       // add vel
       dvel[ndvel++] = v;
       // add skyfreq in the restfreq slot
       rfreq[nrfreq++] = xpeak;
     } else if (Qvlsr) {
-      z = vlsr/c_MKS*1000.0;
+      z = vlsr/ckms;
       restfreq = xpeak * (1+z);
       dprintf(1,"1b: Line at %f, Look near freq = %f %s for a lineid; vel=%g\n", xpeak, restfreq, xunit,vlsr);
       // add freq
@@ -319,7 +325,7 @@ void peak_data()
       if (Qrest) {
 	for (i=0; i<npt; i++) {
 	  if (veldef == VEL_OPT)
-	    z2 = x[i]*1000/c_MKS;
+	    z2 = x[i]/ckms;
 	  else if (veldef == VEL_RAD)
 	    z2 =  vrad2z(x[i]);
 	  else if (veldef == VEL_REL)
@@ -340,7 +346,7 @@ void peak_data()
       if (Qrest) {
 	for (i=0; i<npt; i++) {
 	  z2 = restfreq/x[i] - 1.0;
-	  v = z2*c_MKS/1000.0;
+	  v = z2*ckms;
 	  dprintf(1,"0b: Line at %f %s has z=%f or vel=%f km/s (cz)\n",x[i],xunit,z2,v);
 	  // add vel
 	  dvel[ndvel++] = v;
@@ -349,7 +355,7 @@ void peak_data()
 	for (i=0; i<npt; i++) {
 	  // convert to opt if not opt
 	  if (veldef == VEL_OPT)
-	    z2 = vlsr*1000/c_MKS;
+	    z2 = vlsr/ckms;
 	  else if (veldef == VEL_RAD)
 	    z2 = vrad2z(vlsr);
 	  else if (veldef == VEL_REL)
@@ -401,26 +407,43 @@ void line_id()
       printf("%f\n",rfreq[i]);
       continue;
     }
-    dfmin = -1.0;
-    for (j=0; j<lnum; j++) {   // loop over linelist and find nearest match
-      if (dfmin < 0) {
-	dfmin = ABS(lfreq[j] - rfreq[i]);
-	lmin = j;
-	continue;
+    if (dv < 0) {
+      dfmin = -1.0;
+      for (j=0; j<lnum; j++) {   // loop over linelist and find nearest match
+	if (dfmin < 0) {
+	  dfmin = ABS(lfreq[j] - rfreq[i]);
+	  lmin = j;
+	  continue;
+	}
+	df = ABS(lfreq[j] - rfreq[i]);
+	if (df < dfmin) {
+	  dfmin = df;
+	  lmin = j;
+	}
       }
-      df = ABS(lfreq[j] - rfreq[i]);
-      if (df < dfmin) {
-	dfmin = df;
-	lmin = j;
+      delta = (1-rfreq[i]/lfreq[lmin])*ckms;
+      if (ABS(delta) > -dv)
+	strcpy(comment,"#");
+      else
+	strcpy(comment," ");
+      // @todo do we need comment?
+      printf("%s %f   %d %f %f %g %s\n",comment,rfreq[i], lmin, lfreq[lmin], dfmin, delta, lname[lmin]);
+    } else {
+      // find all neighbors within given dv (in km/s)
+      bool found = FALSE;
+      for (j=0; j<lnum; j++) {   // loop over linelist and find nearest match
+	delta = (1-rfreq[i]/lfreq[j])*ckms;
+	if (ABS(delta) < dv) {
+	  strcpy(comment," ");
+	  printf("%s %f   %d %f %f %g %s\n",comment,rfreq[i], lmin, lfreq[j], dfmin, delta, lname[j]);
+	  found = TRUE;
+	}
       }
+      if (!found) {
+	printf("# %f   no lines found within %g km/s\n", rfreq[i], dv);
+      }
+      printf("#\n");
     }
-    delta = (1-rfreq[i]/lfreq[lmin])*c_MKS/1000.0;
-    if (ABS(delta) > dv)
-      strcpy(comment,"#");
-    else
-      strcpy(comment," ");
-    
-    printf("%s %f   %d %f %f %g %s\n",comment,rfreq[i], lmin, lfreq[lmin], dfmin, delta, lname[lmin]);
   }
 }
 
