@@ -103,10 +103,11 @@ with some common high-Z lines.
 Not set by default.
 .TP
 \fBdv=\fP
-Slop (in km/s) allowed in identifying lines.
-Negative values will use nearest neighbor and report the dv.
+Report all lines within \fBdv\fP km/s.
+Negative values will use nearest neighbor and report the dv, and report but comment
+out the line if the deviation is larger than -dv.
 .br
-[10]
+[-10]
 .TP
 \fBclip=\fP
 Do not fit peaks in the spectrum below this clip level.
