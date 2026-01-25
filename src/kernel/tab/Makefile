@@ -16,7 +16,7 @@ LOBJFILES= $L(table.o) $L(gettab.o) $L(tabselect.o) $L(funtab.o) $L(getaline.o) 
 BINFILES = tabhist tablst tabplot tablsqfit tabmath gettab funtab meanmed \
 	   tabcomment tabspline tab2xml tabnllsqfit tabdate tabfilter tabtrend \
 	   tabstat tabdms txtpar tabcols tabrows tabgen tabcsv tabint tabpeak \
-	   tabsmooth tabtab tabs
+	   tabsmooth tabtab tabs lineid
 TESTFILES= getaline tabletest
 
 help:
