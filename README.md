@@ -5,6 +5,8 @@ image processing and tabular data manipulation. Documentation is maintained
 in the github pages, https://teuben.github.io/nemo , and a manual in
 https://astronemo.readthedocs.io
 
+Unless otherwise specified, all code has been written by a human.
+
 
 ## History
 
