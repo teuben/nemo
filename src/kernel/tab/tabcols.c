@@ -12,7 +12,7 @@
 
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n           input file name(s)",
-    "select=all\n       columns to select",
+    "select=all\n       columns to select (add 0 to add column with row number)",
     "colsep=SP\n        Column separator for output (SP,TAB,NL)",
     "colsepin=\n        Optional enforced character to separate columns in input",
     "out=-\n            output file name",
