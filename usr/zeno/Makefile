@@ -2,6 +2,7 @@
 URL0 = http://legacy.ifa.hawaii.edu/faculty/barnes/
 URL1 = https://github.com/joshuabarnes/zeno/
 URL2 = https://github.com/teuben/zeno
+URL3 = https://github.com/barnes-astro/Treecode2 
 
 TIME = /usr/bin/time
 
