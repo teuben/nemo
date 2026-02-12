@@ -154,8 +154,9 @@ namespace {
     // compiles a falcON C++ program in fname using compiler flags              
     const char* falcON_path = falcON::directory();
     if(falcON_path == 0) throw BfErr("cannot locate falcON directory");
-    char cmmd[512];
-    SNprintf(cmmd,512,"cd /tmp; %s %s.cc -o %s.so"
+    // issue105
+    char cmmd[1024];
+    SNprintf(cmmd,1024,"cd /tmp; %s %s.cc -o %s.so"
 	     " %s -shared -fPIC -I%s/inc -I%s/inc/utils -O2"
 #if __cplusplus >= 201103L
 	     " -std=c++0x"
@@ -176,10 +177,14 @@ namespace {
 
 	     // 	     	     " -march=native -mfpmath=sse -mpreferred-stack-boundary=4 -ggdb3"
 #elif defined(__GNUC__)
-	     " -mfpmath=sse -mpreferred-stack-boundary=4 -ggdb3"
+	     " -mfpmath=sse -ggdb3"
 	     " -Wall -Wextra -Winit-self -Wshadow -Woverloaded-virtual -fPIC"
 	     " -std=c++11"
-	     " -fopenmp -funroll-loops -fforce-addr"
+	     " -funroll-loops -fforce-addr"
+// issue105
+#   ifndef __clang__
+	     " -mpreferred-stack-boundary=4"
+#   endif
 #else
 	     " -fpic -openmp -g"
 #endif
@@ -191,7 +196,7 @@ namespace {
 	     fname,fname,(flags? flags : " "),falcON_path,falcON_path,fname);
     DebugInfo(2,"now compiling using the following command\n   %s\n",cmmd);
     if(system(cmmd)) {
-      if(debug(debug_depth)) {
+      //issue105 if(debug(debug_depth)) {
 	std::cerr<<"could not compile temporary file /tmp/"<<fname<<".cc:\n";
 	char show[512];
 	SNprintf(show,512,"more /tmp/%s.cc > /dev/stderr",fname);
@@ -202,7 +207,7 @@ namespace {
 	SNprintf(show,512,"more /tmp/%s.log > /dev/stderr",fname);
 	std::cerr<<'\n';
 	rr=system(show);
-      }
+     // }
       throw BfErr(message("could not compile expression; "
 			  "perhaps it contains a syntax error"));
     }
@@ -510,7 +515,8 @@ namespace {
       "#define BD_TEST\n"
       "#define body_func\n"
       "#include <public/bodyfuncdefs.h>\n\n"
-      "real   _P[10]={RNG()};\n\n"
+// issue105
+      "real   _P[10]={static_cast<real>(RNG())};\n\n"
       "extern \"C\" {\n"
       "  fieldset "<<ftype<<"(char&_type)\n"
       "  {\n"
