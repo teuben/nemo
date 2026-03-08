@@ -17,6 +17,7 @@ conformant, though the input tables can have their own header/comment files.
 If only one input file is given, a line number is added as the first column, with
 an optional offset. This option is equivalent to the
 unix \fInl(1)\fP program, although "cat -n" also achieves the same result.
+The \fItabcols(1NEMO)\fP with column number 0 will also add the row number.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -42,7 +43,8 @@ todo
 [t]
 .TP
 \fBoffset=\fP
-Offset counter from 0 if line numbers are added.
+Offset counter from 0 if line numbers are added. See also
+\fItabcols(1NEMO)\fP with column 0 how to add row numbers.
 .br
 [1]
 

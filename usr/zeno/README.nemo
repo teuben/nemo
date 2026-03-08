@@ -55,4 +55,8 @@ should come close to this version.
 
 wget --no-check-certificate  https://legacy.ifa.hawaii.edu/faculty/barnes/treecode_old/testdata.txt
 
- - Peter Teuben,    nov 2022
+# Treecode2
+
+Released in 2026. See https://arxiv.org/abs/2602.06295
+
+ - Peter Teuben,    feb 2026
