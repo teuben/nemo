@@ -1,5 +1,6 @@
 /*
  *  TABTAB:  combine tables, using concat or paste
+ *           add line numbers if a single file is input
  */
 
 #include <nemo.h>
@@ -7,33 +8,34 @@
 #include <table.h>
 
 string defv[] = {
-  "in=\n            Input tables",
-  "out=\n           Output table",
+  "in=???\n         Input tables",
+  "out=-\n          Output table",
   "mode=paste\n     cat (by row) or paste (by column)",
   "space=t\n        extra separator?",
-  "VERSION=0.3\n    2-jun-2022 PJT",
+  "offset=0\n       line number offset",
+  "VERSION=0.4\n    19-jan-2026 PJT",
   NULL,
 };
 
-string usage="concatenate or paste conformant tables";
+string usage="concatenate or paste conformant tables, or add line numbers";
 
 
 void nemo_main()
 {
   string mode = getparam("mode");
   bool Qspace = getbparam("space");
+  int offset = getiparam("offset");
   char sep[8];
   if (Qspace)
     sprintf(sep," ");
   else
     sep[0] = '\0';
-  warning("SEP:'%s'", sep);
+  //warning("SEP:'%s'", sep);
 
   string *infiles = burststring(getparam("in")," ,");
   int nfiles = xstrlen(infiles,sizeof(string))-1;
 
-  dprintf(0,"Processing %d tables\n",nfiles);
-  if (nfiles < 2) error("need > 1 input file");
+  dprintf(1,"Processing %d tables\n",nfiles);
 
   // allocate and open all tables
 
@@ -54,7 +56,6 @@ void nemo_main()
   } else
     error("unknown mode %s",mode);
 
-#if 1
   // if the table has no header, we can now do it manually use the space separator
   // but this case can be done with the unix "cat" and "paste" commands as well
   stream o = stropen(getparam("out"),"w");
@@ -62,9 +63,10 @@ void nemo_main()
   if (*mode == 'c') {
     for (int i=0; i<nfiles; i++)
       for (int j=0; j<table_nrows(t[i]); j++)
-	fprintf(o,"%s\n",table_row(t[i],j));
+	fprintf(o,"%s\n",table_row(t[i],j)); 
   } else if (*mode == 'p') {
     for (int j=0; j<table_nrows(t[0]); j++) {
+      if (nfiles==1) fprintf(o,"%d ",j+offset);
       fprintf(o,"%s ",table_row(t[0],j));      
       for (int i=1; i<nfiles; i++)
 	fprintf(o,"%s%s",table_row(t[i],j),sep);
@@ -73,11 +75,8 @@ void nemo_main()
   }
   
   strclose(o);
-#endif
 
   // table_cat
-
-  
   // output
   
 }

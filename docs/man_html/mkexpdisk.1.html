@@ -9,19 +9,22 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mkexpdisk - make an exponential disk 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkexpdisk out=</b>out_file
 [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>mkexpdisk</i> makes an N-body realization of an
-exponential disk, assuming no other mass distribution is present.  Such
+<i>mkexpdisk</i> makes an N-body realization of
+an exponential disk, assuming no other mass distribution is present.  Such
 disks are wildly unstable, but fun to play with. It can also produce tables
 that as function of radius prints out various properties of the streaming
 velocities and velocity dispersion. <p>
 Disks will by rotating counter-clockwise,
 i.e. positive angular momentum. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized.
 
@@ -50,26 +53,28 @@ cutoff radius of disk. Default: <b>1.25</b>. </dd>
 <dt><b>Qtoomre=</b><i>disk_Q_value</i> </dt>
 <dd>Toomre&rsquo;s Q parameter for disk.  For mode=1 this is
 constant over the disk for mode=2 it is ignored and z0 determines the velocity
-dispersions. Default: <b>1.0</b>. </dd>
+dispersions. Note the Toomre criterian is also named Safronov-Toomre, given
+credit to an independant realization of this phenomenon. <br>
+Default: <b>1.0</b>. </dd>
 
 <dt><b>gamma=</b><i>fudge_factor</i> </dt>
-<dd>Used when correcting for pressure
-support (asymmetric drift) When negative attempt is made to use correct
-radial dependance of gamma. By setting this negative, another relationship
-is used to ensure positive streaming. Default: <b>1.0</b>. </dd>
+<dd>Used when correcting for pressure support
+(asymmetric drift) When negative attempt is made to use correct radial
+dependance of gamma. By setting this negative, another relationship is used
+to ensure positive streaming. Default: <b>1.0</b>. </dd>
 
 <dt><b>z0=</b><i>z_scaleheight</i> </dt>
-<dd>Softening,
-which sets the vertical scale of the disk. See also <b>zmode=</b> below. For gauss
-z0/2 is used, for exp and sech^2 z0 is used. Default: <b>0.025</b>. </dd>
+<dd>Softening, which
+sets the vertical scale of the disk. See also <b>zmode=</b> below. For gauss z0/2
+is used, for exp and sech^2 z0 is used. Default: <b>0.025</b>. </dd>
 
-<dt><b>seed=</b><i>random_seed</i>
-</dt>
-<dd>Usual random number seed. Default: <b>12345</b>. </dd>
+<dt><b>seed=</b><i>random_seed</i> </dt>
+<dd>Usual
+random number seed. Default: <b>12345</b>. </dd>
 
 <dt><b>mode=</b><i>creation-mode</i> </dt>
-<dd>Creation mode.
-1=As original (in <b>mkbaredisk</b>), 2=vdKruit/Searle isothermal sech-square sheet.
+<dd>Creation mode. 1=As
+original (in <b>mkbaredisk</b>), 2=vdKruit/Searle isothermal sech-square sheet.
  [default: <b>1</b>]. </dd>
 
 <dt><b>zmode=</b><i>zdensity-mode</i> </dt>
@@ -91,7 +96,8 @@ printing <i>r,m,v_c,omega,kappa,Aoort,mu,sig_r,sig_t,sig_z,v_eff,Qtoomre,</i>
 [Default: <b>t</b>]. </dd>
 
 <dt><b>headline=</b><i>message</i> </dt>
-<dd>Text headline for output. Default: <i>none</i>. </dd>
+<dd>Text headline for output. Default: <i>none</i>. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See
@@ -104,8 +110,10 @@ Also</a></h2>
 <a href='magalie.1.html'>magalie(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
+<p> 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
 Joshua E. Barnes, Peter Teuben 
+<p> 
 <h2><a name='sect6' href='#toc6'>History</a></h2>
 <br>
 <pre>1990<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;cloned off mkbaredisk<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

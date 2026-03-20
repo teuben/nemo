@@ -92,7 +92,13 @@ The number of elements in an
 array is limited, currently hardcoded to 32678 in <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
 . If possible,
 use <a href='seq.1.html'><i>seq(1)</i></a>
-. 
+ or <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
+. Here is an example creating a list of numbers
+1 .. 10 with these three modes. The <b>seq</b> method is the fastest.        nemoinp
+1:10<br>
+       seq 10<br>
+       tabgen - 10 1 mode=4<br>
+  
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 <br>

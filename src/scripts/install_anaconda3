@@ -28,6 +28,7 @@ version=2024.06-1  # 3.12.4
 version=2024.10-1  # 3.12.7   6.6G
 version=2025.06-0  # 3.13.5   7.1G
 version=2025.06-1  # 3.13.5   7.0G
+version=2025.12-2  # 3.13.9   7.1G
 
 
   dir=$(pwd)/anaconda3       # where anaconda will be located (use absolute path)

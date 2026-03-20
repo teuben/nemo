@@ -229,22 +229,22 @@ Here is an example plotting a spectrum:
 
 <p>xcoord=$vel 
 <p> Here is an example working with layout files.   
-<p>   % nemoinp
-1:20 | tabmath - -  &rsquo;ranu(0,1),ranu(0,1)&rsquo; all &gt; ran.tab<br>
-   % tabmath ran.tab - &rsquo;2+%1*16,2+%2*16,0.2&rsquo; all | awk &rsquo;{print "circle",$0}&rsquo; &gt; ran.layout<br>
+<p>   % tabgen
+- 20 3 seed=123 &gt; ran.tab<br>
+   % tabmath ran.tab - &rsquo;2+%1*16,2+%2*16,%3&rsquo; all | awk &rsquo;{print "circle",$0}&rsquo; &gt; ran.layout<br>
    % tabplot ran.tab 1 2 0 1 0 1 layout=ran.layout<br>
  
 <p>  It plots the data points from the file <b>ran.tab</b> as dots, and converts,
 using tabmath and awk, these to a layout file where the same points as
-plotted as open circles in <b>ran.layout</b>. Note that currently the user has to
-convert to <i>yapp</i> (cm) units, and  actually know that most yapp plots runs
-from 2 to 18 cm in both X and Y. This will likely change in a future version
-where points can be given in a more reasonably WCS. <p>
-Here are some examples
-of plotting multiple columns/rows, assuming each example of the tab1 and
-tab2 table has 2 columns:  
-<p>    % paste tab1 tab2 | tabplot - 1 4        
-            headline=x1,y2<br>
+plotted as open circles with a size given by column 3, in <b>ran.layout</b>. Note
+that currently the user has to convert to <i>yapp</i> (cm) units, and  actually
+know that most yapp plots runs from 2 to 18 cm in both X and Y. This will
+likely change in a future version where points can be given in a more reasonably
+WCS. <p>
+Here are some examples of plotting multiple columns/rows, assuming
+each example of the tab1 and tab2 table has 2 columns:  
+<p>    % paste tab1
+tab2 | tabplot - 1 4                     headline=x1,y2<br>
     % tabmath tab1,tab2 - %1-%3,%2-%4 all | tabplot - 1 2 headline=dx,dy<br>
     % paste tab1 tab2 | tabplot - 1,3 2                   headline=x1,x2,y1<br>
     % paste tab1 tab2 | tabplot - 1   2,4                 headline=x1,y1,y2<br>
@@ -263,15 +263,17 @@ tab= doesn&rsquo;t work properly with multiple columns
 , <a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='yapp.5.html'>yapp(5NEMO)</a>
- <p>
-<a href='http://vostat.org'>http://vostat.org</a>
+, <a href='stilts.1.html'>stilts(1)</a>
 
 <p>
+http://vostat.org (expired) <p>
 <a href='http://www.star.bris.ac.uk/~mbt/stilts/'>http://www.star.bris.ac.uk/~mbt/stilts/</a>
  
 <p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben 
+Peter
+
+<p>Teuben 
 <p> 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>

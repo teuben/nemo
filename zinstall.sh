@@ -1,7 +1,8 @@
 #!/bin/sh
 #
 #  graphical aid, using zenity, to configure and build NEMO
-#
+#  https://gitlab.gnome.org/GNOME/zenity
+#  see also https://yad-guide.ingk.se/
 
 
 if ! [ -x "$(command -v zenity)" ]; then

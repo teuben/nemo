@@ -9,10 +9,13 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tabclip - clip a table 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>tabclip</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tabclip</b>
 removes points from a table based on some "smoothness" criteria. Examples
@@ -21,57 +24,90 @@ Or when the derivative exceeds a certain amount. <p>
 Fitting programs, such
 <a href='tabnllsqfit.1.html'><i>tabnllsqfit(1NEMO)</i></a>
  can also be used to remove points that are not close
-to a global model. 
+to a global model. <p>
+
+<p> 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in
-any order if the keyword is also given: 
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+<b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input file name (an ascii table)
-[???]  </dd>
+<dd>Input file name (an ascii
+table). <br>
+No default </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output table [???]      </dd>
+<dd>Output table <br>
+No default </dd>
 
 <dt><b>xcol=</b> </dt>
-<dd>x coordinate column [1]     </dd>
+<dd>x coordinate column <br>
+[1]     </dd>
 
-<dt><b>ycol=</b>
-</dt>
-<dd>y coordinate column [2]     </dd>
+<dt><b>ycol=</b> </dt>
+<dd>y coordinate column <br>
+[2]     </dd>
 
-<dt><b>deriv=</b> </dt>
-<dd>Clipping if abs(derivative) exceeds
-this value []  </dd>
+<dt><b>clip=</b> </dt>
+<dd>Clipping if abs(derivative) exceeds this value </dd>
 
 <dt><b>eta=</b> </dt>
-<dd>Clipping if the value predicted from a 2nd order polynomial
-value exceeds the Y value by more than <i>eta</i>. Default: not used. </dd>
+<dd>Clipping
+if the value predicted from a 2nd order polynomial value exceeds the Y
+value by more than <i>eta</i>.  This mode only works well on smooth data, and should
+not be applied to noisy data. <br>
+Default: not used. </dd>
 
-<dt><b>logic=and|or</b>
-</dt>
-<dd>When a left and right side criteria is applied, this determines the outcome
-of the clipping. <b>and</b> requires both to be satisfied, <b>or</b> requires only one.
+<dt><b>logic=and|or</b> </dt>
+<dd>When a left and right side criteria is applied,
+this determines the outcome of the clipping. <b>and</b> requires both to be satisfied,
+<b>or</b> requires only one. <i>deprecated</i> <br>
 [Default: <b>and</b>]. </dd>
 
 <dt><b>nmax=</b> </dt>
-<dd>Hardcoded allocation space, if needed for piped data.TP
-<b>comment=t|f</b> Keep the clipped points as comments in the output file? By default
-they are left out. </dd>
+<dd>Hardcoded allocation space, if needed for piped data.
+</dd>
+
+<dt><b>comment=t|f</b> </dt>
+<dd>Keep the clipped points as comments in the output file? <br>
+By default they are shown as comments. [t] 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+The value of <b>clip=</b> is
+very important. It should be a few times the sigma in the <i>signal</i> variation
+(see e.g. <a href='tabtrend.1.html'><i>tabtrend(1NEMO)</i></a>
+ how to obtain this). Here we mean the <i>signal</i> to
+be all but the outliers. When this clip value is too high, you will see
+the reported sigma increase as outliers are now taken into the <i>signal</i>. 
+If too low, sigma will also decrease and too much <i>signal</i> is removed.  Recall
+the sigma in the differences is <a href='sqrt.2.html'>sqrt(2)</a>
+ the value of the original sigma.
+Thus there is an optimal value for <b>clip=</b>. 
+<p>  tabclip cliptest.tab  . clip=1
+  ### nemo Debug[0]: X: min/max = 0 99 ### nemo Debug[0]: Y: min/max =
+-11.0065 11.8708 ### nemo Debug[0]: Min/Max for deriv = -0.353729 0.279371 (with
+clip=1) ### nemo Debug[0]: Sigma = 0.136388    clip/sigma=7.33205 ### nemo
+Debug[0]: Wrote 89/100 points  
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabnllsqfit.1.html'>tabnllsqfit(1NEMO)</a>
- 
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
-Peter
-Teuben 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+
+
+<p> 
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
+Peter Teuben 
+<p> 
+<h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>23-Nov-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 27-nov-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 added eta=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+28-dec-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 ANSI C clean up, use clip=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -81,9 +117,10 @@ Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>History</a></li>
 </ul>
 </body>
 </html>

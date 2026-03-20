@@ -37,72 +37,76 @@ is also given. Use <b>--help</b> to confirm this man page is up to date.
 seed. Values 0 and below are special: 
 <p> 0 for the current time (seconds since
 1970.00, see also <a href='time.2.html'><i>time(2)</i></a>
-) 
-<p> -1 for the number of centiseconds since boot
-(see <a href='times.2.html'><i>times(2)</i></a>
+) and $EPOCHSECONDS 
+<p> -1 for the number of centiseconds
+since boot (see <a href='times.2.html'><i>times(2)</i></a>
 )  
 <p> -2 for the current pid (see <a href='getpid.2.html'><i>getpid(2)</i></a>
 ). 
-<p> -3 wishful thinking
+<p> -3 wishful
 
-<p>the linux kernel will give an even more random seed 
-<p> If GSL is implemented
-the seed value can be optionally followed by the random number  generator
-type (default: mt19937). See <a href='xrandom.3.html'><i>xrandom(3)</i></a>
+<p>thinking the linux kernel will give an even more random seed 
+<p> If GSL is
+implemented the seed value can be optionally followed by the random number
+ generator type (default: mt19937). See <a href='xrandom.3.html'><i>xrandom(3)</i></a>
  for more details. </dd>
 
 <dt><b>n=</b> </dt>
-<dd>Number of random
-numbers to draw  [Default: 0]. </dd>
+<dd>Number
+of random numbers to draw <br>
+[Default: 0]. </dd>
 
 <dt><b>m=</b> </dt>
-<dd>Number of times to repeat the experiment.
-If more than 1, tabulating is turned off, and reporting is now doine at
-the end of all tests, and the statistics of the mean&rsquo;s from each <b>n</b> sample
-is shown. [Default: 1]. </dd>
+<dd>Number of times to repeat the experiment. If more than 1,
+tabulating is turned off, and reporting is now doine at the end of all
+tests, and the statistics of the mean&rsquo;s from each <b>n</b> sample is shown. <br>
+[Default: 1]. </dd>
 
 <dt><b>gauss=</b> </dt>
-<dd>Return gaussian numbers instead of uniform?
+<dd>Return gaussian numbers instead of uniform? <br>
 [Default: f] </dd>
 
 <dt><b>exp=</b> </dt>
 <dd>Return exponential random numbers instead. Setting this
-will override the <b>gauss=</b> parameter. [Default: f] </dd>
+will override the <b>gauss=</b> parameter. <br>
+[Default: f] </dd>
 
 <dt><b>report=</b> </dt>
-<dd>Report mean/dispersion/skewness/kurtosis?
- [Default: f] </dd>
+<dd>Report mean/dispersion/skewness/kurtosis?  <br>
+[Default: f] </dd>
 
 <dt><b>tab=t|f</b> </dt>
-<dd>Tabulate all random numbers [t] </dd>
+<dd>Tabulate all random numbers <br>
+[t] </dd>
 
 <dt><b>offset=</b> </dt>
-<dd>Offset of
-distribution from 0. Default: 0.0 </dd>
+<dd>Offset of distribution from 0. <br>
+Default: 0.0 </dd>
 
 <dt><b>gsl=</b> </dt>
-<dd>Name of the random number distribution
-requested. They follow the name convention of the same-name functions <i>gsl_random_xxx</i>
-in the <a href='gsl.3.html'><i>gsl(3)</i></a>
- library. Only available if compiled with GSL. No default. </dd>
+<dd>Name of the random number distribution requested. They
+follow the name convention of the same-name functions <i>gsl_random_xxx</i> in
+the <a href='gsl.3.html'><i>gsl(3)</i></a>
+ library. Only available if compiled with GSL. <br>
+No default. </dd>
 
-<dt><b>pars=</b>
-</dt>
-<dd>Parameters belonging to the selected <b>gsl</b> name. They need to match exactly
-(0, 1, 2 or 3 currently). No default. </dd>
+<dt><b>pars=</b> </dt>
+<dd>Parameters belonging to the selected <b>gsl</b> name. They need
+to match exactly (0, 1, 2 or 3 currently). <br>
+No default. </dd>
 
 <dt><b>seed57=</b> </dt>
-<dd>This quaint option will activate
-von Hoerner&rsquo;s 1957 algorithm of drawing random numbers. It needs a seed between
-0.57 and 0.91. See also <a href='mkvh60.1.html'><i>mkvh60(1NEMO)</i></a>
-. Default: not used. 
+<dd>This quaint option will activate von Hoerner&rsquo;s 1957 algorithm
+of drawing random numbers. It needs a seed between 0.57 and 0.91. See also
+<a href='mkvh60.1.html'><i>mkvh60(1NEMO)</i></a>
+. <br>
+Default: not used. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an
-example script, <b>grandom.csh</b>,  to test if the error in the mean scales as
-1/sqrt(N): <br>
+Here is an example script, <b>grandom.csh</b>,  to test
+if the error in the mean scales as 1/sqrt(N): <br>
 <pre>#! /bin/csh -f
 #
 #       n1: sample size 
@@ -189,6 +193,7 @@ echo $$
 shuf -i 1-100 -n 5
 awk -v n=5 -v seed="$RANDOM" &rsquo;BEGIN {srand(seed); for(i=0; i&lt;n; ++i) printf("%.3f\n",rand())}&rsquo;
 tr -cd "[:digit:]" &lt; /dev/urandom | head -c 6
+echo $EPOCHSECONDS
 </pre>
 <p>Note that /dev/urandom is only available on Linux 
 <p> 
@@ -196,7 +201,7 @@ tr -cd "[:digit:]" &lt; /dev/urandom | head -c 6
 Peter Teuben 
 <p>
 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
 <pre>26-Nov-96<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 turned TESTBED into a TOOLBOX program<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-apr-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;example
@@ -217,7 +222,7 @@ Peter Teuben
 <li><a name='toc5' href='#sect5'>Gsl</a></li>
 <li><a name='toc6' href='#sect6'>Random</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>

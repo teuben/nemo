@@ -9,8 +9,10 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 acceleration - format for accelerations description (functors) 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>#include &lt;acceleration.h&gt;typedef void(*acc_pter)         /* return: void 
@@ -31,11 +33,13 @@ acc_pter get_acceleration(const char*,   /* input:  acc_name
 char*,   /* input:  acc_file               */bool      *,   /* output:
 need masses?           */bool      *);  /* output: need velocities?   
    */</pre>
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <a href='acceleration.5.html'><i>acceleration(5NEMO)</i></a>
- are implemented as an improvement to
-the  nearly-compatible <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+ are implemented as an improvement
+to the  nearly-compatible <a href='potential.5.html'><i>potential(5NEMO)</i></a>
  format. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The 4th argument
 to get_acceleration() is boolean and returns whether masses are required
@@ -60,13 +64,10 @@ otherwise assigned, If bit 1 is set, the acceleration is added, otherwise
 assigned. So, 0 means both are assigned. 
 <p> 
 <p> 
-<p> 
-<p> 
-<p> 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The following table
-lists the non-pattern speed parameters  for a few example potentials found
-in <b>$NEMOOBJ/potential</b>. <i>Note: the pattern speed is not listed here</i> <p>
+The following table lists
+the non-pattern speed parameters  for a few example potentials found in
+<b>$NEMOOBJ/potential</b>. <i>Note: the pattern speed is not listed here</i> <p>
 <br>
 <pre>harmonic<tt> </tt>&nbsp;<tt> </tt>&nbsp;wx,wy,wz<tt> </tt>&nbsp;<tt> </tt>&nbsp;1,1,1
 plummer<tt> </tt>&nbsp;<tt> </tt>&nbsp;m,a      <tt> </tt>&nbsp;<tt> </tt>&nbsp;1,1
@@ -77,9 +78,10 @@ ccd<tt> </tt>&nbsp;<tt> </tt>&nbsp;Iscale,Xcen,Ycen,Dx,Dy<tt> </tt>&nbsp;<tt> </
 </pre>A full listing, including their mathematical expression can be found in
 the NEMO manual, see also <i>$NEMO/text/manuals/potential.inc,</i>, and of course
 in <i>$NEMO/src/orbit/potential/data</i>. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
-Since the later introduction of a
-third character valued parameter in <i>inipotential()</i> a Fortran-to-C interface
+Since the later introduction of
+a third character valued parameter in <i>inipotential()</i> a Fortran-to-C interface
 cannot be used in as portable a way as before. A small Fortran-to-C interface
 is however available, but is not guaranteed to work on all machines. Also
 keep in mind if you write your potentials in fortran: common blocks and
@@ -104,6 +106,7 @@ programs.
 <h2><a name='sect6' href='#toc6'>Environment</a></h2>
 The environment variable <b>ACCPATH</b> can be used to search
 for accelerations in other than the local directory.  
+<p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='acceleration.3.html'>acceleration(3NEMO)</a>
 ,
@@ -111,17 +114,21 @@ for accelerations in other than the local directory.
 , <a href='manipulator.5.html'>manipulator(5NEMO)</a>
 ,<a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
  
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben
 
+<p> 
 <h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>~/src/orbit/potential   potential.c, potential.h potentialf.c
 ~/text/manuals      <tt> </tt>&nbsp;<tt> </tt>&nbsp;potential.inc (latex description)
 </pre>
-<h2><a name='sect10' href='#toc10'>Update History</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>
 <pre>28-oct-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;man page finally written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+5-jul-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;AGAMA reference added<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -137,7 +144,7 @@ Peter Teuben
 <li><a name='toc7' href='#sect7'>See Also</a></li>
 <li><a name='toc8' href='#sect8'>Author</a></li>
 <li><a name='toc9' href='#sect9'>Files</a></li>
-<li><a name='toc10' href='#sect10'>Update History</a></li>
+<li><a name='toc10' href='#sect10'>History</a></li>
 </ul>
 </body>
 </html>

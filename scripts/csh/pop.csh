@@ -81,6 +81,7 @@ grep 2T/W $out.1.stat | awk '{print "2T/W r_v : ",$9}'
 grep 2T/W $out.2.stat | awk '{print "2T/W r_v : ",$9}'
 
 echo vscale=$vscale
+echo "Output 'Plummer of Plummer's in ${out}.2"
 
 if (0) then
   echo "Now try something like:"

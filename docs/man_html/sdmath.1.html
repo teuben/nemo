@@ -18,14 +18,14 @@ sdmath - SD math and file I/O benchmark
 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-This program benchmarks some OpenMP parallellizable Single
-Dish vector math in a typical 4-phase calibration cycle with an ON/OFF with
-a separate COLD/HOT in each pointing. 
+This program benchmarks some OpenMP parallelizable Single Dish
+vector math in a typical 4-phase calibration cycle with an ON/OFF with a
+separate COLD/HOT in each pointing. 
 <p> <p>
-Each spectrum (called row below)
-has <b>nchan</b> channels, Each <b>nscan</b> has 4 rows, with the CalOn and CalOff (Hot
-and Cold if you wish) for the Sig and the Ref (On and Off if you wish).
-The following math is needed to construct a spectrum, thus the total operations
+Each spectrum (called row below) has
+<b>nchan</b> channels, Each <b>nscan</b> has 4 rows, with the CalOn and CalOff (Hot and
+Cold if you wish) for the Sig and the Ref (On and Off if you wish). The
+following math is needed to construct a spectrum, thus the total operations
 scales as nscan*nchan*iter.  
 <p>     Tsys =  Tc * &lt;row1&gt; / &lt;row2-row1&gt;         
        &lt;cold&gt; / &lt;hot&gt;-&lt;cold&gt;<br>
@@ -41,16 +41,19 @@ if this block fits in one of the CPU caches.
 <p> The benchmark here is very
 basic, and only deals with the math with simulated data without the need
 to pass through a fitsio type library. The file I/O bench portion of this
-benchmark reads a large file to get an idea of I/O overhead. <p>
-A slightly
-more realistic one can be found in <a href='sdinfo.1.html'><i>sdinfo(1NEMO)</i></a>
- reading actual <a href='sdfits.5.html'><i>sdfits(5NEMO)</i></a>
-
-files and selecting a set of operations. 
+benchmark reads a large file to get an idea of I/O overhead, even though
+many other tools exist to measure disk I/O, from <a href='hdparm.1.html'><i>hdparm(1)</i></a>
+ to <a href='iozone.1.html'><i>iozone(1)</i></a>
+.
+<p>
+A slightly more realistic one can be found in <a href='sdinfo.1.html'><i>sdinfo(1NEMO)</i></a>
+ reading actual
+<a href='sdfits.5.html'><i>sdfits(5NEMO)</i></a>
+ files and selecting a set of operations. 
 <p> <p>
-The standard benchmark loops 10
-times over 1000 scans of 100,000 channels (thus 1e9 row operations) in
-about 2-3 secs. We call this 1 GRop. 
+The standard benchmark
+loops 10 times over 1000 scans of 100,000 channels (thus 1e9 row operations)
+in about 2-3 secs. We call this 1 GRop. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
  The following parameters
@@ -85,7 +88,7 @@ with a python implementation. <br>
 <dt><b>in=</b><i>filename</i> </dt>
 <dd>If given, read this file into memory. Meant to measure
 disk I/O <br>
-Not provided. </dd>
+[Not used] </dd>
 
 <dt><b>bs=</b><i>int</i> </dt>
 <dd>Blocksize in kB to read file with. <br>
@@ -113,31 +116,42 @@ since 1970.0). See also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
 avoid system time. These are 10 Grops. CPU times are user space seconds [nemobench5
 scores listed where available]  
 <p> Xeon E5620  @ 2.40GHz (fourier) - 115.1 
-[218] AMD EPYC 7302 @ 3.0 GHz (lma)   -  34.1  [675] Ultra 7 155H @ 4.5 GHz
-(d76)    -  21.8  [~1200] M4 air                          -  15.4  [~2000]
-
+[218] AMD EPYC 7302 @ 3.0 GHz (lma)   -  34.1  [675] AMD Ryzen AI 9 HX PRO
+370       -  23.4  [~1170] Ultra 7 155H @ 4.5 GHz (d76)    -  21.8  [~1200]
+M4 air                          -  15.4  [~2000] 
 <p> <p>
 
 <p>  
-<p> To view the impact of OpenMP, here is an example performance on an
-Ultra 7 155H, measured in wall clock time seconds, and iter=20: 
-<p>  OMP_NUM_THREADS=2
-/usr/bin/time sdmath  1000 160000 iter=20 
+<p> To view the impact of
+OpenMP, here is an example performance on an Ultra 7 155H, measured in
+wall clock time seconds, and iter=20: 
+<p>  OMP_NUM_THREADS=2 /usr/bin/time
+sdmath  1000 160000 iter=20 
 <p> 
-<p> nscan  nchan      1      2
-     4      8     12     16     20  ----- ------    ---    ---    ---    ---    ---    ---    ---  1000
-160000    7.8    5.0    3.9    4.2    3.7    3.6    5.7<br>
+<p> nscan  nchan      1      2      4      8
+    12     16     20  ----- ------    ---    ---    ---    ---    ---    ---    ---  1000 160000    7.8
+   5.0    3.9    4.2    3.7    3.6    5.7<br>
   2000  80000    7.8<br>
   4000  40000    7.8 <br>
   8000  20000    7.8<br>
  16000  10000    8.0    5.4    4.4    5.3    5.2    9.5    9.9 ----- ------    ---    ---    --- 
   ---    ---    ---    --- 
 <p>  Somewhat surprisingly that barely a factor of 2 can be
-gained by going multi-core. 
+gained by going multi-core on an typical laptop intel CPU.  An AMD CPU fares
+much better. The  Ryzen AI 9 HX PRO 370 is able to lower the wall clock
+time all the way up to 12 cores. 
 <p> <p>
-A read benchmark can be done with a large series
-of Plummer models. The example file created here is about 5GB in size: 
-   mkplummer p1M 1000000 nmodel=100<br>
+To see the effect of the CPU cache, pick
+a case where nscan*nchan*iter is constant, but  nscan nchan iter 1e1  
+1e1   1e7   1.52sec 1e1   1e2   1e6   1.42 1e1   1e3   1e5   1.77 1e1   1e4
+  1e4   1.82      3 MB 1e1   1e5   1e3   2.33     30 MB 1e1   1e6   1e2 
+ 2.52    300 MB 1e1   1e7   1e1   3.23   3000 MB 1e2   1e6   1e1   2.69  
+3000 MB 1e2   1e5   1e2   2.31    300 MB 
+<p>  
+<p> <p>
+A read benchmark can be done
+with a large series of dummy Plummer models. The example file created here
+is about 5GB in size:     mkplummer p1M 1000000 nmodel=100<br>
     /usr/bin/time sdmath  in=p1M<br>
     /usr/bin/time sdmath  in=p1M maxbuf=1000<br>
   the latter resets the buffer 5 times, where the last read is a partial
@@ -155,7 +169,7 @@ $NEMO/src/tutor/bench/sdmath.c
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
 <pre>30-apr-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -171,7 +185,7 @@ Peter Teuben
 <li><a name='toc5' href='#sect5'>See Also</a></li>
 <li><a name='toc6' href='#sect6'>Files</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>

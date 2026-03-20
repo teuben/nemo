@@ -9,194 +9,218 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mkkd95 - Kuijken-Dubinski-95 composite disk-bulge-halo model 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkkd95</b>
 [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>mkkd95</b> creates a composite Disk-Bulge-Halo galaxy
-in  near equilibrium following the procedure described in Kuijken &amp; Dubinksi
-(1995). This program is merely a NEMO wrapper that assembles all the correct
-parameters, runs the a set of KD95 programs (commonly referred to as the
-GalactICS Software) in a temporary rundirectory and converts the ascii
-output to a NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+<b>mkkd95</b> creates a composite Disk-Bulge-Halo
+galaxy in  near equilibrium following the procedure described in Kuijken
+&amp; Dubinksi (1995). This program is merely a NEMO wrapper that assembles all
+the correct parameters, runs the a set of KD95 programs (commonly referred
+to as the GalactICS Software) in a temporary rundirectory and converts
+the ascii output to a NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 .  <p>
-The bulge and halo are  a King and lowered
-Evans distribution resp, whereas the disk a 3D generalization of Shu&rsquo;s planar
-disk to include a 3rd integral of motion to account for the vertical structure.
-The construction occurs in 3 steps. First the potential is calculated, after
-which the disk distribution function is constructed which generates the
-given potential. Finally, each component is realized with a self-consistent
-distribution of particle orbits. <p>
-Although one has the option of including
-any combination of components, leaving out the halo probably won&rsquo;t work.
-<p>
-Two new versions have been published since the current 1995 K&amp;D version:
-Widrow &amp; Dubinski (2005) and Widrow, Pym and Dubinski (2008). These are not
-(yet) supported in the current <b>mkkd95</b> program. 
+The bulge and halo are  a King
+and lowered Evans distribution resp, whereas the disk a 3D generalization
+of Shu&rsquo;s planar disk to include a 3rd integral of motion to account for
+the vertical structure. The construction occurs in 3 steps. First the potential
+is calculated, after which the disk distribution function is constructed
+which generates the given potential. Finally, each component is realized
+with a self-consistent distribution of particle orbits. <p>
+Although one has
+the option of including any combination of components, leaving out the
+halo probably won&rsquo;t work. <p>
+Two new versions have been published since the
+current 1995 K&amp;D version: Widrow &amp; Dubinski (2005) and Widrow, Pym and Dubinski
+(2008). These are not (yet) supported in the current <b>mkkd95</b> program. <p>
+The
+GalactICS package is also available within <a href='amuse.1.html'><i>amuse(1NEMO)</i></a>
+. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+ The
+following parameters are recognized in order; they may be given in any
+order if the keyword is also given. Use <b>--help</b> to confirm this man page is
+up to date.  
 <dl>
 
 <dt><b>out=</b> </dt>
-<dd>output snapshot
-(a rundirectory $out.tmpdir is also created).  No default. </dd>
+<dd>output snapshot (a rundirectory $out.tmpdir is also created).
+<br>
+No default. </dd>
 
 <dt><b>ndisk=</b> </dt>
-<dd>Number of
-particles in disk. Set them to 0 to leave out this component. Notice these
-are the first set (of three) of particles in the snapshot.  [8000]  <br>
- </dd>
+<dd>Number of particles in disk. Set them to 0 to leave out
+this component. Notice these are the first set (of three) of particles in
+the snapshot. <br>
+[8000]   </dd>
 
 <dt><b>nbulge=</b> </dt>
-<dd>Number of particles in bulge, the second set of particles in the
-output snapshot. [4000]   </dd>
+<dd>Number of particles in bulge, the second set of particles
+in the output snapshot. <br>
+[4000]   </dd>
 
 <dt><b>nhalo=</b> </dt>
-<dd>Number of particles in halo.  Notice these
-are the thirds and last set of particles in the snapshot. [6000]   </dd>
+<dd>Number of particles in halo.  Notice these are the thirds
+and last set of particles in the snapshot. <br>
+[6000]   </dd>
 
-<dt><b>psi0=</b>
-</dt>
-<dd>in.dbh: Psi0 (HALO)  central potential - the smaller (the more negative)
-this parameter the deeper the potential and the more extended the halo
+<dt><b>psi0=</b> </dt>
+<dd>in.dbh: Psi0 (HALO)  central potential - the smaller (the
+more negative) this parameter the deeper the potential and the more extended
+the halo <br>
 [-4.6]     </dd>
 
 <dt><b>v0=</b> </dt>
 <dd>in.dbh: v0 = sqrt(2.0)*sigma0 where sigma0 is the central velocity
-dispersion. roughly the velocity where the halo rotation curve peaks [1.42]
-     </dd>
+dispersion. roughly the velocity where the halo rotation curve peaks <br>
+[1.42]      </dd>
 
 <dt><b>q=</b> </dt>
-<dd>in.dbh: q  an optional flattening parameter for the potential - generally
-0.7 &lt; q &lt; 1.05 - q=1.0 will give a nearly spherical halo [1]      </dd>
+<dd>in.dbh: q  an optional flattening parameter for the potential
+- generally 0.7 &lt; q &lt; 1.05 - q=1.0 will give a nearly spherical halo <br>
+[1]      </dd>
 
 <dt><b>rck2=</b> </dt>
-<dd>in.dbh:
-(rc/rk)^2  a core smoothing parameter - ratio of the core radius to the derived
-King radius for halo only models set this to 1.0.  For multicomponent models,
-this can be a smaller number 0.0 to 0.1.  I&rsquo;ve found that with this parameter=0.0
-the program can crash. [0.1]      </dd>
+<dd>in.dbh: (rc/rk)^2  a core smoothing parameter - ratio of the
+core radius to the derived King radius for halo only models set this to
+1.0.  For multicomponent models, this can be a smaller number 0.0 to 0.1.  I&rsquo;ve
+found that with this parameter=0.0 the program can crash. <br>
+[0.1]      </dd>
 
 <dt><b>ra=</b> </dt>
-<dd>in.dbh: Ra   - a scaling radius for the
-halo - The halo Ra radius is the radius at which the halo rotation curve,
-at its initial slope ignoring cutoffs and the other components, reaches
-v0.  [0.8]     <br>
- </dd>
+<dd>in.dbh: Ra   - a scaling radius for the halo - The halo Ra radius
+is the radius at which the halo rotation curve, at its initial slope ignoring
+cutoffs and the other components, reaches v0. <br>
+[0.8]      </dd>
 
 <dt><b>md=</b> </dt>
-<dd>in.dbh: M_d - mass of the exponential disk ignoring cutoffs [0.867] 
-   </dd>
+<dd>in.dbh: M_d - mass of the exponential disk ignoring cutoffs
+<br>
+[0.867]     </dd>
 
 <dt><b>rd=</b> </dt>
-<dd>in.dbh: R_d - exponential scale length [1]      </dd>
+<dd>in.dbh: R_d - exponential scale length <br>
+[1]      </dd>
 
 <dt><b>router=</b> </dt>
-<dd>in.dbh:  R_outer
-- outer radius where we begin to truncate the disk density [5]      </dd>
+<dd>in.dbh:  R_outer - outer radius where we begin to truncate
+the disk density <br>
+[5]      </dd>
 
-<dt><b>zd=</b>
-</dt>
-<dd>in.dbh:  z_d - disk scale height assuming a sech^2(z/zd) vertical density
-law [0.1]      </dd>
+<dt><b>zd=</b> </dt>
+<dd>in.dbh:  z_d - disk scale height assuming a sech^2(z/zd) vertical
+density law <br>
+[0.1]      </dd>
 
 <dt><b>drtrunc=</b> </dt>
 <dd>in.dbh:  dR_trunc - truncation width - the disk density
-smoothly drops to zero in the range R_outer &lt; R &lt; ~R_outer + 2*dR_trunc. [0.5]
-     </dd>
+smoothly drops to zero in the range R_outer &lt; R &lt; ~R_outer + 2*dR_trunc. <br>
+[0.5]      </dd>
 
 <dt><b>rhob=</b> </dt>
-<dd>in.dbh:  rho_b    - bulge central density [14.45]     </dd>
+<dd>in.dbh:  rho_b    - bulge central density <br>
+[14.45]     </dd>
 
 <dt><b>psicut=</b> </dt>
-<dd>in.dbh:
- psi_cut  - bulge cut-off potential psi0 &lt; psi_cut &lt; 0.0          - energy cut-off
-for the bulge<br>
- [-2.3]      </dd>
+<dd>in.dbh:  psi_cut  - bulge cut-off potential psi0 &lt; psi_cut
+&lt; 0.0          - energy cut-off for the bulge<br>
+ <br>
+[-2.3]      </dd>
 
 <dt><b>sigb=</b> </dt>
-<dd>in.dbh:  sig_b    - bulge central potential [0.714]     
-</dd>
+<dd>in.dbh:  sig_b    - bulge central potential <br>
+[0.714]      </dd>
 
 <dt><b>dr=</b> </dt>
-<dd>in.dbh: delta_r  the width of the radial bins used to calculate the
-potential [0.01]      </dd>
+<dd>in.dbh: delta_r  the width of the radial bins used to calculate
+the potential <br>
+[0.01]      </dd>
 
 <dt><b>nr=</b> </dt>
-<dd>in.dbh: nr - number of radial bins - initially a
-guess since we don&rsquo;t know the radial extent of the system [2400]      </dd>
+<dd>in.dbh: nr - number of radial bins - initially a guess since
+we don&rsquo;t know the radial extent of the system <br>
+[2400]      </dd>
 
-<dt><b>lmax=</b>
-</dt>
-<dd>in.dbh: the largest value in the potential harmonic expansion - use lmax=2
-to get a quick look at the mass profile and lmax=10 for the final calculation
-of the model  number of harmonics [10]   <br>
- </dd>
+<dt><b>lmax=</b> </dt>
+<dd>in.dbh: the largest value in the potential harmonic expansion
+- use lmax=2 to get a quick look at the mass profile and lmax=10 for the
+final calculation of the model  number of harmonics<br>
+ <br>
+[10] </dd>
 
 <dt><b>sigvr0=</b> </dt>
-<dd>in.diskdf: central radial velocity dispersion [0.47]   </dd>
+<dd>in.diskdf: central radial velocity dispersion <br>
+[0.47] </dd>
 
 <dt><b>sigr0=</b> </dt>
-<dd>in.diskdf:
-scalelength of sig_r^2 [1.0]    </dd>
+<dd>in.diskdf: scalelength of sig_r^2 <br>
+[1.0] </dd>
 
 <dt><b>ncorr=</b> </dt>
-<dd>in.diskdf: number of intervals for
-correction function [50] </dd>
+<dd>in.diskdf: number of intervals for correction function <br>
+[50] </dd>
 
 <dt><b>niter=</b> </dt>
-<dd>in.diskdf: number of iterations [10]   
-</dd>
+<dd>in.diskdf: number of iterations <br>
+[10] </dd>
 
 <dt><b>fstreamb=</b> </dt>
-<dd>in.bulge: the streaming fraction of stars with L_z &gt; 0. This controls
-the  rotation of the bulge and the halo, with f=0.5 the non-rotating case.
+<dd>in.bulge: the streaming fraction of stars with L_z &gt; 0. This
+controls the  rotation of the bulge and the halo, with f=0.5 the non-rotating
+case. <br>
 [0.75]       </dd>
 
 <dt><b>fstreamh=</b> </dt>
-<dd>in.halo: see above, for the halo. [0.5]       </dd>
+<dd>in.halo: see above, for the halo. <br>
+[0.5] </dd>
 
-<dt><b>iseed=</b>
-</dt>
-<dd>in.- Random Seed - KD95 convention. Notice this seed is shared by all 3 components.
-[-1]     </dd>
+<dt><b>iseed=</b> </dt>
+<dd>in.- Random Seed - KD95 convention. Notice this seed is shared
+by all 3 components. <br>
+[-1] </dd>
 
 <dt><b>zerocm=</b> </dt>
-<dd>in.- Center the snapshot? Notice again this is shared by
-all three components. [t]    </dd>
+<dd>in.- Center the snapshot? Notice again this is shared by all
+three components. <br>
+[t] </dd>
 
 <dt><b>bin=</b> </dt>
-<dd>directory in which KD95 binaries live.
-Unless your binaries  have been added  to your search PATH, you need to
-specify the directory where these live.  [.] <br>
- </dd>
+<dd>directory in which KD95 binaries live. Unless your binaries  have
+been added  to your search PATH, you need to specify the directory where
+these live. <br>
+[.]  </dd>
 
 <dt><b>model=A|B|C|D</b> </dt>
-<dd>Base K&amp;D95 model. The default model parameters above are  already
-for model-A, but with this keyword another one of the 4 published models
-can be quickly loaded. After that specific parameters can still be overriden
-by setting their value explicitly. By default model is not set via this
-method. </dd>
+<dd>Base K&amp;D95 model. The default model parameters above are 
+already for model-A, but with this keyword another one of the 4 published
+models can be quickly loaded. After that specific parameters can still be
+overriden by setting their value explicitly. <br>
+By default model is not set via this method. </dd>
 
 <dt><b>nmodel=</b> </dt>
-<dd>Number of models computed. Useful if you want to stack a
-large number of models to increase signal to noise. Default: 1. </dd>
+<dd>Number of models computed.
+Useful if you want to stack a large number of models to increase signal
+to noise. <br>
+Default: 1. </dd>
 
-<dt><b>cleanup=t|f</b>
-</dt>
-<dd>Cleanup the temporary run directory after usage. The contents of this directory
-is probably only useful for  debugging, it contains the output of all the
-individual programs and temporary files before final conversion to the
-<i>out</i> file. Default: t </dd>
+<dt><b>cleanup=t|f</b> </dt>
+<dd>Cleanup the temporary run directory after usage. The
+contents of this directory is probably only useful for  debugging, it contains
+the output of all the individual programs and temporary files before final
+conversion to the <i>out</i> file. <br>
+Default: t 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Procedure</a></h2>
-Creating a galaxy model from these parameters
-is sort of a black art since the halo and bulge models are not parameterized
-in terms of their mass profiles but rather properties of their distribution
+Creating a galaxy model from these parameters is sort
+of a black art since the halo and bulge models are not parameterized in
+terms of their mass profiles but rather properties of their distribution
 functions.  Changes in psi0, v0 etc. have weird but predictable effects on
 the mass profile. <p>
 The halo is a flattened analogue of the King model so
@@ -235,6 +259,7 @@ the current guess for the potential is insufficient to generate a potential
 well as deep as requested. If this persists over many iterations, again
 increase the number or size of the radial bins. <p>
 
+<p> 
 <h2><a name='sect5' href='#toc5'>Programs</a></h2>
 Although <b>mkkd95</b>
 calls a number of KD95 programs, here is a brief explanation of some of
@@ -264,22 +289,21 @@ is independantly of the number of particles.
 <h2><a name='sect7' href='#toc7'>Examples</a></h2>
 The default keywords
 are for Kuijken-Dubinski&rsquo;s model-A. 
-<p> <br>
-<pre>% mkkd95 A0.dat
-% snapmstat A0.dat sort=f
-0 0:7999  = 8000 Mass= 0.000108822 TotMas= 0.87058 CumMas= 0.87058
-1 8000:11999  = 4000 Mass= 0.00010631 TotMas= 0.425242 CumMas= 1.29582
-2 12000:17999 = 6000 Mass= 0.000819365 TotMas= 4.91619 CumMas= 6.21201
-% snapplot A0.dat color=&rsquo;i&lt;8000?2.0/16.0:(i&lt;12000?3.0/16.0:4.0/16.0)&rsquo; yvar=z
-% snapxyz A0.dat - color=&rsquo;i&lt;8000?1:(i&lt;12000?2:4)&rsquo; | xyzview - maxpoint=18000 nfast=18000
-scale=8 fullscreen=t
-% mkkd95 B0.dat model=B
-% snapplot B0.dat color=&rsquo;i&lt;1000?2.0/16.0:(i&lt;2000?3.0/16.0:4.0/16.0)&rsquo; yvar=z
-% mkkd95 C0.dat model=C
-% snapplot C0.dat color=&rsquo;i&lt;4000?2.0/16.0:(i&lt;6000?3.0/16.0:4.0/16.0)&rsquo; yvar=z
-% mkkd95 D0.dat model=D
-% snapplot D0.dat color=&rsquo;i&lt;1000?2.0/16.0:(i&lt;2000?3.0/16.0:4.0/16.0)&rsquo; yvar=z
-</pre>
+<p>  % mkkd95 A0.dat % snapmstat A0.dat sort=f
+0 0:7999  = 8000 Mass= 0.000108822 TotMas= 0.87058 CumMas= 0.87058 1 8000:11999
+ = 4000 Mass= 0.00010631 TotMas= 0.425242 CumMas= 1.29582 2 12000:17999 =
+6000 Mass= 0.000819365 TotMas= 4.91619 CumMas= 6.21201 % snapplot A0.dat color=&rsquo;i&lt;8000?2.0/16.0:(i&lt;12000?3.0/16.0:4.0/16.0)&rsquo;
+yvar=z % snapxyz A0.dat - color=&rsquo;i&lt;8000?1:(i&lt;12000?2:4)&rsquo; | xyzview - maxpoint=18000
+
+<p>nfast=18000 scale=8 fullscreen=t 
+<p> % mkkd95 B0.dat model=B % snapplot B0.dat
+color=&rsquo;i&lt;1000?2.0/16.0:(i&lt;2000?3.0/16.0:4.0/16.0)&rsquo; yvar=z 
+<p> % mkkd95 C0.dat model=C
+% snapplot C0.dat color=&rsquo;i&lt;4000?2.0/16.0:(i&lt;6000?3.0/16.0:4.0/16.0)&rsquo; yvar=z 
+<p> % mkkd95
+D0.dat model=D % snapplot D0.dat color=&rsquo;i&lt;1000?2.0/16.0:(i&lt;2000?3.0/16.0:4.0/16.0)&rsquo;
+yvar=z  
+<p> 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
 gendisk, genbulge, genhalo, dbh, getfreqs, diskdf, <a href='snapmstat.1.html'>snapmstat(1NEMO)</a>
 ,
@@ -302,7 +326,9 @@ makegalaxy     https://bitbucket.org/lutorm/makegalaxy
 
 GalIC<tt> </tt>&nbsp;<tt> </tt>&nbsp;[ascl:1408.008] GALIC: Galaxy initial conditions construction 
 
-makediskgalaxy  Springel et. al 2005 - 2005MNRAS.361..776S 
+makediskgalaxy  Springel et. al 2005 - 2005MNRAS.361..776S
+
+AGAMA - https://github.com/GalacticDynamics-Oxford/Agama
 </pre>
 <p> 
 <h2><a name='sect9' href='#toc9'>Ads</a></h2>
@@ -321,10 +347,12 @@ $out.tmdir/b.dat              same as above, but only for bulge
 $out.tmdir/mr.dat             mass and radial extent (or edge) of disk, bulge
 and halo
 </pre>
+<p> 
 <h2><a name='sect11' href='#toc11'>Author</a></h2>
 Konrad Kuijken &amp; John Dubinski (fortran programs - 1995) Peter Teuben
 (NEMO interface) - 
-<h2><a name='sect12' href='#toc12'>Update History</a></h2>
+<p> 
+<h2><a name='sect12' href='#toc12'>History</a></h2>
 <br>
 <pre>06-Mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created, using kd95&rsquo;s  README file <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 added nmodel= and warns about using model= <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -350,7 +378,7 @@ Konrad Kuijken &amp; John Dubinski (fortran programs - 1995) Peter Teuben
 <li><a name='toc9' href='#sect9'>Ads</a></li>
 <li><a name='toc10' href='#sect10'>Files</a></li>
 <li><a name='toc11' href='#sect11'>Author</a></li>
-<li><a name='toc12' href='#sect12'>Update History</a></li>
+<li><a name='toc12' href='#sect12'>History</a></li>
 </ul>
 </body>
 </html>
