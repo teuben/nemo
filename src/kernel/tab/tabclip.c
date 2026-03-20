@@ -24,9 +24,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "deriv=\n            Clipping if abs(derivative) exceeds this value",
     "eta=\n              Max deviation of local 2nd order polynomial allowed",
     "logic=and\n         Use AND or OR",
+    "nn=2\n              How many neighbors to remove",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
-    "comment=f\n         Keep clipped points as commented lines?",
-    "VERSION=0.4\n	 22-dec-2025 PJT",
+    "comment=t\n         Keep clipped points as commented lines?",
+    "VERSION=0.5\n	 27-dec-2025 PJT",
     NULL
 };
 
@@ -47,6 +48,7 @@ local int    npt;			/* actual number of data points */
 local int    nmax;			/* lines to allocate */
 
 local bool Qand;
+local int  nn;
 
 
 /****************************** START OF PROGRAM **********************/
@@ -65,6 +67,8 @@ void setparams()
     Qand = FALSE;
   else 
     error("logic %s must be 'and' or 'or'",logic);
+
+  nn = getiparam("nn");
 
   nmax = nemo_file_lines(input,getiparam("nmax"));
   dprintf(1,"Allocated %d lines for table\n",nmax);
@@ -106,7 +110,7 @@ void read_data()
 }
 
 
-void deriv_data()
+void deriv_data(int nn)
 {
   int    i;
   real d1, d2, d1a, d2a, dmin = getdparam("deriv");
@@ -121,7 +125,7 @@ void deriv_data()
 	first = FALSE;
       }
     } else
-      d1 = dmin+1;
+      d1 = dmin+1;  // ???
     if (i>2 )
       d1a = (y[i]-y[i-2]);
     else
@@ -149,7 +153,11 @@ void deriv_data()
     if (d2 < dmin) {
       d_max = MAX(d_max,d1);
       d_max = MAX(d_max,d2);}
-    if (d1 > dmin || d2 > dmin || d1a > dmin || d2a > dmin) ok[i] = FALSE;
+    if (nn==2) {
+      if (d1 > dmin || d2 > dmin || d1a > dmin || d2a > dmin) ok[i] = FALSE;
+    else if (nn==1) 
+      if (d1 > dmin || d2 > dmin) ok[i] = FALSE;	
+    }
     dprintf(1,"DERIV: %d %g %g %g %g %g %g %g %g %d\n",i,y[i],y[i-1],dmin,dmin,d1,d2,d1a,d2a,ok[i]);
   }
   dprintf(0,"Min/Max for deriv = %g %g (dmin=%g)\n",d_min,d_max,dmin);
@@ -275,7 +283,7 @@ void nemo_main()
     instr = stropen(input,"r");
     outstr = stropen(output,"w");
     read_data();
-    if (hasvalue("deriv")) deriv_data();
+    if (hasvalue("deriv")) deriv_data(nn);
     if (hasvalue("eta"))     eta_data();
     write_data();
 }
