@@ -1,4 +1,4 @@
-.TH TABCLIP 1NEMO "4 January 2026"
+.TH TABCLIP 1NEMO "20 March 2026"
 
 .SH "NAME"
 tabclip \- clip a table
@@ -31,7 +31,7 @@ Output table
 No default
 .TP
 \fBxcol=\fP
-x coordinate column. Column 0 can be used for values 0,1,2,...
+x coordinate column. Column value 0 can be used for row values 1,2,3,...
 .br
 [1]
 .TP
@@ -57,13 +57,23 @@ the outcome of the clipping. \fBand\fP requires both to be satisfied,
 .br
 [Default: \fBand\fP].
 .TP
-\fBnmax=\fP
-Hardcoded allocation space, if needed for piped data.
+\fBnn=\fP
+Number of neighbors to remove. - Deprecated
+.br
+2
+.TP
+\fBnf=\fP
+Max number of contiguous outliers.
+.br
+3
 .TP
 \fBcomment=t|f\fP
 Keep the clipped points as comments in the output file?
 .br
 By default they are shown as comments. [t]
+.TP
+\fBnmax=\fP
+Hardcoded allocation space, if needed for piped data.
 
 .SH "CAVEATS"
 The value of \fBclip=\fP is very important. It should be a few times the sigma in the \fIsignal\fP variation
@@ -94,4 +104,5 @@ Peter Teuben
 23-Nov-02	V0.1 Created	PJT
 27-nov-02	V0.3 added eta=	PJT
 28-dec-2025	V0.5 ANSI C clean up, use clip=	PJT
+20-mar-2026	V0.6 testing a merge	PJT
 .fi
