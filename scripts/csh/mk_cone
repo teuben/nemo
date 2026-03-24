@@ -94,7 +94,9 @@ end
 # Bolatto et al. 2021
 # See https://arxiv.org/abs/2307.01854
 # See also Westmoquette et al. (2011) - MNRAS 414, 3719
-
+# See also https://arxiv.org/abs/2511.07861  
+#          A Modified 3D Biconical Outflow Model: Spatial Constraints on AGN-driven Outflows
+# See also Flury (2026) https://arxiv.org/abs/2512.10650
 
 rm -f $out.*
 
