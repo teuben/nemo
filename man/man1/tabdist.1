@@ -1,9 +1,12 @@
-.TH TABDIST 1NEMO "18 November 2013"
-.SH NAME
+.TH TABDIST 1NEMO "1 April 2026"
+
+.SH "NAME"
 tabdist \- Compare distances between points in two tables, aka catalog matching
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtabdist\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 Given two tables, each containing specified column(s) that represent a set
 of 1D, 2D or 3D points, it will
 compute the nearest neigbor(s) from each point in the first table
@@ -11,36 +14,58 @@ to those from the second table.
 .PP
 The output contains the same number of rows as the input number of
 rows in the first dataset.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin1=\fP
-First dataset, an ascii table. No default.
+First dataset, an ascii table.
+.br
+No default.
 .TP
 \fBin2=\fP
-Second dataset, an ascii table. No default.
+Second dataset, an ascii table. 
 The tables do not need to be of the same length.
+.br
+No default.
 .TP
 \fBcol1=\fP
-Coordinate columns from 1st dataset. 1D, 2D and 3D are currently supported [1,2]
+Coordinate columns from 1st dataset. 1D, 2D and 3D are currently supported
+.br
+[1,2]
 .TP
 \fBcol2=\fP
-Coordinate columns from 2nd dataset. 1D, 2D and 3D are currently supported [1,2]
+Coordinate columns from 2nd dataset. 1D, 2D and 3D are currently supported
+.br
+[1,2]
 .TP
 \fBid1=\fP
 Column in first dataset representing the ID name.
-By default a number between 1 and number of sources is used. [0]
+By default a number between 1 and number of sources is used.
+.br
+[0]
 .TP
 \fBid2=\fP
-Column in second dataset representing the ID name [0]
+Column in second dataset representing the ID name
+.br
+[0]
 .TP
 \fBradec=t|f\fP
 Should columns be interpreted as angular (usually RA/DEC)?
 Only 2D comparisions are allowed here. Units must be radians at the moment.
 See also \fItabdms(1NEMO)\fP.
+.br
 Default: false
-.SH EXAMPLES
+.TP
+\fBunits=r|d\fP
+Units of the X,Y angular coordinates, radians or degrees.
+.br
+Default: degree
+.TP
+\fBdmin=\fP
+Only print distances less than this value.   Units: arcsec if input units=degree
+
+.SH "EXAMPLES"
 The X,Y,Z coordinates of a 3 particle plummer sphere are perturbed by a small
 amount and then compared to the original list. Thus they must match one on one:
 .nf
@@ -67,20 +92,25 @@ and then a full 3D case:
 Currently it will display the line number, the coordinate(s) in table1,
 then the best matching line number and coordinates(s) from table2, and finally the distance.
 
-.SH CAVEAT
+.SH "CAVEATS"
 Currently a brute force (quadratic in N) minimum distance is used.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 tabmath(1NEMO), tabdms(1NEMO), comparecats(SIRTF.map2)
 .PP
 k-d Match: http://arxiv.org/abs/1304.0838
-.SH FILES
+
+.SH "FILES"
 src/kernel/tab/tabdist.c
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 13-Feb-13	V0.1 Created	PJT
 13-nov-2013	V0.3 added radec=	PJT
 18-nov-2013	V0.4 added id1,id2=	PJT
+1-apr-2026	V0.8 ansi fixes, print full line	PJT
 .fi
