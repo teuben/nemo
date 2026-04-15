@@ -113,7 +113,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=8.0d\n		  29-aug-2024 PJT",
+    "VERSION=8.1\n		  14-apr-2026 PJT",
     NULL
 };
 
@@ -502,7 +502,17 @@ local void histogram(void)
   
   if (npt != n_moment(&m))
     error("Counting error, probably in removing outliers...");
+
+  /* get min and max of the counts in the bins */
+  int count_max = 0;
+  for (k=0; k<nsteps; k++)
+    if (count[k] > count_max) count_max = count[k];
+  int count_min = count_max;
+  for (k=0; k<nsteps; k++)
+    if (count[k] < count_min) count_min = count[k];
+  
   dprintf (0,"Number of points     : %d\n",npt);
+  dprintf (0,"Bincount min and max : %d %d\n", count_min, count_max);
   if (npt>1)
     dprintf (0,"Mean and dispersion  : %g %g %g\n",mean,sigma,sigma/sqrt(npt-1.0));
   else
