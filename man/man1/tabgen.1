@@ -1,4 +1,4 @@
-.TH TABGEN 1NEMO "14 February 2024"
+.TH TABGEN 1NEMO "10 April 2026"
 
 .SH "NAME"
 tabgen \- Create an arbitrarely large ASCII table with (random) values
@@ -119,6 +119,14 @@ tabgen - 100 2 |\\
      tabplot - line=1,1
 
 .EE
+
+An example of turning a matrix in row based single column:
+.EX
+
+tabgen - nr=20 nc=5 mode=4 | tabcols - colsep=n
+
+.EE
+Should list "100" as the last element.
 
 .SH "SEE ALSO"
 seq(1), tabhead(1NEMO), tabmath(1NEMO), xrandom(1NEMO), nemoinp(1NEMO), xrandom(3NEMO), printf(3)
