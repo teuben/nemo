@@ -6,5 +6,5 @@ have been abandoned.  Nothing was ever documented.
 
 The first thing each branch should do is document it's use, also
 provided another easy to see point where branching occured.  When the
-branch is merged back, it should become part of the master. 
+branch is merged back, it should become part of the master.
 
