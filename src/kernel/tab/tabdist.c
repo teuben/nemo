@@ -4,6 +4,7 @@
  *      13-feb-2013     0.1    Created, Q&D
  *      24-jun-2016     0.7    allow radec in degrees; fix C language issues, introduce dmin=,
  *                             faster precompute
+ *       1-apr-2026     0.8    ansi compiler + cleanup
  *
  *  See also the SIRTF/map2 project in 'c2d'
  *
@@ -15,11 +16,15 @@
  *  @todo   Faster lookup using 2D grid with linked list?
  *
  *  @todo   Generalize to N tables?
+ *
+ *  @todo   Pick if to use short lines (id,coord) or full lines from input table
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <extstring.h>
 #include <grid.h>
+#include <table.h>
 
 string defv[] = {
     "in1=???\n		First (ascii table) dataset",
@@ -29,27 +34,30 @@ string defv[] = {
     "id1=0\n            Column in first data reprenting the ID",
     "id2=0\n            Column in second data reprenting the ID",
     "radec=false\n      Interpret X and Y as RA/DEC angles on sky",
-    "units=r\n          radians or degree",
+    "units=d\n          radians or degree for 2D case in case of radec=t",
     "xgrid=\n           Grid to limit nearest neighbors for special 2D case",
     "ygrid=\n           Grid to limit nearest neighbors for special 2D case",
     "dmin=-1\n          If positive, only print distances less than this value",
-    "VERSION=0.7\n	24-jun-2016 PJT",
+    "all=t\n            Show all columns of match, or just the coords",
+    "VERSION=0.9\n	2-apr-2026 PJT",
     NULL,
 };
 
 string usage="Compare distances between points in two tables";
-string cvsid="$Id$";
 
-#define MAXGRID  1024
+//#define MAXGRID  1024
 
 void compare_1d (int npt1, int npt2, real *x1, real *x2, real dmin);
 void compare_2d (int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real dmin);
 void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real scale, string *name1, string *name2, real dmin);
+void compare_2da_slow(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real s, string *name1, string *name2, real dmin_out);
 void compare_2dg(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, Grid *g, real dmin);
 void compare_3d (int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real *z1, real *z2, real dmin);
 
 void get_atable_a(stream instr, int id, int npt, string *name);
+void get_atable_l(stream instr, int npt, string *name);
 
+  
 inline static real dist1(real x1,real x2) {
   real d = x1-x2;
   if (d > 0.0) return d;
@@ -76,8 +84,8 @@ static real *X1, *X2;
 static real *Sinx1, *Sinx2, *Siny1, *Siny2;
 static real *Cosx1, *Cosx2, *Cosy1, *Cosy2;
 
-inline static real dist2ai(i,j) {
-  return Siny1[i]*Siny2[j]+Cosy1[i]*Cosy2[j]*cos(X1[i]-X2[j]);
+inline static real dist2ai(int i,int j) {
+  return Siny1[i]*Siny2[j] + Cosy1[i]*Cosy2[j]*cos(X1[i]-X2[j]);
 }
 
 
@@ -90,9 +98,9 @@ void key2grid(string key, Grid *g)
 
 #define NDIM   3
 
-nemo_main()
+void nemo_main()
 {
-  int i, npt, npt1, npt2, ncol1, ncol2, id1, id2;
+  int i, npt1, npt2, ncol1, ncol2, id1, id2;
   real *coldat1[NDIM], *coldat2[NDIM];
   int colnr1[NDIM], colnr2[NDIM];
   real *x1 = NULL, *x2 = NULL;
@@ -103,8 +111,9 @@ nemo_main()
   string input1 = getparam("in1");
   string input2 = getparam("in2");
   stream instr1, instr2;
-  string *name1, *name2;
+  string *name1, *name2, *line1, *line2, *show1, *show2;
   bool Qradec = getbparam("radec");
+  bool Qall = getbparam("all");
   string units = getparam("units");
   Grid gx, gy;
 
@@ -190,12 +199,27 @@ nemo_main()
     get_atable_a(instr2,id2,npt2,name2);
   } else
     name2 = NULL;
+
+  if (Qall) {
+    rewind(instr1);
+    line1 = (string *) allocate(npt1 * sizeof(string));
+    get_atable_l(instr1,npt1,line1);
+
+    rewind(instr2);
+    line2 = (string *) allocate(npt2 * sizeof(string));
+    get_atable_l(instr2,npt2,line2);
+    show1 = line1;
+    show2 = line2;
+  } else {
+    show1 = name1;
+    show2 = name2;
+  }
   
   strclose(instr1);
   strclose(instr2);
 
   if (Qradec && ncol1==2)
-    compare_2da(npt1, npt2, x1, x2, y1, y2, ascale, name1, name2, dmin);
+    compare_2da_slow(npt1, npt2, x1, x2, y1, y2, ascale, show1, show2, dmin);
   else if (ncol1 == 1) 
     compare_1d(npt1, npt2, x1, x2, dmin);
   else if (ncol1 == 2) 
@@ -207,12 +231,11 @@ nemo_main()
 }
 
 
-
-
 void compare_1d(int npt1, int npt2, real *x1, real *x2, real dmin_out)
 {
   int i, j, jmin;
   real d, dmin;
+  int count=0;
   
   for (i=0; i<npt1; i++) {
     dmin = dist1(x1[i],x2[0]);
@@ -224,15 +247,19 @@ void compare_1d(int npt1, int npt2, real *x1, real *x2, real dmin_out)
 	jmin = j;
       }
     }
-    if (dmin_out>0 && dmin<dmin_out)
+    if (dmin_out>0 && dmin<dmin_out) {
+      count++;
       printf("%d %g   %d %g   %g\n",i+1,x1[i],jmin+1,x2[jmin], dmin);
+    }
   }
+  printf("# Found %d matches for dmin=%g in 1d\n",count,dmin_out);    
 }
 
 void compare_2d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real dmin_out)
 {  
   int i, j, jmin;
   real d, dmin;
+  int count=0;
   
   for (i=0; i<npt1; i++) {
     dmin = dist2(x1[i],y1[i],x2[0],y2[0]);
@@ -245,9 +272,12 @@ void compare_2d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real
       }
     }
     dmin = sqrt(dmin);
-    if (dmin_out>0 && dmin<dmin_out)
+    if (dmin_out>0 && dmin<dmin_out) {
+      count++;
       printf("%d %g %g   %d %g %g   %g\n",i+1,x1[i],y1[i],jmin+1,x2[jmin], y2[jmin],dmin);
+    }
   }
+  printf("# Found %d matches for dmin=%g in 2d\n",count,dmin_out);  
 }
 
 /* fast version - doesn't work yet 
@@ -303,6 +333,7 @@ void compare_2da_slow(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2
   real d, dmax, dmin;
   string n1, n2;
   char ord1[16], ord2[16];
+  int count = 0;
 
   
   for (i=0; i<npt1; i++) {
@@ -330,15 +361,20 @@ void compare_2da_slow(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2
     } else
       n2 = name2[jmin];
 
-    if (dmin_out>0 && dmin<dmin_out)
-      printf("%s %g %g   %s %g %g   %g\n",n1,x1[i],y1[i],n2,x2[jmin],y2[jmin],dmin);
+    if (dmin_out>0 && dmin<dmin_out) {
+      count++;
+      //printf("%s %s   %g\n",name1[i],name2[jmin],dmin);      
+      printf("%s %g %g    %s %g %g    %g\n",n1,x1[i],y1[i],n2,x2[jmin],y2[jmin],dmin);
+    }
   }
+  printf("# Found %d matches for dmin=%g in 2da\n",count,dmin_out);
 }
 
 void compare_2g(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, Grid *gx, Grid *gy, real dmin_out)
 {  
   int i, j, jmin;
   real d, dmin;
+  int count = 0;
   
   for (i=0; i<npt1; i++) {
     dmin = dist2(x1[i],y1[i],x2[0],y2[0]);
@@ -351,9 +387,12 @@ void compare_2g(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, Grid
       }
     }
     dmin = sqrt(dmin);
-    if (dmin_out>0 && dmin<dmin_out)
+    if (dmin_out>0 && dmin<dmin_out) {
+      count++;
       printf("%d %g %g   %d %g %g   %g\n",i+1,x1[i],y1[i],jmin+1,x2[jmin], y2[jmin],dmin);
+    }
   }
+  printf("# Found %d matches for dmin=%g in 2g\n",count,dmin_out);
 }
 
 
@@ -361,6 +400,7 @@ void compare_3d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real
 {  
   int i, j, jmin;
   real d, dmin;
+  int count = 0;
   
   for (i=0; i<npt1; i++) {
     dmin = dist3(x1[i],y1[i],z1[i],x2[0],y2[0],z2[0]);
@@ -373,8 +413,12 @@ void compare_3d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real
       }
     }
     dmin = sqrt(dmin);
-    printf("%d %g %g %g   %d %g %g %g   %g\n",i+1,x1[i],y1[i],z1[i],jmin+1,x2[jmin],y2[jmin],z2[jmin],dmin);
+    if (dmin_out>0 && dmin<dmin_out) {
+      count++;
+      printf("%d %g %g %g   %d %g %g %g   %g\n",i+1,x1[i],y1[i],z1[i],jmin+1,x2[jmin],y2[jmin],z2[jmin],dmin);
+    }
   }
+  printf("# Found %d matches for dmin=%g in 3d\n",count,dmin_out);
 }
 
 /* 
@@ -399,6 +443,22 @@ void get_atable_a(stream instr, int id, int npt, string *name)
     }
     name[i] = strdup(sp[id-1]);
     freestrings(sp);
+    i++;
+  }
+  dprintf(1,"First and last ID: %s %s\n",name[0],name[npt-1]);
+}
+
+void get_atable_l(stream instr, int npt, string *name)
+{
+  static char line[MAX_LINELEN];
+  int i;
+
+  for (i=0; i<npt; ) {
+    if (fgets(line,MAX_LINELEN,instr) == NULL)
+      error("unexpected EOF on table read (%d)",npt);
+    if (line[0] == '#') continue;
+    line[strlen(line)-1] = '\0';
+    name[i] = strdup(line);
     i++;
   }
   dprintf(1,"First and last ID: %s %s\n",name[0],name[npt-1]);

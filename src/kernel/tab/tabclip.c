@@ -24,10 +24,11 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "clip=\n             Clipping if abs(derivative) exceeds this value",
     "eta=\n              Max deviation of local 2nd order polynomial allowed",
     "logic=and\n         Use AND or OR",
-    "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
+    "nn=2\n              How many neighbors to remove",
     "nf=3\n              Max number of channels of contiguous outliers",
     "comment=t\n         Keep clipped points as commented lines?",
-    "VERSION=0.5\n	 28-dec-2025 PJT",
+    "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
+    "VERSION=0.6\n	 20-mar-2026 PJT",
     NULL
 };
 
@@ -47,10 +48,10 @@ local real *d;                          /* difference array */
 
 local int   npt;			/* actual number of data points */
 local int   nmax;			/* lines to allocate */
-local int   nf;
+local int   nf;                         /* max number of channels of contiguous outliers */
+local int  nn;                          /* number of neighbors to remove */
 
-local bool Qand;                        /* logic and/or dealing with both sides */
-
+local bool Qand;
 
 /****************************** START OF PROGRAM **********************/
 
@@ -70,6 +71,8 @@ void setparams()
     error("logic %s must be 'and' or 'or'",logic);
   nf = getiparam("nf");
   if (nf > 3) error("Code cannot handle nf > 3");
+
+  nn = getiparam("nn");
 
   nmax = nemo_file_lines(input,getiparam("nmax"));
   dprintf(1,"Allocated %d lines for table\n",nmax);
@@ -112,7 +115,7 @@ void read_data()
 }
 
 
-void deriv_data()
+void deriv_data(int nn)
 {
   int    i;
   real d1, d2, d1a, d2a, dmin = getdparam("clip");
@@ -127,7 +130,7 @@ void deriv_data()
 	first = FALSE;
       }
     } else
-      d1 = dmin+1;
+      d1 = dmin+1;  // ???
     if (i>2 )
       d1a = (y[i]-y[i-2]);
     else
@@ -155,7 +158,11 @@ void deriv_data()
     if (d2 < dmin) {
       d_max = MAX(d_max,d1);
       d_max = MAX(d_max,d2);}
-    if (d1 > dmin || d2 > dmin || d1a > dmin || d2a > dmin) ok[i] = FALSE;
+    if (nn==2) {
+      if (d1 > dmin || d2 > dmin || d1a > dmin || d2a > dmin) ok[i] = FALSE;
+    else if (nn==1) 
+      if (d1 > dmin || d2 > dmin) ok[i] = FALSE;
+    }
     dprintf(1,"DERIV: %d %g %g %g %g %g %g %g %g %d\n",i,y[i],y[i-1],dmin,dmin,d1,d2,d1a,d2a,ok[i]);
   }
   dprintf(0,"Min/Max for deriv = %g %g (dmin=%g)\n",d_min,d_max,dmin);
@@ -356,6 +363,8 @@ void nemo_main()
     instr = stropen(input,"r");
     outstr = stropen(output,"w");
     read_data();
+
+    // if (hasvalue("deriv")) deriv_data(nn);
     if (hasvalue("clip")) deriv_data2(nf);
     if (hasvalue("eta"))     eta_data();
     write_data();

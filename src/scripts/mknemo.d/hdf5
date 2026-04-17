@@ -5,7 +5,10 @@
 #
 #  25-dec-2019  drafted
 #  17-mar-2020  wgetc
+#  17-apr-2026  deal with new V2 structure
 #
+#  old now:   https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
+#  new ex:    https://github.com/HDFGroup/hdf5/archive/refs/tags/2.1.1.tar.gz
 
 #   highest versions in respective 1.xx versions
 version=1.10.11     #    oct-2021
@@ -13,6 +16,8 @@ version=1.12.1      # 06-jul-2021 <toltec default>
 version=1.13.0      # 01-dec-2021 falcon2 cannot yet use 1.13 and up
 version=1.13.3      # 27-oct-2022
 version=1.14.3      # 30-oct-2023
+#version=2.1.1       # 23-mar-2026
+
 url=https://github.com/HDFGroup/hdf5
 
 wget=wgetc
@@ -21,20 +26,35 @@ for arg in $*; do
   export $arg
 done
 
+Mversion=$(echo $version | awk -F. '{printf("%s",$1)}')
 mversion=$(echo $version | awk -F. '{printf("%s.%s",$1,$2)}')
 
 cd $NEMO/local
-$wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-$mversion/hdf5-$version/src/hdf5-$version.tar.gz    
 
-tar zxf hdf5-$version.tar.gz
-cd hdf5-$version
+if [ $Mversion == 1 ]; then
+    echo Old version $version
 
-./configure --prefix=$NEMO/opt --enable-build-mode=production --enable-cxx
-make -j
-make install 
+    $wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-$mversion/hdf5-$version/src/hdf5-$version.tar.gz    
+
+    tar zxf hdf5-$version.tar.gz
+    cd hdf5-$version
+
+    ./configure --prefix=$NEMO/opt --enable-build-mode=production --enable-cxx
+    make -j
+    make install
+else
+    echo New version $version experimental
+
+    $wget https://github.com/HDFGroup/hdf5/releases/download/$version/hdf5-$version.tar.gz    
+    tar zxf hdf5-$version.tar.gz
+    cd hdf5-$version
+    #  needs ninja, javac
+    #cmake --workflow --preset ci-StdShar-GNUC --fresh
+    echo "cmake          --preset ci-StdShar-GNUC -DCMAKE_INSTALL_PREFIX=$NEMO/opt"
+    cmake          --preset ci-StdShar-GNUC -DCMAKE_INSTALL_PREFIX=$NEMO/opt 
+    echo "cmake  --build --preset ci-StdShar-GNUC"
+fi
 
 echo hdf5 $version `date` >> $NEMO/opt/mknemo.log
 echo Example to test linking:  mknemo 
 
-# future 2.0 release will use cmake, e.g.
-# cmake .. -DCMAKE_INSTALL_PREFIX=${NEMO}/opt
