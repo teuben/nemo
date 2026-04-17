@@ -59,13 +59,11 @@ string defv[] = {
     "eta=\n               if used, stop if abs(de/e) > eta",
     "variable=f\n         Use variable timesteps (needs eta=)",
     "tstop=\n             If given, this overrides nsteps=",
-    "VERSION=4.3\n        21-mar-2021 PJT",
+    "VERSION=4.4\n        17-apr-2026 PJT",
     NULL,
 };
 
 string usage = "integrate stellar orbits";
-
-string cvsid="$Id$";
 
 
 #ifndef HUGE
@@ -86,6 +84,8 @@ real   eta = -1.0;                      /* stop criterion parameter */
 bool   Qstop = FALSE;                   /* global flag to stop intgr. */
 bool   Qvar;
 
+real c1, c2, c3, c4, d1, d2, d3;        /* Yoshida constants */
+
 
 int osfac[2] = {1, -1};   /* coriolis factor */
 
@@ -96,7 +96,7 @@ proc pot;				/* pointer to the potential */
 real print_diag();                      /* returns total energy/hamiltonian */
 void setparams(), prepare();
 void integrate_euler1(), integrate_euler2(), 
-     integrate_leapfrog1(), integrate_leapfrog2(),
+     integrate_leapfrog1(), integrate_leapfrog2(), integrate_leapfrog4(), 
      integrate_rk2(), integrate_rk4();
 void set_rk(double *ko, double *pos, double *vel, double *acc, 
 	    int n, double dt, double *ki);
@@ -181,7 +181,19 @@ void setparams()
       eta = getdparam("eta");
     else if (Qvar)
       error("Variable timesteps choosen, it needs a control parameter eta=");
-    
+
+    /* yoshida constants */
+    real cr2 = pow(2.0,1.0/3.0);   // cbrt(2.0);
+    real w0 = -cr2/(2-cr2);
+    real w1 = 1/(2-cr2);
+    c1 = c4 = w1/2.0;      //  0.6756
+    c2 = c3 = (w0+w1)/2.0; // -0.1756
+    d1 = d3 = w1;
+    d2 = w0;
+    dprintf(1,"Yoshida: cbrt(2)     = %g\n", cr2);
+    dprintf(1,"Yoshida: w0,w1       = %g %g\n", w0,w1);
+    dprintf(1,"Yoshida: c1,c2,c3,c4 = %g %g %g %g\n", c1,c2,c3,c4);
+    dprintf(1,"Yoshida: d1,d2,d3    = %g %g %g\n", d1,d2,d3);
 }
 
 void prepare()
@@ -602,6 +614,103 @@ void integrate_leapfrog2()
 	}
     if (ndiag)
     dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
+}
+
+/* 4th order leapfrog - Yoshida 1990 */
+void integrate_leapfrog4()
+{
+  dprintf(1,"EXPERIMENTAL LEAPFROG4 Yoshida integration\n");
+  /*
+     https://en.wikipedia.org/wiki/Leapfrog_integration
+     
+     x1 = r_i + c1.v_i.DT       drift
+     a(x1) = acc(x1)
+     v1 = v_i + d1.a(x1).DT     kick
+
+     x2 = x1 + c2.v1.DT         drift2 <0
+     a(x2) = acc(x2)
+     v2 = v1 + d2.a(x2).DT      kick2  <0
+
+     x3 = x2 + c3.v2.DT         drift3 <0
+     a(x3) = acc(x3)
+     v3 = v2 + d3.a(x3).DT      kick3
+
+     r_i+1 = x3 + c4.v3.DT      drift4
+     v_i+1 = V3
+     
+   */
+
+	int i, kdiag, ksave, isave, ndim;
+	double epot,e_last;
+	double time,pos[3],vel[3],acc[3];
+
+        dprintf(1,"LEAPFROG integration\n");
+
+            /* start at last step of input file */
+	time = Torb(o_out,0) = Torb(o_in,Nsteps(o_in)-1);
+	pos[0] = Xorb(o_out,0) = Xorb(o_in,Nsteps(o_in)-1);
+	pos[1] = Yorb(o_out,0) = Yorb(o_in,Nsteps(o_in)-1);
+	pos[2] = Zorb(o_out,0) = Zorb(o_in,Nsteps(o_in)-1);
+	vel[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
+	vel[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
+	vel[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
+#ifdef ORBIT_PHI
+	Porb(o_out,0)  = Porb(o_in,Nsteps(o_in)-1);
+	AXorb(o_out,0) = AXorb(o_in,Nsteps(o_in)-1);
+	AYorb(o_out,0) = AYorb(o_in,Nsteps(o_in)-1);
+	AZorb(o_out,0) = AZorb(o_in,Nsteps(o_in)-1);
+#endif    
+	
+	ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
+	kdiag=0;			/* reset-counter for diagnostics */
+	ksave=0;			/* reset-counter for saving */
+	isave=0;			/* save counter */
+	i=0;				/* counter of timesteps */
+	(*pot)(&ndim,pos,acc,&epot,&tdum);
+	I1(o_out) = print_diag(time,pos,vel,epot);
+        /* prepare half step for LEAPFROG to get VEL and POS out of sync */
+	vel[0] += dt2*(acc[0]+omega2*pos[0]+tomega*vel[1]);
+	vel[1] += dt2*(acc[1]+omega2*pos[1]-tomega*vel[0]);
+	vel[2] += dt2*acc[2];
+	while (i<nsteps) {
+		i++;
+		time += dt;
+		pos[0] += dt*vel[0];
+		pos[1] += dt*vel[1];
+		pos[2] += dt*vel[2];
+		(*pot)(&ndim,pos,acc,&epot,&time);
+                /* bring back to sync for possible output */
+        	vel[0] += dt2*(acc[0]+omega2*pos[0]+tomega*vel[1]);
+	        vel[1] += dt2*(acc[1]+omega2*pos[1]-tomega*vel[0]);
+	        vel[2] += dt2*acc[2];
+
+		if (ndiag && ++kdiag == ndiag) {
+		    e_last=print_diag(time,pos,vel,epot);
+		    kdiag = 0;
+		}
+		if (++ksave == nsave) {
+		    ksave=0;
+		    isave++;
+		    dprintf(2,"writing isave=%d for i=%d\n",isave,i);
+		    Torb(o_out,isave) = time;
+		    Xorb(o_out,isave) = pos[0];
+		    Yorb(o_out,isave) = pos[1];
+		    Zorb(o_out,isave) = pos[2];
+		    Uorb(o_out,isave) = vel[0];
+		    Vorb(o_out,isave) = vel[1];
+		    Worb(o_out,isave) = vel[2];
+		}
+                /* put back out of sync */
+        	vel[0] += dt2*(acc[0]+omega2*pos[0]+tomega*vel[1]);
+	        vel[1] += dt2*(acc[1]+omega2*pos[1]-tomega*vel[0]);
+	        vel[2] += dt2*acc[2];
+
+	}
+    if (ndiag)
+      dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
+
+
+  
 }
 
 /* Standard 2nd order RK2 integration */
