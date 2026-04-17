@@ -1,5 +1,5 @@
 /*
- *  ORBINT: testroutine to integrate stellar orbits
+ *  ORBINT:  integrate stellar orbits
  *
  *	xx-jul-87	Princeton - first version	P.J. Teuben
  *	16-jul-87	V1.1 small mod in orbit-struct	PJT
@@ -36,6 +36,7 @@
  *      10-dec-2019     V4.2 Add optional Phi/Acc to output     PJT
  *                           but not implemented for all cases - also fixed pattern speed bug
  *      21-mar-2021     V4.3 optional tstop which override nsteps  PJT
+ *      17-apr-2026     V4.4 added leapfrog4                       PJT
  *                           
  *
  */
@@ -55,7 +56,7 @@ string defv[] = {
     "potname=\n	  	  potential name (default from orbit)",
     "potpars=\n	          parameters of potential ",
     "potfile=\n		  extra data-file for potential ",
-    "mode=rk4\n           integration method (euler,leapfrog,rk2,rk4)",
+    "mode=rk4\n           integration method (euler,leapfrog,leap4,rk2,rk4)",
     "eta=\n               if used, stop if abs(de/e) > eta",
     "variable=f\n         Use variable timesteps (needs eta=)",
     "tstop=\n             If given, this overrides nsteps=",
@@ -137,7 +138,7 @@ void nemo_main ()
 
     outstr = stropen (outfile,"w");
     prepare();
-    match(getparam("mode"),"euler leapfrog test rk2 rk4 me end",&imode);
+    match(getparam("mode"),"euler leapfrog test rk2 rk4 me leap4 end",&imode);
     if (imode==0x01)           // euler
         integrate_euler1();
     else if (imode==0x02)      // leapfrog
@@ -150,8 +151,11 @@ void nemo_main ()
         integrate_rk4();
     else if (imode==0x20)      // me
         integrate_euler2();
+    else if (imode==0x40)      // leap4
+      integrate_leapfrog4();
+    
     else
-        error("imode=0x%x; Illegal integration mode=",imode);
+        error("imode=0x%x; Illegal integration mode",imode);
 
     put_history(outstr);
     write_orbit (outstr,o_out); 
@@ -182,18 +186,19 @@ void setparams()
     else if (Qvar)
       error("Variable timesteps choosen, it needs a control parameter eta=");
 
-    /* yoshida constants */
-    real cr2 = pow(2.0,1.0/3.0);   // cbrt(2.0);
-    real w0 = -cr2/(2-cr2);
-    real w1 = 1/(2-cr2);
-    c1 = c4 = w1/2.0;      //  0.6756
-    c2 = c3 = (w0+w1)/2.0; // -0.1756
-    d1 = d3 = w1;
-    d2 = w0;
-    dprintf(1,"Yoshida: cbrt(2)     = %g\n", cr2);
+    /* yoshida constants    https://en.wikipedia.org/wiki/Leapfrog_integration */
+    real cr2 = cbrt(2.0);   //  1.25992
+    real w0 = -cr2/(2-cr2); // -1.70241
+    real w1 = 1/(2-cr2);    //  1.35121
+    c1 = c4 = w1/2.0;       //  0.675604
+    c2 = c3 = (w0+w1)/2.0;  // -0.175604
+    d1 = d3 = w1;           //  1.35121 
+    d2 = w0;                // -1.70241 
+    dprintf(1,"Yoshida: cbrt(2)     = %g\n", cr2); 
     dprintf(1,"Yoshida: w0,w1       = %g %g\n", w0,w1);
     dprintf(1,"Yoshida: c1,c2,c3,c4 = %g %g %g %g\n", c1,c2,c3,c4);
     dprintf(1,"Yoshida: d1,d2,d3    = %g %g %g\n", d1,d2,d3);
+
 }
 
 void prepare()
@@ -619,7 +624,8 @@ void integrate_leapfrog2()
 /* 4th order leapfrog - Yoshida 1990 */
 void integrate_leapfrog4()
 {
-  dprintf(1,"EXPERIMENTAL LEAPFROG4 Yoshida integration\n");
+  dprintf(1,"EXPERIMENTAL LEAPFROG4 Yoshida integration - no pattern speed\n");
+  warning("Note: this mode isn't conserving energy as it should");
   /*
      https://en.wikipedia.org/wiki/Leapfrog_integration
      
@@ -638,54 +644,70 @@ void integrate_leapfrog4()
      r_i+1 = x3 + c4.v3.DT      drift4
      v_i+1 = V3
      
+     mkorbit - x=0 y=1 z=0 vx=0.4 vy=0 vz=0 potname=plummer | orbint - . mode=leap4 ndiag=1 dt=0.1 nsteps=10
    */
 
 	int i, kdiag, ksave, isave, ndim;
 	double epot,e_last;
-	double time,pos[3],vel[3],acc[3];
+	double time,pos1[3],vel1[3],acc1[3],
+	            pos2[3],vel2[3],acc2[3],
+	            pos3[3],vel3[3],acc3[3];
 
-        dprintf(1,"LEAPFROG integration\n");
+        dprintf(1,"LEAPFROG4 Yoshida 1990 integration\n");
 
             /* start at last step of input file */
-	time = Torb(o_out,0) = Torb(o_in,Nsteps(o_in)-1);
-	pos[0] = Xorb(o_out,0) = Xorb(o_in,Nsteps(o_in)-1);
-	pos[1] = Yorb(o_out,0) = Yorb(o_in,Nsteps(o_in)-1);
-	pos[2] = Zorb(o_out,0) = Zorb(o_in,Nsteps(o_in)-1);
-	vel[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
-	vel[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
-	vel[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
-#ifdef ORBIT_PHI
-	Porb(o_out,0)  = Porb(o_in,Nsteps(o_in)-1);
-	AXorb(o_out,0) = AXorb(o_in,Nsteps(o_in)-1);
-	AYorb(o_out,0) = AYorb(o_in,Nsteps(o_in)-1);
-	AZorb(o_out,0) = AZorb(o_in,Nsteps(o_in)-1);
-#endif    
+	time    = Torb(o_out,0) = Torb(o_in,Nsteps(o_in)-1);
+	pos1[0] = Xorb(o_out,0) = Xorb(o_in,Nsteps(o_in)-1);
+	pos1[1] = Yorb(o_out,0) = Yorb(o_in,Nsteps(o_in)-1);
+	pos1[2] = Zorb(o_out,0) = Zorb(o_in,Nsteps(o_in)-1);
+	vel1[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
+	vel1[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
+	vel1[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
 	
 	ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
 	kdiag=0;			/* reset-counter for diagnostics */
 	ksave=0;			/* reset-counter for saving */
 	isave=0;			/* save counter */
 	i=0;				/* counter of timesteps */
-	(*pot)(&ndim,pos,acc,&epot,&tdum);
-	I1(o_out) = print_diag(time,pos,vel,epot);
-        /* prepare half step for LEAPFROG to get VEL and POS out of sync */
-	vel[0] += dt2*(acc[0]+omega2*pos[0]+tomega*vel[1]);
-	vel[1] += dt2*(acc[1]+omega2*pos[1]-tomega*vel[0]);
-	vel[2] += dt2*acc[2];
+	(*pot)(&ndim,pos1,acc1,&epot,&time);
+	I1(o_out) = print_diag(time,pos1,vel1,epot);
 	while (i<nsteps) {
 		i++;
-		time += dt;
-		pos[0] += dt*vel[0];
-		pos[1] += dt*vel[1];
-		pos[2] += dt*vel[2];
-		(*pot)(&ndim,pos,acc,&epot,&time);
-                /* bring back to sync for possible output */
-        	vel[0] += dt2*(acc[0]+omega2*pos[0]+tomega*vel[1]);
-	        vel[1] += dt2*(acc[1]+omega2*pos[1]-tomega*vel[0]);
-	        vel[2] += dt2*acc[2];
+		time    += dt; 
+		pos1[0] += c1*dt*vel1[0];                 /* kick */
+		pos1[1] += c1*dt*vel1[1];
+		pos1[2] += c1*dt*vel1[2];
+		(*pot)(&ndim,pos1,acc1,&epot,&time);
+        	vel1[0] += d1*dt*acc1[0];                 /* drift */
+		vel1[1] += d1*dt*acc1[1];
+		vel1[2] += d1*dt*acc1[2];
+
+		pos2[0] = pos1[0] + c2*dt*vel1[0];
+		pos2[1] = pos1[1] + c2*dt*vel1[1];
+		pos2[2] = pos1[2] + c2*dt*vel1[2];
+		(*pot)(&ndim,pos2,acc2,&epot,&time);
+        	vel2[0] = vel1[0] + d2*dt*acc2[0];       
+        	vel2[1] = vel1[1] + d2*dt*acc2[1];       
+        	vel2[2] = vel1[2] + d2*dt*acc2[2];       
+
+		pos3[0] = pos2[0] + c3*dt*vel2[0];
+		pos3[1] = pos2[1] + c3*dt*vel2[1];
+		pos3[2] = pos2[2] + c3*dt*vel2[2];
+		(*pot)(&ndim,pos3,acc3,&epot,&time);
+        	vel3[0] = vel2[0] + d3*dt*acc3[0];
+        	vel3[1] = vel2[1] + d3*dt*acc3[1];
+        	vel3[2] = vel2[2] + d3*dt*acc3[2];
+
+		
+		pos1[0] = pos3[0] + c4*dt*vel3[0];
+		pos1[1] = pos3[1] + c4*dt*vel3[1];
+		pos1[2] = pos3[2] + c4*dt*vel3[2];
+		vel1[0] = vel3[0];
+		vel1[1] = vel3[1];
+		vel1[2] = vel3[2];
 
 		if (ndiag && ++kdiag == ndiag) {
-		    e_last=print_diag(time,pos,vel,epot);
+		    e_last=print_diag(time,pos1,vel1,epot);
 		    kdiag = 0;
 		}
 		if (++ksave == nsave) {
@@ -693,17 +715,13 @@ void integrate_leapfrog4()
 		    isave++;
 		    dprintf(2,"writing isave=%d for i=%d\n",isave,i);
 		    Torb(o_out,isave) = time;
-		    Xorb(o_out,isave) = pos[0];
-		    Yorb(o_out,isave) = pos[1];
-		    Zorb(o_out,isave) = pos[2];
-		    Uorb(o_out,isave) = vel[0];
-		    Vorb(o_out,isave) = vel[1];
-		    Worb(o_out,isave) = vel[2];
+		    Xorb(o_out,isave) = pos1[0];
+		    Yorb(o_out,isave) = pos1[1];
+		    Zorb(o_out,isave) = pos1[2];
+		    Uorb(o_out,isave) = vel1[0];
+		    Vorb(o_out,isave) = vel1[1];
+		    Worb(o_out,isave) = vel1[2];
 		}
-                /* put back out of sync */
-        	vel[0] += dt2*(acc[0]+omega2*pos[0]+tomega*vel[1]);
-	        vel[1] += dt2*(acc[1]+omega2*pos[1]-tomega*vel[0]);
-	        vel[2] += dt2*acc[2];
 
 	}
     if (ndiag)
