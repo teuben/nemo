@@ -45,13 +45,14 @@ if [ $Mversion == 1 ]; then
 else
     echo New version $version experimental
 
-    $wget https://github.com/HDFGroup/hdf5/archive/refs/tags/$version.tar.gz
-    tar zxf $version.tar.gz
+    $wget https://github.com/HDFGroup/hdf5/releases/download/$version/hdf5-$version.tar.gz    
+    tar zxf hdf5-$version.tar.gz
     cd hdf5-$version
     #  needs ninja, javac
     #cmake --workflow --preset ci-StdShar-GNUC --fresh
+    echo "cmake          --preset ci-StdShar-GNUC -DCMAKE_INSTALL_PREFIX=$NEMO/opt"
     cmake          --preset ci-StdShar-GNUC -DCMAKE_INSTALL_PREFIX=$NEMO/opt 
-    cmake  --build --preset ci-StdShar-GNUC
+    echo "cmake  --build --preset ci-StdShar-GNUC"
 fi
 
 echo hdf5 $version `date` >> $NEMO/opt/mknemo.log
