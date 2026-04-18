@@ -60,7 +60,7 @@ string defv[] = {
     "eta=\n               if used, stop if abs(de/e) > eta",
     "variable=f\n         Use variable timesteps (needs eta=)",
     "tstop=\n             If given, this overrides nsteps=",
-    "VERSION=4.4\n        17-apr-2026 PJT",
+    "VERSION=4.4\n        18-apr-2026 PJT",
     NULL,
 };
 
@@ -84,6 +84,7 @@ real   tdum=0.0;                        /* time used in potential() */
 real   eta = -1.0;                      /* stop criterion parameter */
 bool   Qstop = FALSE;                   /* global flag to stop intgr. */
 bool   Qvar;
+bool   Qomega;                          /* easier check on omega != 0 */
 
 real c1, c2, c3, c4, d1, d2, d3;        /* Yoshida constants */
 
@@ -134,6 +135,7 @@ void nemo_main ()
     dprintf(0,"Pattern speed=%g\n",omega);
     omega2 = omega*omega;
     tomega = 2.0*omega;
+    Qomega = omega != 0;
 
 
     outstr = stropen (outfile,"w");
@@ -141,15 +143,15 @@ void nemo_main ()
     match(getparam("mode"),"euler leapfrog test rk2 rk4 me leap4 end",&imode);
     if (imode==0x01)           // euler
         integrate_euler1();
-    else if (imode==0x02)      // leapfrog
+    else if (imode==0x02)      // leapfrog1
         integrate_leapfrog1();
-    else if (imode==0x04)      // test
+    else if (imode==0x04)      // test = leapfrog2
         integrate_leapfrog2();
     else if (imode==0x08)      // rk2
         integrate_rk2();
     else if (imode==0x10)      // rk4
         integrate_rk4();
-    else if (imode==0x20)      // me
+    else if (imode==0x20)      // me = euler2
         integrate_euler2();
     else if (imode==0x40)      // leap4
       integrate_leapfrog4();
@@ -190,6 +192,7 @@ void setparams()
     real cr2 = cbrt(2.0);   //  1.25992
     real w0 = -cr2/(2-cr2); // -1.70241
     real w1 = 1/(2-cr2);    //  1.35121
+    //    w0 = -0.35121;  // test Simon
     c1 = c4 = w1/2.0;       //  0.675604
     c2 = c3 = (w0+w1)/2.0;  // -0.175604
     d1 = d3 = w1;           //  1.35121 
@@ -198,6 +201,8 @@ void setparams()
     dprintf(1,"Yoshida: w0,w1       = %g %g\n", w0,w1);
     dprintf(1,"Yoshida: c1,c2,c3,c4 = %g %g %g %g\n", c1,c2,c3,c4);
     dprintf(1,"Yoshida: d1,d2,d3    = %g %g %g\n", d1,d2,d3);
+
+    /* mess around */
 
 }
 
@@ -246,8 +251,10 @@ void integrate_euler1()
 
 	time   += dt;                     /* advance particle */
 #if 1
-        acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
-        acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
+	if (Qomega) {
+	  acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
+	  acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
+	}
 
 	pos[0] += dt*vel[0];
 	pos[1] += dt*vel[1];
@@ -331,7 +338,7 @@ void integrate_euler2()
 	(*pot)(&ndim,pos,acc,&epot,&time);
 
 	time += dt;                     /* advance particle */
-	if (omega != 0) {
+	if (Qomega) {
 	  acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
 	  acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
 	}
@@ -469,6 +476,7 @@ void integrate_leapfrog1_implicit_test()
     if (ndiag)
     dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
 }
+
 /* Standard Leapfrog */
 void integrate_leapfrog1()
 {
@@ -555,7 +563,7 @@ void integrate_leapfrog2()
 	double acc1[3];
 
         dprintf(1,"EXPERIMENTAL LEAPFROG integration\n");
-	if (omega!=0.0) warning("LEAPFROG2; cannot do omega!=0.0 (%g)",omega);
+	if (Qomega) warning("LEAPFROG2; cannot do omega!=0.0 (%g)",omega);
 
             /* start at last step of input file */
 	time = Torb(o_out,0) = Torb(o_in,Nsteps(o_in)-1);
@@ -629,9 +637,9 @@ void integrate_leapfrog4()
   /*
      https://en.wikipedia.org/wiki/Leapfrog_integration
      
-     x1 = r_i + c1.v_i.DT       drift
+     x1 = r_i + c1.v_i.DT       drift1
      a(x1) = acc(x1)
-     v1 = v_i + d1.a(x1).DT     kick
+     v1 = v_i + d1.a(x1).DT     kick1
 
      x2 = x1 + c2.v1.DT         drift2 <0
      a(x2) = acc(x2)
@@ -642,7 +650,7 @@ void integrate_leapfrog4()
      v3 = v2 + d3.a(x3).DT      kick3
 
      r_i+1 = x3 + c4.v3.DT      drift4
-     v_i+1 = V3
+     v_i+1 = V3                 final
      
      mkorbit - x=0 y=1 z=0 vx=0.4 vy=0 vz=0 potname=plummer | orbint - . mode=leap4 ndiag=1 dt=0.1 nsteps=10
    */
@@ -674,13 +682,13 @@ void integrate_leapfrog4()
 	while (i<nsteps) {
 		i++;
 		time    += dt; 
-		pos1[0] += c1*dt*vel1[0];                 /* kick */
-		pos1[1] += c1*dt*vel1[1];
-		pos1[2] += c1*dt*vel1[2];
-		(*pot)(&ndim,pos1,acc1,&epot,&time);
-        	vel1[0] += d1*dt*acc1[0];                 /* drift */
-		vel1[1] += d1*dt*acc1[1];
-		vel1[2] += d1*dt*acc1[2];
+		pos1[0] +=          c1*dt*vel1[0];        /* initial drift */
+		pos1[1] +=          c1*dt*vel1[1];
+		pos1[2] +=          c1*dt*vel1[2];
+		(*pot)(&ndim,pos1,acc1,&epot,&time);      /* @todo   time is not exactly correct */
+		vel1[0] +=          d1*dt*acc1[0];        /* initial kick */
+		vel1[1] +=          d1*dt*acc1[1];
+		vel1[2] +=          d1*dt*acc1[2];
 
 		pos2[0] = pos1[0] + c2*dt*vel1[0];
 		pos2[1] = pos1[1] + c2*dt*vel1[1];
@@ -699,7 +707,7 @@ void integrate_leapfrog4()
         	vel3[2] = vel2[2] + d3*dt*acc3[2];
 
 		
-		pos1[0] = pos3[0] + c4*dt*vel3[0];
+		pos1[0] = pos3[0] + c4*dt*vel3[0];      // final
 		pos1[1] = pos3[1] + c4*dt*vel3[1];
 		pos1[2] = pos3[2] + c4*dt*vel3[2];
 		vel1[0] = vel3[0];
