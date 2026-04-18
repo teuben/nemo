@@ -28,13 +28,11 @@ string defv[] = {
   "potfile=\n		extra data-file for potential ",
   "mode=dopri5\n        integration method (dopri5 dop853)",
   "tol=-7\n             tolerance of integration",
-  "VERSION=1.1a\n       11-jun-2016 PJT",
+  "VERSION=1.1b\n       18-apr-2026 PJT",
   NULL,
 };
 
-string usage = "integrate stellar orbits";
-
-string cvsid="$Id$";
+string usage = "integrate stellar orbits with variable timestep";
 
 
 #ifndef HUGE
@@ -53,6 +51,7 @@ real   tstop;                           /* stop time */
 real   omega, omega2, tomega;  		/* pattern speed */
 real   tdum=0.0;                        /* time used in potential() */
 real   eta ;                            /* tolerance */
+bool   Qomega;                          /* if omega != 0 */
 
 
 
@@ -99,7 +98,7 @@ void nemo_main ()
     dprintf(0,"Pattern speed=%g\n",omega);
     omega2 = omega*omega;
     tomega = 2.0*omega;
-
+    Qomega = omega != 0.0;
 
     outstr = stropen (outfile,"w");
     prepare();
@@ -159,8 +158,10 @@ void rhs(unsigned n, double x, double *y, double *f)
   vel[2] = y[5];
   time = x;
   (*pot)(&ndim,pos,acc,&last_pot,&time);
-  acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
-  acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
+  if (Qomega) {
+    acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
+    acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
+  }
 
   f[0] = y[3];
   f[1] = y[4];
@@ -204,7 +205,7 @@ void solout5(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
 void integrate_dopri5(void)
 {
   int i, ndim, kdiag, ksave, isave, res, iout, itoler;
-  double time,epot,e_last, rtoler, atoler;
+  double time, rtoler, atoler;
   double y[6];
   
   dprintf (1,"DOPRI5 integration\n");
@@ -267,7 +268,7 @@ void solout8(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
 void integrate_dop853()
 {
   int i, ndim, kdiag, ksave, isave, res, iout, itoler;
-  double time,epot,e_last, rtoler, atoler;
+  double time, rtoler, atoler;
   double y[6];
   
   dprintf (1,"DOP853 integration\n");
