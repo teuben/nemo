@@ -1,10 +1,13 @@
 .TH ORBINTV 1NEMO "10 February 2004"
-.SH NAME
+
+.SH "NAME"
 orbintv \- integrating single stellar orbit with variable timestep
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBorbintv in=\fPorbit \fBout=\fPorbit [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBorbintv\fP will integrate a stellar orbit using a higher order
 variable timestep. A number of constant timestepping algorithms are implemented
 in \fIorbint(1NEMO)\fP.
@@ -17,9 +20,9 @@ order 8(5,3) due to Dormand & Prince with step size control and dense output.
 .PP
 Non-rotating potentials are also supported, but only with the
 rotation axis defined along the Z-axis.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIorbit(5NEMO)\fP format [no default]
@@ -70,7 +73,8 @@ Tolerance used by the integrators to control time stepping.
 Negative numbers will cause this number to raised to the
 power 10.
 [Default: -7]
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 The following example launches a particle from the Y axis (at y=1)
 in the X direction (speed 0.4) in a plummer potential. Although
 the 6D initial conditions are fully specified, so a potential
@@ -78,7 +82,8 @@ the 6D initial conditions are fully specified, so a potential
 that the orbint integrator will use it. The integrated orbit is
 then passed on to a simple plotting program, which plots an X-Y 
 view of this 2D orbit.
-.nf
+.EX
+
 mkorbit - x=0 y=1 z=0 vx=0.4 vy=0 vz=0 potname=plummer |\\
      orbintv - - tstop=10 dt=0.05 |\\
      orbplot -
@@ -88,22 +93,28 @@ vel: 0.400000 0.000000 0.000000
 etot: -0.627107
 lz=-0.400000
 Pattern speed=0
-.fi
-.SH CAVEAT
+
+.EE
+
+.SH "CAVEAT"
 For large values of the output timestep, energy conservation may not seem
 very good. This is a result of the dense output interpolator.
+
 .SH "SEE ALSO"
 mkorbit(1NEMO), orblist(1NEMO), orbint(1NEMO), potential(5NEMO), newton0(1NEMO)
 .PP
 
-.SH AUTHOR
+.SH "AUTHOR"
+.nf
 Peter Teuben (NEMO adaptation)
 Hairer & G. Wanner (Fortran version of core integrators)
 J.Colinge (C versions of the core integrators)
-.SH FILES
+.fi
+
+.SH "FILES"
 .nf
 .ta +2.5i
-src/orbit/misc  	orbintv.c
+src/orbit/misc  	orbintv.c, dopri5.c, dop853.c
 .fi
 .SH "UPDATE HISTORY"
 .nf
