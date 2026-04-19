@@ -93,7 +93,8 @@ the 6D initial conditions are fully specified, so a potential
 that the orbint integrator will use it. The integrated orbit is
 then passed on to a simple plotting program, which plots an X-Y 
 view of this 2D orbit.
-.nf
+.EX
+
 mkorbit - x=0 y=1 z=0 vx=0.4 vy=0 vz=0 potname=plummer |\\
      orbint - - nsteps=10000 dt=0.05 ndiag=1000 |\\
      orbplot -
@@ -115,7 +116,8 @@ Pattern speed=0
 450.400000 0.109993 -0.737100     -0.6271068833543 1.62919e-07
 Energy conservation: 1.62919e-07
 Read orbit with 10001 phase-points
-.fi
+
+.EE
 
 .SH "SEE ALSO"
 mkorbit(1NEMO), orblist(1NEMO), orbintv(1NEMO), epic5(1NEMO), potential(5NEMO), newton0(1NEMO)
@@ -127,7 +129,7 @@ GALA: Galactic astronomy and gravitational dynamics (ascl:1707.006) - https://gi
 .nf
 .ta +2.0i
 With fpa on SUN 3/50 (~16Mhz) 1000 integration steps
-potential=harmonic	1s
+potential=harmonic	1s  (in 2026 showed it 20,000 times faster)
 potential=plummer	1s
 potential=bar83  	3s
 potential=hackforce	10s (100 bodies, standard Plummer model)
