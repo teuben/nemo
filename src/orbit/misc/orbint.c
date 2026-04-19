@@ -624,27 +624,8 @@ void integrate_leapfrog2()
 /* 4th order leapfrog - Yoshida 1990 */
 void integrate_leapfrog4()
 {
-  dprintf(1,"EXPERIMENTAL LEAPFROG4 Yoshida integration - no pattern speed\n");
-  /*
-     https://en.wikipedia.org/wiki/Leapfrog_integration
-     
-     x1 = r_i + c1.v_i.DT       drift
-     a(x1) = acc(x1)
-     v1 = v_i + d1.a(x1).DT     kick
+        dprintf(1,"EXPERIMENTAL LEAPFROG4 Yoshida integration - no pattern speed\n");
 
-     x2 = x1 + c2.v1.DT         drift2 <0
-     a(x2) = acc(x2)
-     v2 = v1 + d2.a(x2).DT      kick2  <0
-
-     x3 = x2 + c3.v2.DT         drift3 <0
-     a(x3) = acc(x3)
-     v3 = v2 + d3.a(x3).DT      kick3
-
-     r_i+1 = x3 + c4.v3.DT      drift4
-     v_i+1 = V3
-
-     mkorbit - x=0 y=1 z=0 vx=0.4 vy=0 vz=0 potname=plummer | orbint - . mode=leap4 ndiag=1 dt=0.1 nsteps=10
-   */
 
 	int i, kdiag, ksave, isave, ndim;
 	double epot,e_last;
@@ -673,32 +654,32 @@ void integrate_leapfrog4()
 	while (i<nsteps) {
 		i++;
 		time    += dt; 
-		pos1[0] += c1*dt*vel1[0];                 /* kick */
+		pos1[0] += c1*dt*vel1[0];                 /* drift1 */
 		pos1[1] += c1*dt*vel1[1];
 		pos1[2] += c1*dt*vel1[2];
 		(*pot)(&ndim,pos1,acc1,&epot,&time);
-        	vel1[0] += d1*dt*acc1[0];                 /* drift */
+        	vel1[0] += d1*dt*acc1[0];                 /* kick1 */
 		vel1[1] += d1*dt*acc1[1];
 		vel1[2] += d1*dt*acc1[2];
 
-		pos2[0] = pos1[0] + c2*dt*vel1[0];
+		pos2[0] = pos1[0] + c2*dt*vel1[0];        /* drift2 < 0*/
 		pos2[1] = pos1[1] + c2*dt*vel1[1];
 		pos2[2] = pos1[2] + c2*dt*vel1[2];
 		(*pot)(&ndim,pos2,acc2,&epot,&time);
-        	vel2[0] = vel1[0] + d2*dt*acc2[0];       
+        	vel2[0] = vel1[0] + d2*dt*acc2[0];        /* kick2 < 0 */
         	vel2[1] = vel1[1] + d2*dt*acc2[1];       
         	vel2[2] = vel1[2] + d2*dt*acc2[2];       
 
-		pos3[0] = pos2[0] + c3*dt*vel2[0];
+		pos3[0] = pos2[0] + c3*dt*vel2[0];        /* drift3 < 0 */
 		pos3[1] = pos2[1] + c3*dt*vel2[1];
 		pos3[2] = pos2[2] + c3*dt*vel2[2];
 		(*pot)(&ndim,pos3,acc3,&epot,&time);
-        	vel3[0] = vel2[0] + d3*dt*acc3[0];
+        	vel3[0] = vel2[0] + d3*dt*acc3[0];        /* kick3 */
         	vel3[1] = vel2[1] + d3*dt*acc3[1];
         	vel3[2] = vel2[2] + d3*dt*acc3[2];
 
 		
-		pos1[0] = pos3[0] + c4*dt*vel3[0];
+		pos1[0] = pos3[0] + c4*dt*vel3[0];        /* drift4 */
 		pos1[1] = pos3[1] + c4*dt*vel3[1];
 		pos1[2] = pos3[2] + c4*dt*vel3[2];
 		vel1[0] = vel3[0];
