@@ -10,22 +10,28 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tabpeak - find peaks or valleys in a table 
+tabpeak - find peaks in a table 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>tabpeak</b> [parameter=value]
+<b>tabpeak</b> [parameter=value] 
+<p>
 
-<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-Find local maxima (and/or minima) and fit a local paraboloid,
-return the location and value of the peak, or valley. See also <a href='tablsqfit.1.html'><i>tablsqfit(1NEMO)</i></a>
+<b>tabpeak</b> finds local maxima (and/or minima) and fit a local paraboloid,
+return the location and value of the peaks, or valleys. See also <a href='tablsqfit.1.html'><i>tablsqfit(1NEMO)</i></a>
 
 and <a href='ccdmom.1.html'><i>ccdmom(1NEMO)</i></a>
-. <p>
-The default is to search for local 3 point extrema. Using
-<b>edge=</b> one can force it away from the edge, and using <b>pmin=</b> one can increase
-
-<p>the minimum number of points that need to be in the extreme 
+ for more advanced versions of peak finding. <p>
+The default
+is to search for local 3 point extrema. Using <b>edge=</b> one can force it away
+from the edge, and using <b>pmin=</b> one can increase the minimum number of points
+that need to be in the extreme. <p>
+For noisy data <a href='tabsmooth.1.html'><i>tabsmooth(1NEMO)</i></a>
+ can be useful
+to get more robust estimates of the peaks. <p>
+<b>tabpeak</b> can also be a useful
+tool to determine lines in a spectrum and pass them to <a href='lineid.1.html'><i>lineid(1NEMO)</i></a>
+ 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 
@@ -35,99 +41,121 @@ is up to date.
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input file name [???]     </dd>
+<dd>Input file name, in <a href='table.5.html'><i>table(5NEMO)</i></a>
+ format. <br>
+No default </dd>
 
 <dt><b>xcol=</b> </dt>
-<dd>X-Column [1]       </dd>
+<dd>X-Column  <br>
+[1]       </dd>
 
-<dt><b>ycol=</b>
-</dt>
-<dd>Y-column [2]       </dd>
+<dt><b>ycol=</b> </dt>
+<dd>Y-column <br>
+[2] </dd>
 
 <dt><b>clip=</b> </dt>
-<dd>Only consider points above this [0] </dd>
+<dd>Only consider points above this value <br>
+[0] </dd>
 
 <dt><b>delta=</b> </dt>
-<dd>If a
-positive value is used, single peaks larger than this value on either side
-of this peak are reported. [0] </dd>
+<dd>If a positive value is used, single peaks larger than this value
+on either side of this peak are reported. <br>
+[0] </dd>
 
 <dt><b>pmin=</b> </dt>
-<dd>[EXPERIMENTAL] Require the peak to
-contain at least <b>pmin</b> points. By default, only 3 are required, in which
-case a polynomial is fit (though this is an exact fit).  By setting this
-higher, more points are required to be part of a peak which is then required
-to be monotonously decreasing. <b>edge=</b> Number of points near the edge to skip
-for a peak finder.   For the simplest 3-point peak finder this should be
-at least 1. [1] </dd>
+<dd>[EXPERIMENTAL] Require the peak to contain at least <b>pmin</b> points.
+By default, only 3 are required, in which case a polynomial is fit (though
+this is an exact fit).  By setting this higher, more points are required
+to be part of a peak which is then required to be monotonously decreasing.
+<br>
+[1] </dd>
+
+<dt><b>edge=</b> </dt>
+<dd>Number of points near the edge to skip for a peak finder.   For
+the simplest 3-point peak finder this should be at least 1. <br>
+[1] </dd>
 
 <dt><b>valley=t|f</b> </dt>
-<dd>Also fit valleys, in which case the signal has
-to be below -clip. [Default: f] </dd>
+<dd>Also fit valleys, in which case the signal has to be below
+-clip. <br>
+[f] </dd>
 
 <dt><b>mean=t|f</b> </dt>
-<dd>Use intensity weighted mean ?  [Default:
-f] </dd>
+<dd>Use intensity weighted mean ? <br>
+[f] </dd>
 
 <dt><b>npeak=</b> </dt>
 <dd>extract the Nth peak (N&gt;0). If npeak=0, no extraction done. Other
-keywords will be ignored if a peak is ectracted for further analysis.  [Default:
-0] </dd>
+keywords will be ignored if a peak is ectracted for further analysis. <br>
+[0] </dd>
 
 <dt><b>epeak=</b> </dt>
 <dd>expand around the N-th peak extracted by npeak&gt;0 by this factor.
 By default the segment around a peak is defined until the first point away
-from the peak will increase again. [Default: 1] </dd>
+from the peak will increase again. <br>
+[1] </dd>
 
 <dt><b>nmax=</b> </dt>
-<dd>max size if a pipe
-[100000]   
+<dd>max size if a pipe <br>
+[100000] 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The peak in a simple paraboloid: <br>
-<pre>  $ nemoinp 1:3 | tabmath - - &rsquo;-(2.2-%1)**2+10&rsquo; | tabpeak -
-  2.200000 10.000000
-  
-</pre>Here is a pipeline extracting the first peak, fitting a gaussian to it,
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+Only fits location of peaks, does not attempt to find
+the width, like a gaussian fit would do. 
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+The peak in a simple paraboloid:
+ 
+<p>   nemoinp 1:3 | tabmath - - "-(2.2-%1)**2+10" | tabpeak -<br>
+   2.200000 10.000000<br>
+   <br>
+  Here is a pipeline extracting the first peak, fitting a gaussian to it,
 and plotting the data and residuals (in the PGPLOT driver the data will
-be in red, the residuals in green, and the fit in blue): <br>
-<pre>  $ tabpeak spec.tab | tabnllsqfit - fit=gauss1d out=- | tee fit.log | tabcomment
-- | tabplot - 1 2,3,4 color=2,3,4 line=1,1
-  $ cat fit.log
-   
-</pre><p>
+be in red, the residuals in green, and the fit in blue):  
+<p>   tabpeak spec.tab
+| tabnllsqfit - fit=gauss1d out=- | tee fit.log |\<br>
+           tabcomment - | tabplot - 1 2,3,4 color=2,3,4 line=1,1<br>
+   cat fit.log<br>
+    <br>
+  <p>
 Finding single peaks by setting an appropriate delta (related to a robust
 dispersion of the differences of the data): 
-<p> <br>
-<pre>  $ tabtrend L1157-B1_109989__1.bstats.tab  2 | tabhist - robust=t
-  ...
-  Robust Mean Disp     : 1.52724e-05 0.00640417
-  
-  $ tabpeak L1157-B1_109989__1.bstats.tab  delta=0.05
-  #  X       Y       Ypeak    Delta    Delta
-  166.000000 1.591776  0.083979 0.087718 0.080239
-  286.000000 26.544859  25.062155 25.063228 25.061082
-  452.000000 1.838022  0.324911 0.324182 0.325639
-  ...
-  3524.000000 1.520718  0.229133 0.229248 0.229019
-  3810.000000 0.427400  -0.871551 0.870384 0.872717
-</pre>
+<p>    tabtrend L1157-B1_109989__1.bstats.tab
+ 2 | tabhist - robust=t<br>
+   ...<br>
+   Robust Mean Disp     : 1.52724e-05 0.00640417<br>
+   <br>
+   tabpeak L1157-B1_109989__1.bstats.tab  delta=0.05<br>
+   #  X       Y       Ypeak    Delta    Delta<br>
+   166.000000 1.591776  0.083979 0.087718 0.080239<br>
+   286.000000 26.544859  25.062155 25.063228 25.061082<br>
+   452.000000 1.838022  0.324911 0.324182 0.325639<br>
+   ...<br>
+   3524.000000 1.520718  0.229133 0.229248 0.229019<br>
+   3810.000000 0.427400  -0.871551 0.870384 0.872717<br>
+ 
+<p>  
 <p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
 , <a href='tabnllsqfit.1.html'>tabnllsqfit(1NEMO)</a>
 , <a href='tabtrend.1.html'>tabtrend(1NEMO)</a>
 , <a href='tabhist.1.html'>tabhist(1NEMO)</a>
 ,
 <a href='tabplot.1.html'>tabplot(1NEMO)</a>
+, <a href='tabsmooth.1.html'>tabsmooth(1NEMO)</a>
+, <a href='lineid.1.html'>lineid(1NEMO)</a>
+, <a href='table.5.html'>table(5NEMO)</a>
  
 <p> 
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
-Peter Teuben 
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
+Peter
+
+<p>Teuben 
 <p> 
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>28-May-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-may-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 added valley=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -144,10 +172,11 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>Update History</a></li>
 </ul>
 </body>
 </html>

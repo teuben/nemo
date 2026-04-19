@@ -11,62 +11,86 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tabtab -  
+tabtab - concatenate or paste conformant tables, or add line numbers
+
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>tabtab</b> [parameter=value] 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-concatenate
-or paste conformant tables. <p>
-In <b>paste</b> mode the number of rows need to be
-the same.  In <b>concat</b> mode the number of columns need to be same.   Although
-these mimic the standard <a href='paste.1.html'><i>paste(1)</i></a>
+<b>tabtab</b> will concatenate or
+paste conformant tables. <p>
+In <b>paste</b> mode the number of rows need to be the
+same.  In <b>concat</b> mode the number of columns need to be same.   Although these
+mimic the standard <a href='paste.1.html'><i>paste(1)</i></a>
  and <a href='cat.1.html'><i>cat(1)</i></a>
- programs, the tables need
-to be conformant, though the input tables can have their own header/comment
-files. 
+ programs, the tables need to be
+conformant, though the input tables can have their own header/comment files.
+<p>
+If only one input file is given, a line number is added as the first column,
+with an optional offset. This option is equivalent to the unix <a href='nl.1.html'><i>nl(1)</i></a>
+ program,
+although "cat -n" also achieves the same result. The <a href='tabcols.1.html'><i>tabcols(1NEMO)</i></a>
+ with
+column number 0 will also add the row number. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if
-the keyword is also given: 
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
+
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input files. At least 2 need to be given.
-</dd>
+<dd>Input files. <br>
+No default. If only one file is given, line numbers are added. </dd>
 
-<dt><b>out=</b> </dt>
-<dd>Output file, must not exist yet. </dd>
+<dt><b>out=-</b> </dt>
+<dd>Output
+file, must not exist yet. <br>
+Default: stdout </dd>
 
 <dt><b>mode=p|c</b> </dt>
-<dd>Paste or Concat mode. [p]. 
-<p>
-</dd>
+<dd>Paste or Concat mode. <br>
+[p]. </dd>
+
+<dt><b>space=t|f</b> </dt>
+<dd>todo <br>
+[t] </dd>
+
+<dt><b>offset=</b> </dt>
+<dd>Offset counter from 0 if line numbers are added. See also <a href='tabcols.1.html'><i>tabcols(1NEMO)</i></a>
+
+with column 0 how to add row numbers. <br>
+[1] 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-
-<p> <br>
-<pre>% tabtab tab1,tab2  tab2
-</pre>
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+Table headers are lost 
 <p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+
+<p>  % nemoinp 10:15 &gt; tab1 % tabtab
+tab1,tab1  &gt; tab2 % tabtab tab1 &gt; tab3  
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabcols.1.html'>tabcols(1NEMO)</a>
 , <a href='tabrows.1.html'>tabrows(1NEMO)</a>
-, <a href='table.5.html'>table(5NEMO)</a>
+,
+<a href='table.5.html'>table(5NEMO)</a>
  
 <p> 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
-src/kernel/tab/tabtab.c
-
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
+src/kernel/tab/tabtab.c 
 <p> 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>26-apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+19-jan-2026<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.4 add offset= and allow single file numbering<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -76,11 +100,12 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>

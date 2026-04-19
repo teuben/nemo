@@ -9,11 +9,15 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tabdist - Compare distances between points in two tables, aka catalog
-matching 
+
+<p>matching 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>tabdist</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 Given two tables,
 each containing specified column(s) that represent a set of 1D, 2D or 3D
@@ -21,48 +25,65 @@ points, it will compute the nearest neigbor(s) from each point in the first
 table to those from the second table.  <p>
 The output contains the same number
 of rows as the input number of rows in the first dataset. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+ The
+following parameters are recognized in order; they may be given in any
+order if the keyword is also given. Use <b>--help</b> to confirm this man page is
+up to date.  
 <dl>
 
 <dt><b>in1=</b> </dt>
-<dd>First dataset, an ascii table. No default. </dd>
+<dd>First dataset, an ascii table. <br>
+No default. </dd>
 
 <dt><b>in2=</b> </dt>
-<dd>Second dataset,
-an ascii table. No default. The tables do not need to be of the same length.
-</dd>
+<dd>Second dataset, an ascii table.  The tables do not need
+to be of the same length. <br>
+No default. </dd>
 
 <dt><b>col1=</b> </dt>
-<dd>Coordinate columns from 1st dataset. 1D, 2D and 3D are currently supported
+<dd>Coordinate columns from 1st dataset. 1D, 2D and 3D are
+currently supported <br>
 [1,2] </dd>
 
 <dt><b>col2=</b> </dt>
 <dd>Coordinate columns from 2nd dataset. 1D, 2D and 3D are currently
-supported [1,2] </dd>
+supported <br>
+[1,2] </dd>
 
 <dt><b>id1=</b> </dt>
-<dd>Column in first dataset representing the ID name. By
-default a number between 1 and number of sources is used. [0] </dd>
+<dd>Column in first dataset representing the ID name. By default
+a number between 1 and number of sources is used. <br>
+[0] </dd>
 
 <dt><b>id2=</b> </dt>
-<dd>Column
-in second dataset representing the ID name [0] </dd>
+<dd>Column in second dataset representing the ID name <br>
+[0] </dd>
 
 <dt><b>radec=t|f</b> </dt>
-<dd>Should columns
-be interpreted as angular (usually RA/DEC)? Only 2D comparisions are allowed
-here. Units must be radians at the moment. See also <a href='tabdms.1.html'><i>tabdms(1NEMO)</i></a>
-. Default:
-false </dd>
+<dd>Should columns be interpreted as angular (usually RA/DEC)?
+Only 2D comparisions are allowed here. Units must be radians at the moment.
+See also <a href='tabdms.1.html'><i>tabdms(1NEMO)</i></a>
+. <br>
+Default: false </dd>
+
+<dt><b>units=r|d</b> </dt>
+<dd>Units of the X,Y angular coordinates, radians or
+degrees. <br>
+Default: degree </dd>
+
+<dt><b>dmin=</b> </dt>
+<dd>Only print distances less than this value.   Units:
+
+<p>arcsec if input units=degree 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The X,Y,Z coordinates of a 3 particle plummer sphere are
-perturbed by a small amount and then compared to the original list. Thus
-they must match one on one: <br>
+The X,Y,Z coordinates of a 3 particle
+plummer sphere are perturbed by a small amount and then compared to the
+original list. Thus they must match one on one: <br>
 <pre>% mkplummer - 3 | snapprint - x,y,z &gt; tab11
 % tabmath tab11 - &rsquo;%1+rang(0,0.01),%2+rang(0,0.01),%3+rang(0,0.01)&rsquo; &gt; tab12
 </pre>
@@ -82,9 +103,10 @@ they must match one on one: <br>
 then the best matching line number and coordinates(s) from table2, and
 finally the distance. 
 <p> 
-<h2><a name='sect5' href='#toc5'>Caveat</a></h2>
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
 Currently a brute force (quadratic in N) minimum
 distance is used. 
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabdms.1.html'>tabdms(1NEMO)</a>
@@ -92,16 +114,21 @@ distance is used.
 <p>
 k-d Match: <a href='http://arxiv.org/abs/1304.0838'>http://arxiv.org/abs/1304.0838</a>
  
+<p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/kernel/tab/tabdist.c 
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter
-Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+
+<p>Teuben 
+<p> 
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>13-Feb-13<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-nov-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 added radec=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 18-nov-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 added id1,id2=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+1-apr-2026<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.8 ansi fixes, print full line<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -112,11 +139,11 @@ Teuben
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>Caveat</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Files</a></li>
 <li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>
