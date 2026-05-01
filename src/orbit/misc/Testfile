@@ -17,7 +17,7 @@ OMEGA = 0.1
 
 all:    $(BIN)
 
-mkorbit:
+orb1.in mkorbit:
 	@echo Running $@
 	$(EXEC) mkorbit orb1.in x=1 vy=1 potname=plummer
 	@bsf orb1.in "0.151791 0.486094 -0.707107 1 18"
@@ -50,10 +50,13 @@ orbint: orb1.in orbint2
 	$(EXEC) orbint orb1.in orb2.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=me      
 	$(EXEC) orbint orb1.in orb3.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=leapfrog
 	$(EXEC) orbint orb1.in orb4.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=rk4
+	$(EXEC) orbint orb1.in orb5.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=leap4
 	@bsf orb1.out '0.146682 0.502794 -0.707107 1 128'
 	@bsf orb2.out '0.155618 0.492162 -0.705346 1 128'
 	@bsf orb3.out '0.231297 0.417577 -0.707107 1 128'
 	@bsf orb4.out '0.144751 0.500719 -0.707107 1 128'
+	@bsf orb5.out '0.239546 0.406907 -0.293361 1 128' 
+	
 
 orbint2: orb2.in
 	@echo Running $@
@@ -61,11 +64,14 @@ orbint2: orb2.in
 	$(EXEC) orbint orb2.in orb2b.out nsteps=10000 dt=0.01 ndiag=1000 mode=leapfrog
 	$(EXEC) orbint orb2.in orb2c.out nsteps=10000 dt=0.01 ndiag=1000 mode=rk2
 	$(EXEC) orbint orb2.in orb2d.out nsteps=10000 dt=0.01 ndiag=1000 mode=rk4
+	$(EXEC) orbint orb2.in orb2e.out nsteps=10000 dt=0.01 ndiag=1000 mode=leap4
 	@bsf orb2a.out '4.28069 17.0096 -9.04051 100 110018'
 	@bsf orb2b.out '4.33963 16.9909 -8.84718 100 110018'
 	@bsf orb2c.out '4.29883 17.0019 -8.86182 100 110018'
 	@bsf orb2d.out '4.29881 17.0019 -8.8621 100 110018'
+	@bsf orb2e.out # this fails because leap4 doesn't know about an ODE in rotating potential
 
+	
 orbint3: orb3.in
 	@echo Running $@
 	$(EXEC) orbint orb3.in orb3a.out nsteps=10000 dt=0.01 ndiag=1000 mode=euler   
