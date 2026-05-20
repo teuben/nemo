@@ -1,0 +1,58 @@
+.TH TABCOG 1NEMO "20 May 2025"
+
+.SH "NAME"
+tabcog \- integrate a sorted table, using the Curve of Growth method
+
+.SH "SYNOPSIS"
+\fBtabint\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBtabcog\fP integrates a function Y=F(X) that is defined by a set of (X,Y) points
+selected from two columns from an ASCII table using a Curve of Growth
+metho (see Yu et al. 2020).
+.PP
+See also \fItabint(1NEMO)\fP for a more traditional approach.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input table file.
+.br
+No default.
+.TP
+\fBxcol=\fP
+Column with sorted X coordinates. If the X coordinates are not increasing, the
+array will be reversed.
+.br
+[Default: 1]
+.TP
+\fBycol=\fP
+Column with Y coordinate of the function
+.br
+[Default: 2]
+.TP
+\fBxmin=\fP
+If given, value below which data to be discarded
+.br
+By default it uses the smallest datapoint from the table.
+.TP
+\fBxmax=\fP
+If given, value above which data to be discarded
+.br
+By default it uses the largest datapoint from the table.
+
+.SH "SEE ALSO"
+tabint(1NEMO), table(5NEMO)
+
+.SH "FILES"
+src/kernel/tab
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+19-may-2026	V0.1 Cloned off tabint, aided by Claude	PJT
+.fi
