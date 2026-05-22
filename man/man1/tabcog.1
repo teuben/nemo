@@ -69,10 +69,13 @@ when no noise is added, after which some noise is added and the CoG method is us
 analyze the signal and compute the flux and error in the flux
 
 .EX
-nemoinp 1000:2000:5 | tabmath - - 'exp(-(%1-1500)**2/(2*50**2))' | tabint -
+nemoinp 1000:2000:5 |\\
+   tabmath - - 'exp(-(%1-1500)**2/(2*50**2))' | tabint -
 125.331
 
-nemoinp 1000:2000:5 | tabmath - - 'exp(-(%1-1500)**2/(2*50**2))+rang(0,0.01)' seed=123 |tabcog -
+nemoinp 1000:2000:5 |\\
+   tabmath - - 'exp(-(%1-1500)**2/(2*50**2))+rang(0,0.01)' seed=123 |\\
+   tabcog -
 flux     = 125.607
 flux_std = 0.493996
 vel      = 1495.92
@@ -89,6 +92,8 @@ width[0.75] = 115 +/- 5.13055
 width[0.85] = 145 +/- 10.1046
 width[0.95] = 195 +/- 5.3668
 .EE
+
+The flux should be 'sqrt(2*pi)*50' = 125.331
 
 .SH "SEE ALSO"
 tabint(1NEMO), table(5NEMO)
