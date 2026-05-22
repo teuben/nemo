@@ -18,7 +18,9 @@ string defv[] = {
   "xc=\n            Override central point",
   "xmin=\n          value if data below xmin to be discarded",
   "xmax=\n          value if data above xmax to be discarded",
-  "VERSION=0.1\n    17-jan-2025 PJT",
+  "tol=0.1\n        flat tolerance",
+  "bench=1\n        How often to call curve_of_growth",
+  "VERSION=0.2\n    20-may-2026 PJT",
   NULL,
 
 };
@@ -67,7 +69,10 @@ void nemo_main()
   string spectrum = getparam("in");
   bool Qmin = hasvalue("xmin");
   bool Qmax = hasvalue("xmax");
+  int nbench = getiparam("bench");
   int mom = 0;
+  double xc = NAN;
+  double flat_tol = getdparam("tol");
   
   /* read the data */
 
@@ -80,6 +85,8 @@ void nemo_main()
   mdarray2 d = table_md2cr(t,2,colnr,0,0);
   xdat = &d[0][0];
   ydat = &d[1][0];
+
+  if (hasvalue("xc"))  xc = getdparam("xc");
 
   /* reverse arrays if not sorted properly */
   if (xdat[0] > xdat[1])
@@ -114,7 +121,10 @@ void nemo_main()
   }
 
   CogResult res;
-  curve_of_growth(xdat, ydat, n, NAN, NULL, 0, -1, -1, 0.1, 1.0, &res);
+  while (nbench-- > 0) {
+    //                            vc   wf_in n_wf_in, bchan,echan, flat_tol, fw
+    curve_of_growth(xdat, ydat, n, xc, NULL, 0, -1, -1, flat_tol, 1.0, &res);
+  }
 
   printf("flux     = %g\n", res.flux);
   printf("flux_std = %g\n", res.flux_std);
@@ -535,40 +545,4 @@ void curve_of_growth(const double *x, const double *y, int n,
     free(b); free(bp); free(r); free(rp);
     free(t); free(dxt); free(xt);
     free(nt); free(nt_std);
-}
-
-/* ------------------------------------------------------------------ */
-/* main  (mirrors the test block at the bottom of cog.py)             */
-/* ------------------------------------------------------------------ */
-int old_main(void) {
-    int n = 1001;
-    double *v = (double *)malloc(n * sizeof(double));
-    double *f = (double *)malloc(n * sizeof(double));
-    double vc_true = 400.0, sig = 5.0;
-
-    for (int i = 0; i < n; i++) {
-        v[i] = i;                              /* linspace(0,1000,1001) */
-        double d = (v[i] - vc_true) / sig;
-        f[i] = exp(-0.5 * d * d);
-    }
-
-    CogResult res;
-    curve_of_growth(v, f, n, NAN, NULL, 0, -1, -1, 0.1, 1.0, &res);
-
-    printf("flux     = %g\n", res.flux);
-    printf("flux_std = %g\n", res.flux_std);
-    printf("vel      = %g\n", res.vel);
-    printf("vel_std  = %g\n", res.vel_std);
-    printf("A_F      = %g\n", res.A_F);
-    printf("A_C      = %g\n", res.A_C);
-    printf("C_V      = %g\n", res.C_V);
-    printf("rms      = %g\n", res.rms);
-    printf("bchan    = %d\n", res.bchan);
-    printf("echan    = %d\n", res.echan);
-    for (int k = 0; k < res.n_wf; k++)
-        printf("width[%.2f] = %g +/- %g\n",
-               res.wf[k], res.width[k], res.width_std[k]);
-
-    free(v); free(f);
-    return 0;
 }
