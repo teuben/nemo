@@ -1,10 +1,13 @@
 .TH FITSTAB 1NEMO "10 November 2005"
-.SH NAME
+
+.SH "NAME"
 fitstab \- convert fits table to ascii table
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBfitstab in=\fPfits_table [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBfitstab\fP reads a fits table file from disk and converts it to
 an ascii table. The input file must be in \fIfits(5NEMO)\fP format,  
 the output will be on \fIstdout\fP. Tables can be selected by their
@@ -13,12 +16,14 @@ are automatically skipped.
 .PP
 See notes in \fIccdfits(1NEMO)\fP how to process fits files from
 tape instead disk.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
 \fBin=\fIfits-file\fP
-input file, must be \fIfits(5)\fP format. 
+input file, must be \fIfits(5)\fP format.
+.br
 [no default].
 .TP
 \fBhdu=\fInumber\fP
@@ -26,6 +31,7 @@ HDU number to be processed. The first one counts as 1. A 0 will
 convert all. 
 HDU's which do not have the table extension 
 (\fBXTENSION='TABLE     '\fP) are automatically skipped.
+.br
 [Default: 0].
 .TP
 \fBselect=\fP
@@ -37,6 +43,7 @@ row number if the option \fBrow\fP is also supplied, and
 \fBheader\fP lists the column names and their attributes from
 the FITS header. The parameters from a random group HDU can also
 be printed using \fBgroup\fP.
+.br
 [Default: \fBdata\fP].
 .TP
 \fBcol=\fIcolumn_names\fP
@@ -48,14 +55,17 @@ will contains an extra blank inbetween columns, UNLESS that column was
 followed by a \fB+\fP sign, for example \fBcol=DecSign+DecD\fP will not
 put an extra space between \fBDecSign\fP and \fBDecD\fP. \fI*** this last
 item not implemented yet ***\fP
+.br
 [Default: all].
 .TP
 \fBfnl=\fP
 Frequency of newlines in the output, meaning every \fBfnl\fP numbers that
 are written, a newline will be added to the output.  Use 0 if no extra
 newlines are needed.
+.br
 [Default: 0]
-.SH BUGS
+
+.SH "BUGS"
 Columns are output in the order that they appear in the table, not
 as specified with the \fBcol=\fP keyword.
 .PP
@@ -64,7 +74,8 @@ no magic blanking substitution, no scaling TSCALnnn, TZEROnnn ?
 column names are treated case sensitive. 
 .PP
 X format not understood yet
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Show the random group parameters of the first 4 record:
 .nf
 % fitstab sim0.fts hdu=1 row=1:4 select=group,data
@@ -77,16 +88,20 @@ RANDOM GROUP: 4950 rows with 10 (4-byte) length each; 7 pars
  -3.45473e-07 6.32915e-07 0 2.47447e+06 0.572593 260 1 893.396 27.1245 7.5
  -8.36404e-07 -5.8816e-07 0 2.47447e+06 0.572593 261 1 518.19 129.551 7.5
 .fi
+
 .SH "SEE ALSO"
 ccdfits(1NEMO), fits(5NEMO), dd(1), FTB (\fIADC Fits Table Browser\fP), fv(1ftools)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/image/fits  	fitstab.c
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
 .ta +1.0i +4.0i
 8-apr-92	V1.0 Written	PJT
