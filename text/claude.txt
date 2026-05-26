@@ -8,3 +8,5 @@ my claude experiment started in spring 2026
 17-apr-2026   adding leapfrog4 -myself- showed it to be linear, not 4th order.found the bug,
               not in the code, but in forgetting to recompute force before diagnosstics.
 	      impressively subtle.
+
+19-may        converted cog.py to functions used in tabcog.c
