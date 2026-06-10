@@ -1,7 +1,9 @@
 /*
- * TABCOLS: select columns from a table
+ * TABCOLS: select columns from a table; a simple awk like processor
  *
  *      27-jan-00   created
+ *
+ *   @todo     properly parse ,, as an empty column (use burst0string)
  */
 
 #include <stdinc.h>
@@ -15,9 +17,9 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "select=all\n       columns to select (add 0 to add column with row number)",
     "colsep=SP\n        Column separator for output (SP,TAB,NL)",
     "colsepin=\n        Optional enforced character to separate columns in input",
-    "width=\n           Width of each column (can repeat until exhausted)",
+    "empty=f\n          Allow empty strings (only useful of colsep is not SP)",
     "out=-\n            output file name",
-    "VERSION=2.6\n      10-jun-2026 PJT",
+    "VERSION=3.0\n      8-apr-2026 PJT",
     NULL
 };
 
@@ -30,7 +32,7 @@ table  *tptr;                           /* table */
 int    ninput;				/* number of input files */
 
 #ifndef MAX_COL
-#define MAX_COL 512
+#define MAX_COL 256
 #endif
 
 
@@ -40,12 +42,14 @@ int    maxcol = 0;                      /* largest column number */
 string colsepin;                        /* character(s) to separate columns on input */
 char   colsep;                          /* character to separate columns on output */
 bool   Qall;
+bool   Qempty;
 
 local void setparams(void);
 local void convert(stream , stream);
 local void tab2space(char *);
 
 extern  string *burststring(string, string);
+extern  string *burst0string(string, string);
 
 
 void nemo_main()
@@ -66,6 +70,8 @@ local void setparams(void)
     instr  = stropen(input,"r");
     tptr   = table_open(instr,1);
     outstr = stropen (output,"w");
+
+    Qempty = getbparam("empty");
 
     // dprintf(1,"table: %d x %d\n", table_nrows(tptr), table_ncols(tptr));
     
@@ -89,7 +95,6 @@ local void setparams(void)
 	  }
         }
     }
-    dprintf(1,"nkeep=%d\n",nkeep);
 
     separator = getparam("colsep");
     switch (*separator) {
@@ -140,10 +145,13 @@ local void convert(stream instr, stream outstr)
         nlines++;
         tab2space(line);                  /* work around a Gipsy (?) problem */
 
-        outv = burststring(line,seps);
+	if (Qempty)
+	  outv = burst0string(line,seps);
+	else
+	  outv = burststring(line,seps);
+	  
         noutv = xstrlen(outv,sizeof(string)) - 1;
         if (noutv < maxcol) {
-	  dprintf(2,"line: %s\n",line);
 	  warning("skipping line %d; Too few columns in input file (%d < %d)",nlines,noutv,maxcol);
 	  continue;
 	}
@@ -163,7 +171,7 @@ local void convert(stream instr, stream outstr)
 }
 /*
  * small helper function, replaces tabs by spaces before processing.
- * this prevents me from diving into gipsy parsing routines and  fix
+ * this prevents me from diving into gipsy parsing routines and fix
  * the problem there 
  * PJT - June 1998.
  */
