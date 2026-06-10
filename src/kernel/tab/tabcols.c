@@ -15,8 +15,9 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "select=all\n       columns to select (add 0 to add column with row number)",
     "colsep=SP\n        Column separator for output (SP,TAB,NL)",
     "colsepin=\n        Optional enforced character to separate columns in input",
+    "width=\n           Width of each column (can repeat until exhausted)",
     "out=-\n            output file name",
-    "VERSION=2.5\n      10-sep-2024 PJT",
+    "VERSION=2.6\n      10-jun-2026 PJT",
     NULL
 };
 
@@ -29,7 +30,7 @@ table  *tptr;                           /* table */
 int    ninput;				/* number of input files */
 
 #ifndef MAX_COL
-#define MAX_COL 256
+#define MAX_COL 512
 #endif
 
 
@@ -88,6 +89,7 @@ local void setparams(void)
 	  }
         }
     }
+    dprintf(1,"nkeep=%d\n",nkeep);
 
     separator = getparam("colsep");
     switch (*separator) {
@@ -141,6 +143,7 @@ local void convert(stream instr, stream outstr)
         outv = burststring(line,seps);
         noutv = xstrlen(outv,sizeof(string)) - 1;
         if (noutv < maxcol) {
+	  dprintf(2,"line: %s\n",line);
 	  warning("skipping line %d; Too few columns in input file (%d < %d)",nlines,noutv,maxcol);
 	  continue;
 	}
