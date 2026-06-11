@@ -17,9 +17,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "select=all\n       columns to select (add 0 to add column with row number)",
     "colsep=SP\n        Column separator for output (SP,TAB,NL)",
     "colsepin=\n        Optional enforced character to separate columns in input",
-    "empty=f\n          Allow empty strings (only useful of colsep is not SP)",
+    "empty=t\n          Allow empty strings (only useful of colsep is not SP)",
+    "width=\n           Enforce a width for each output column (repeats if absent)",
     "out=-\n            output file name",
-    "VERSION=3.0\n      8-apr-2026 PJT",
+    "VERSION=3.1\n      11-jun-2026 PJT",
     NULL
 };
 
@@ -37,12 +38,14 @@ int    ninput;				/* number of input files */
 
 
 int    keep[MAX_COL+1];                 /* column numbers to keep */
-int    nkeep;                           /* actual number of skip columns */
+int    width[MAX_COL-1];                /* width of columns, if set */
+int    nkeep, nwidth;                   /* actual number of skip columns */
 int    maxcol = 0;                      /* largest column number */
 string colsepin;                        /* character(s) to separate columns on input */
 char   colsep;                          /* character to separate columns on output */
 bool   Qall;
 bool   Qempty;
+char   fmt[32];
 
 local void setparams(void);
 local void convert(stream , stream);
@@ -73,6 +76,8 @@ local void setparams(void)
 
     Qempty = getbparam("empty");
 
+    nwidth = nemoinpi(getparam("width"),width,MAX_COL);    
+
     // dprintf(1,"table: %d x %d\n", table_nrows(tptr), table_ncols(tptr));
     
 
@@ -94,6 +99,13 @@ local void setparams(void)
             maxcol = MAX(maxcol,keep[i]);
 	  }
         }
+    }
+    dprintf(1,"nkeep::%d\n",nkeep);
+    dprintf(1,"nwidth::%d\n",nwidth);
+    if (nwidth > 0) dprintf(1,"width::%d\n",width[0]);
+    if (nkeep > 0) {
+      for (i=nwidth; i<nkeep; i++)
+	width[i] = width[i-1];
     }
 
     separator = getparam("colsep");
@@ -153,15 +165,22 @@ local void convert(stream instr, stream outstr)
         noutv = xstrlen(outv,sizeof(string)) - 1;
         if (noutv < maxcol) {
 	  warning("skipping line %d; Too few columns in input file (%d < %d)",nlines,noutv,maxcol);
+	  dprintf(2,"Line: %s\n",line);
 	  continue;
-	}
+	} else
+	  dprintf(2,"Line[%d,%d] %s\n",nlines,noutv,line);
         if (Qall) nkeep = noutv;
                         
         for (i=0; i<nkeep; i++) {
             if (keep[i] == 0)
                 fprintf(outstr,"%d",nlines);
-            else
-                fprintf(outstr,"%s",outv[keep[i]-1]);
+            else {
+	        if (nwidth > 0) {
+		    sprintf(fmt,"%%-%ds",width[i]);
+                    fprintf(outstr,fmt,outv[keep[i]-1]);
+	        } else
+                    fprintf(outstr,"%s",outv[keep[i]-1]);
+	    }
             if (i < nkeep-1) fprintf(outstr,"%c",colsep);
         }
         if (colsep != 'n') fprintf(outstr,"\n");    /* end of line */
