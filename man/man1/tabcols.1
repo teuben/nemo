@@ -1,4 +1,4 @@
-.TH TABCOLS 1NEMO "10 September 2024"
+.TH TABCOLS 1NEMO "12 June 2026"
 
 .SH "NAME"
 tabcols \- Select columns, and optionally rearrange, from a table
@@ -16,7 +16,7 @@ a table with multiple columns.
 To select specific rows/lines, use \fItabrows(1NEMO)\fP or \fItabmath(1NEMO)\fP.
 .PP
 To align a table by column, use the \fIcolumn(1)\fP program with the \fB-t\fP
-option.
+option, or use the \fBwidth=\fP parameter
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -47,7 +47,12 @@ and '\fB:\fP'.
 Column separator for input. By default an internal set (space, comma, tab, vertical bar)
 is used. A string can be specified here consistent of multiple characters.
 
-
+.TP
+\fBwidth=\fP
+Specify the width of the extracted columns. If fewer numbers than the actual number,
+the width value repeats.
+.br
+Default: no specified widths
 .TP
 \fBout=-\fP
 output file name. By default standard output it used.
@@ -89,4 +94,5 @@ Peter Teuben
 9-apr-09	V2.0 out=- now default and last argument	PJT
 5-may-2022	V2.1 converted to table V2 interface	PJT
 10-sep-2024	V2.4 added colsepin=	PJT
+12-jun-2026	V3.1 added width= and make empty=t default	PJT
 .fi
