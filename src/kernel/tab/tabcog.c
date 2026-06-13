@@ -19,8 +19,9 @@ string defv[] = {
   "xmin=\n          value if data below xmin to be discarded",
   "xmax=\n          value if data above xmax to be discarded",
   "tol=0.1\n        flat tolerance",
+  "tab=f\n          tabular output?",
   "bench=1\n        How often to call curve_of_growth",
-  "VERSION=0.2\n    20-may-2026 PJT",
+  "VERSION=0.4\n    29-may-2026 PJT",
   NULL,
 
 };
@@ -39,7 +40,7 @@ typedef struct {
     double flux_b,    flux_b_std;
     double A_F, A_C, C_V;
     double rms;
-    int    bchan, echan;
+    int    bchan, echan, nchan;
     double vel,       vel_std;
     /* parallel arrays for each width fraction */
     int    n_wf;
@@ -69,6 +70,7 @@ void nemo_main()
   string spectrum = getparam("in");
   bool Qmin = hasvalue("xmin");
   bool Qmax = hasvalue("xmax");
+  bool Qtab = getbparam("tab");
   int nbench = getiparam("bench");
   int mom = 0;
   double xc = NAN;
@@ -126,19 +128,29 @@ void nemo_main()
     curve_of_growth(xdat, ydat, n, xc, NULL, 0, -1, -1, flat_tol, 1.0, &res);
   }
 
-  printf("flux     = %g\n", res.flux);
-  printf("flux_std = %g\n", res.flux_std);
-  printf("vel      = %g\n", res.vel);
-  printf("vel_std  = %g\n", res.vel_std);
-  printf("A_F      = %g\n", res.A_F);
-  printf("A_C      = %g\n", res.A_C);
-  printf("C_V      = %g\n", res.C_V);
-  printf("rms      = %g\n", res.rms);
-  printf("bchan    = %d\n", res.bchan);
-  printf("echan    = %d\n", res.echan);
-  for (int k = 0; k < res.n_wf; k++)
-    printf("width[%.2f] = %g +/- %g\n",
-	   res.wf[k], res.width[k], res.width_std[k]);
+  if (Qtab) {
+    printf("%g %g %g %g %g %g %g %g %d %d",
+	   res.flux, res.flux_std, res.vel, res.vel_std,
+	   res.A_F, res.A_C, res.C_V, res.rms, res.bchan, res.echan);
+    for (int k = 0; k < res.n_wf; k++)
+      printf(" %.2f %g %g", res.wf[k], res.width[k], res.width_std[k]);
+    printf("\n");
+  } else {
+    printf("flux     = %g\n", res.flux);
+    printf("flux_std = %g\n", res.flux_std);
+    printf("vel      = %g\n", res.vel);
+    printf("vel_std  = %g\n", res.vel_std);
+    printf("A_F      = %g\n", res.A_F);
+    printf("A_C      = %g\n", res.A_C);
+    printf("C_V      = %g\n", res.C_V);
+    printf("rms      = %g\n", res.rms);
+    printf("bchan    = %d\n", res.bchan);
+    printf("echan    = %d\n", res.echan);
+    printf("nchan    = %d\n", res.nchan);
+    for (int k = 0; k < res.n_wf; k++)
+      printf("width[%.2f] = %g +/- %g\n",
+	     res.wf[k], res.width[k], res.width_std[k]);
+  }
 
 }  
 
@@ -533,6 +545,7 @@ void curve_of_growth(const double *x, const double *y, int n,
     result->C_V        = c_v;
     result->rms        = rms;
     result->bchan      = _bchan;     result->echan      = _echan;
+    result->nchan      = n;
     result->vel        = _vc;        result->vel_std    = vc_std;
     result->n_wf       = nwf;
     memcpy(result->wf,        wf,         nwf * sizeof(double));
