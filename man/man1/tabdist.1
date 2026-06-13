@@ -1,4 +1,4 @@
-.TH TABDIST 1NEMO "1 April 2026"
+.TH TABDIST 1NEMO "11 June 2026"
 
 .SH "NAME"
 tabdist \- Compare distances between points in two tables, aka catalog matching
@@ -14,6 +14,9 @@ to those from the second table.
 .PP
 The output contains the same number of rows as the input number of
 rows in the first dataset.
+.PP
+There is also a hack to find the angular distance on the sky between two points.
+See examples below.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -91,6 +94,19 @@ and then a full 3D case:
 .fi
 Currently it will display the line number, the coordinate(s) in table1,
 then the best matching line number and coordinates(s) from table2, and finally the distance.
+
+.PP
+To compute the angular distance between two points is a bit kludgy.  Put the two sources
+in two tables as follows:
+.EX
+   $ tabdist tab1 tab2 2,3 2,3 radec=t dmin=9999
+   VIIZW700 258.847083 57.431389 258.847 57.4314    NGC6338  258.845812 57.411185 258.846 57.4112    72.7761
+
+   $ cat tab1 tab2
+   VIIZW700 258.847083 57.431389 9539
+   NGC6338  258.845812 57.411185 8185
+.EE
+the two galaxies are 73 arcsec apart.
 
 .SH "CAVEATS"
 Currently a brute force (quadratic in N) minimum distance is used.
