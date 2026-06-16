@@ -335,7 +335,7 @@ mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
 	Mvr  += xi * (mi*vp);
 	add_outer_product2(Mxx,xi,mi);
       }
-      sd[i] = M / (Pi * i? square(R[ir[i+1]]) - square(R[ir[i-1]])
+      sd[i] = M / Pi / (i? square(R[ir[i+1]]) - square(R[ir[i-1]])
 		        :  square(R[ir[i+1]]) );
       vl[i] = Mvl/M;
       vr[i] = abs(Mvr)/M;
@@ -361,7 +361,7 @@ mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
 	M    += mi;
 	add_outer_product2(Mxx,xi,mi);
       }
-      sd[i] = M / (Pi * i? square(R[ir[i+1]]) - square(R[ir[i-1]])
+      sd[i] = M / Pi / (i? square(R[ir[i+1]]) - square(R[ir[i-1]])
 		        :  square(R[ir[i+1]]) );
       symmetrize2(Mxx);
       double ab  = Mxx[0][0]-Mxx[1][1];
