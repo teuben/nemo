@@ -181,7 +181,7 @@ ${IONO}/check_file.o       : ${IONS}/check_file.h ${IONS}/check_file.c
 
 # main program used with g77 compiler
 ${IONO}/nemo_g77.o         : ${IONS}/nemo_g77.c
-	$(CC) $(CFLAGS) -D$(DFC) $(OPT) $(INC) -c ${IONS}/nemo_g77.c -o ${IONO}/nemo_g77.o 
+	$(CC) $(CFLAGS) -D$(DFC) $(OPT) $(INC) -c ${IONS}/nemo_g77.c -o ${IONO}/nemo_g77.o
 
 #
 # io_nemo test programs
