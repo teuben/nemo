@@ -1,4 +1,4 @@
-.TH TABCOLS 1NEMO "12 June 2026"
+.TH TABCOLS 1NEMO "20 June 2026"
 
 .SH "NAME"
 tabcols \- Select columns, and optionally rearrange, from a table
@@ -48,6 +48,13 @@ Column separator for input. By default an internal set (space, comma, tab, verti
 is used. A string can be specified here consistent of multiple characters.
 
 .TP
+\fBempty=t|f\fP
+Allow empty columns? For example "1,,3" would then return an empty string. Use with care,
+since column separators also matter.
+.br
+Default: f
+
+.TP
 \fBwidth=\fP
 Specify the width of the extracted columns. If fewer numbers than the actual number,
 the width value repeats.
@@ -94,5 +101,5 @@ Peter Teuben
 9-apr-09	V2.0 out=- now default and last argument	PJT
 5-may-2022	V2.1 converted to table V2 interface	PJT
 10-sep-2024	V2.4 added colsepin=	PJT
-12-jun-2026	V3.1 added width= and make empty=t default	PJT
+20-jun-2026	V3.1 added width= and make empty=f default	PJT
 .fi
