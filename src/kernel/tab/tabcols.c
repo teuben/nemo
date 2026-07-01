@@ -17,10 +17,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "select=all\n       columns to select (add 0 to add column with row number)",
     "colsep=SP\n        Column separator for output (SP,TAB,NL)",
     "colsepin=\n        Optional enforced character to separate columns in input",
-    "empty=t\n          Allow empty strings (only useful of colsep is not SP)",
+    "empty=f\n          Allow empty strings (only useful of colsep is not SP)",
     "width=\n           Enforce a width for each output column (repeats if absent)",
     "out=-\n            output file name",
-    "VERSION=3.1\n      11-jun-2026 PJT",
+    "VERSION=3.1a\n     19-jun-2026 PJT",
     NULL
 };
 
@@ -123,7 +123,7 @@ local void setparams(void)
         case '|':
         case '\\':
         case '/':       colsep = separator[0]; break;
-        default:        error("Illegal separator: s t n r : ,");
+        default:        error("Illegal separator: s t n r : , | \\ /");
     }
     dprintf(1,"colsep:'%c'\n", colsep);
 
