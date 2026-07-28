@@ -2,6 +2,10 @@
 #
 #  Peter Erwin's fitting program
 #
+#  sudo apt install scons libfftw3-dev  libcfitsio-dev
+
+#
+
 url=https://github.com/perwin/imfit
 version=git
 
