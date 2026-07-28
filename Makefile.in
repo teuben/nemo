@@ -348,6 +348,7 @@ targit0:
 	git clone $(GIT2) nemo_git/local/pgplot
 	tar zcf nemo_git.tar.gz nemo_git
 
+## upstream:  show upstream reminder
 upstream:
 	-git remote add upstream https://github.com/teuben/nemo
 	@echo Reminder, to sync with the upsteam:
