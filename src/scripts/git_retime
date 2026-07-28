@@ -1,0 +1,11 @@
+#! /usr/bin/env bash
+#
+#    changes the timestamp of each file in a git tree to that of
+#    the latest committed version. Like cvs used to do ...
+#
+
+git ls-tree -r --name-only HEAD | while read filename; do
+    unixtime=$(git log -1 --format="%at" -- "${filename}")
+    touchtime=$(date -d @$unixtime +'%Y%m%d%H%M.%S')
+    touch -t ${touchtime} "${filename}"
+done
