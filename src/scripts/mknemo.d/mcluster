@@ -6,7 +6,10 @@ set dir=$NEMO/usr/kuepper/mcluster
 if (! -e $dir) then
   echo "mknemo: $dir does not exist, creating it"
   cd $NEMO/usr/kuepper
-  git clone https://github.com/ahwkuepper/mcluster
+  #git clone https://github.com/ahwkuepper/mcluster
+
+  # july 2026 patch
+  git clone -b gcc15 https://github.com/teuben/mcluster
 endif
 
 cd $dir
