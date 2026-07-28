@@ -1,0 +1,35 @@
+#! /usr/bin/env bash
+#
+# mpicxx is needed
+# sudo apt install openmpi-bin libopenmpi-dev
+#
+
+
+URL1=https://github.com/lwang-astro/PeTar
+URL2=https://github.com/lwang-astro/SDAR
+URL3=https://github.com/FDPS/FDPS
+
+
+cd $NEMO/local
+git clone $URL1
+cd PeTar
+git clone $URL2
+git clone $URL3
+(cd FDPS; git checkout v7.0)
+
+
+sdar=`pwd`/SDAR
+fdps=`pwd`/FDPS
+
+if [ -d $NEMO/usr/makinfo/FDPS ]; then
+    fdps=$NEMO/usr/makinfo/FDPS
+fi
+
+echo SDAR=$sdar FDPS=$fdps
+
+./configure --without-mpi --with-fdps-prefix=$fdps --with-sdar-prefix=$sdar  --prefix=$NEMO/opt/
+make
+make install
+
+
+echo SDAR=$sdar FDPS=$fdps
