@@ -33,8 +33,10 @@
 #include <inline.h>
 #include <acc/timer.h>
 #define __NO_AUX_DEFACC
-#include <defacc.h> // $NEMOINC/defacc.h
+// issue105
 #include <stdinc.h>
+#include <defacc.h> // $NEMOINC/defacc.h
+
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace WDutils;
