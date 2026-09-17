@@ -23,7 +23,6 @@ double xrand(double xl, double xh)
 }
 
 
-static double seed_svh = -1.0;
 
 /*
  * ran_svh57:    returns a number between 0 and 1
@@ -31,7 +30,9 @@ static double seed_svh = -1.0;
 
 double ran_svh57(double seed)
 {
+  static double seed_svh = -1.0;
   double x2, xnew;
+  
   if (seed_svh < 0) {
     if (seed < 0.57 || seed > 0.91) error("SvH seed needs to be between 0.57 and 0.91");
     dprintf(0,"SvH seed=%g\n",seed);
