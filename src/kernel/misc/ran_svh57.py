@@ -46,5 +46,5 @@ for n in range(n):
         ran = int(('%.12f' % xnew)[5:])/1e9        # true chopping of 12 digits
     else:
         ran = math.modf(xnew*1000)[0]              # full math
-    print(ran)
+    print(f'{ran:.9f}')
     x = xnew
