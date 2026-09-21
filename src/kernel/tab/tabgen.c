@@ -14,6 +14,7 @@ string defv[] = {
     "sep=s\n       column separator (s=space t=tab c=comma v=vertical bar)",
     "addrow=f\n    Add row number (1=first) as first column?",
     "VERSION=0.8\n 14-feb-2024 PJT",
+    "header=None\n     Add a dummy header in a given style [ecsv, ipac]",
     NULL,
 };
 
@@ -34,6 +35,38 @@ local real linear(real c1, real c2)
   return count;
 }
 
+string add_header(int nc, string header)
+{
+  char *result = malloc(100);
+  result[0] = '\0';
+  int first = 1;
+  int arr_len = 0;
+
+  strcat(result, "| ");
+  for (int i = 0; i < nc; i++) {
+        char col_num[100];
+        if (!first) {
+            strcat(result, " | ");
+        }
+        sprintf(col_num, "col%d", (i+1));
+        strcat(result, col_num);
+        first = 0;
+        arr_len++;
+  }
+
+  strcat(result, " |");
+  strcat(result, "\n");
+  strcat(result, "| double");
+
+  for (int i = 1; i < arr_len; i++) {
+        strcat(result, " | double");
+  }
+
+  strcat(result, " |");
+
+  return result;
+
+}
 
 void nemo_main()
 {
@@ -48,13 +81,15 @@ void nemo_main()
   string seps = getparam("sep");
   bool Qrow = getbparam("addrow");
   char sep[8];
+  string header = getparam("header");
+
+  fprintf(ostr, "%s\n", add_header(header));
 
   if (seps[0] == 'c') strcpy(sep,",");
   else if (seps[0] == 's') strcpy(sep," ");
   else if (seps[0] == 't') strcpy(sep,"\t");
   else if (seps[0] == 'v') strcpy(sep,"|");
   else strcpy(sep,seps);
-  
 
   dprintf(1,"seed=%d\n",seed);
 
@@ -79,15 +114,16 @@ void nemo_main()
     int k=0;
     for (i=0; i<nr; i++)
       for (j=0; j<nc; j++)
-	x[k++] = my_random(0.0,1.0);
+        x[k++] = my_random(0.0,1.0);
   } else
     // output to file as well
     for (i=0; i<nr; i++) {
       if (Qrow) fprintf(ostr,"%d ", i+1);
       for (j=0; j<nc; j++) {
-	if (j>0) fprintf(ostr, "%s", sep);
-	fprintf(ostr,fmt, my_random(0.0, 1.0));
+        if (j>0) fprintf(ostr, "%s", sep);
+        fprintf(ostr,fmt, my_random(0.0, 1.0));
       }
       fprintf(ostr,"\n");
     }
+
 }
