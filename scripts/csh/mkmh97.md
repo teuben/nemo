@@ -2,11 +2,11 @@
 
 Loosely based on the paper by Makino & Hut (1997) -
 https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract - the
-**mkmh97.sh** script lets two Plummer (1911) interact with either
-other. In the original Makino & Hut paper the masses were equal, but
+**mkmh97.sh** script lets two Plummer (1911) spheres interact with either
+other. In the original mh97 paper the masses were equal, but
 the model, relative velocity and impact parameter were all parameters.
 
-In this script we extend this with a few options:
+In this script we extend this with a few options, explained below:
 
 1. a (near) collision or a (near) circular orbit. (controlled by the sign of **v0=**)
 
@@ -26,7 +26,7 @@ for further time-dependant analysis.
 ## Related papers
 
 
-* https://arxiv.org/pdf/2506.09136   -   Mergers of galaxies
+* https://arxiv.org/pdf/2506.09136   -   Mergers of galaxies- Kaviraj
 
 
 ## Input parameters
