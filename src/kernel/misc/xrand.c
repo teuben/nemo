@@ -8,13 +8,14 @@
  *
  *     4-mar-94    ansi, added -DNEED_RAND section - added stdin.h
  *    18-apr-2021  von Hoerner's 1957 pretty good algorithm
+ *    24-sep-2026  Fix the xlo from 0.57 to 0.59 - no doubt svh57 caused that
  */
 
 #include <stdinc.h>
 #include <stdlib.h>  /* this is where rand() normally resides */
 
 #ifndef RAND_MAX
-#define RAND_MAX  2147483647   /* some machines (DOS) may need 32767 */
+#define RAND_MAX  2147483647   /* some older machines may need 32767 */
 #endif
 
 double xrand(double xl, double xh)
@@ -31,15 +32,16 @@ double xrand(double xl, double xh)
 double ran_svh57(double seed)
 {
   static double seed_svh = -1.0;
+  static double xlo = 0.59, xhi = 0.91;
   double x2, xnew;
   
   if (seed_svh < 0) {
-    if (seed < 0.57 || seed > 0.91) error("SvH seed needs to be between 0.57 and 0.91");
+    if (seed < xlo || seed > xhi) error("SvH seed needs to be between %g and %g", xlo, xhi);
     dprintf(0,"SvH seed=%g\n",seed);
     seed_svh = seed;
   }
   x2 = seed_svh*seed_svh;
-  if (x2 < 0.57)
+  if (x2 < xlo)
     seed_svh = x2 + 0.32;
   else
     seed_svh = x2;
