@@ -27,6 +27,7 @@ double xrand(double xl, double xh)
 
 /*
  * ran_svh57:    returns a number between 0 and 1
+ *               aka "middle square method" ref. von Neumann 1946
  */
 
 double ran_svh57(double seed)

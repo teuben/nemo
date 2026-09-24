@@ -3,6 +3,7 @@
 #   random number generator according to SvH 1957,
 #   as explained in vH1960. In NEMO also as ran_svh57() in xrand.c
 #   and use xrandom to test the C version
+#   aka "middle square method" ref. von Neumann 1946
 #
 #  Comparing the python and C version:
 #      ./ran_svh57.py   0.580128 1001 > tab1
