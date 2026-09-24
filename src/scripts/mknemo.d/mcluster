@@ -3,16 +3,23 @@
 
 set dir=$NEMO/usr/kuepper/mcluster
 
+set git=kuepper
+set git=teuben
+
 if (! -e $dir) then
   echo "mknemo: $dir does not exist, creating it"
   cd $NEMO/usr/kuepper
-  #git clone https://github.com/ahwkuepper/mcluster
-
-  # july 2026 patch
-  git clone -b gcc15 https://github.com/teuben/mcluster
+  if ( $git == "kuepper") then
+    git clone https://github.com/ahwkuepper/mcluster
+  else
+    # july 2026 patch
+    git clone -b gcc15 https://github.com/teuben/mcluster
+  endif
 endif
 
 cd $dir
 git pull
 make clean mcluster
 mv mcluster $NEMOBIN
+
+echo mcluster $git `date` >> $NEMO/opt/mknemo.log
