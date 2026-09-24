@@ -13,12 +13,12 @@
 import math
 import sys
 
-# pick number between 0.57 and 0.91
+# pick number between 0.59 and 0.91
 
-xlo = 0.57
+xlo = 0.59
 xhi = 0.91
 
-seed = 0.580128
+seed = 0.590207
 n    = 10
 if True:
     seed = float(sys.argv[1])
