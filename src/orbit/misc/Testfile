@@ -1,3 +1,5 @@
+# -*- makefile -*-
+
 DIR = src/orbit/misc
 BIN = mkorbit orbint orbintv otos orblist 
 NEED = $(BIN) potcode snapprint
@@ -10,7 +12,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f orb1.in orb2.in snap1.in orb?.out orb??.out snap?.out orb?.log
+	@rm -f orb?.in snap1.in orb?.out orb??.out snap?.out orb?.log
 
 NBODY = 10
 OMEGA = 0.1
@@ -42,8 +44,7 @@ otos:
 	@bsf snap2.out '0.10005 0.413643 -1 1 474'
 	@bsf snap3.out '0.0998601 0.414066 -1 1 474'
 	@bsf snap4.out '0.0999947 0.413788 -1 1 474'
-	
-	
+
 orbint: orb1.in orbint2
 	@echo Running $@
 	$(EXEC) orbint orb1.in orb1.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=euler   
@@ -56,7 +57,6 @@ orbint: orb1.in orbint2
 	@bsf orb3.out '0.231297 0.417577 -0.707107 1 128'
 	@bsf orb4.out '0.144751 0.500719 -0.707107 1 128'
 	@bsf orb5.out '0.239546 0.406907 -0.293361 1 128' 
-	
 
 orbint2: orb2.in
 	@echo Running $@
@@ -71,13 +71,12 @@ orbint2: orb2.in
 	@bsf orb2d.out '4.29881 17.0019 -8.8621 100 110018'
 	@bsf orb2e.out # this fails because leap4 doesn't know about an ODE in rotating potential
 
-	
 orbint3: orb3.in
 	@echo Running $@
 	$(EXEC) orbint orb3.in orb3a.out nsteps=10000 dt=0.01 ndiag=1000 mode=euler   
 
 
-orbintv:
+orbintv: orb1.in
 	@echo Running $@
 	$(EXEC) orbintv orb1.in orb1v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dopri5
 	$(EXEC) orbintv orb1.in orb2v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dop853  
