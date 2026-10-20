@@ -21,56 +21,61 @@ to find the fundamental frequencies and differentiate between various orbital
 families (see also <a href='orbname.1.html'><i>orbname(1NEMO)</i></a>
  for an  alternative approach). <p>
 <i>The analysis
-of 3-dimensional orbits is still under development.</i> 
+of 3-dimensional orbits is still under development.</i> <p>
+The  source code was
+never in the mainline of NEMO, didn&rsquo;t make it to CVS and was on a disk that
+crashed. A backup disk is sadly also a disk with clicking noises when booted
+up. It is probably easier to recreate this program from scratch if there
+is a need to revive. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+The following parameters are recognized in
+any order if the keyword is also given: 
 <dl>
 
-<dt><b>in=</b><i>in_orbit</i>
-</dt>
-<dd>Input orbit, must be in <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
- format. The number of steps in the
-orbit must be a power of 2, and must contain equal stepsizes. No default.
-</dd>
+<dt><b>in=</b><i>in_orbit</i> </dt>
+<dd>Input orbit, must be
+in <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
+ format. The number of steps in the orbit must be a power
+of 2, and must contain equal stepsizes. No default. </dd>
 
 <dt><b>var=</b><i>v1,v2,...</i> </dt>
-<dd>Variable(s) to select to fourier analyze. Valid names are: <b>x,
-y, z, vx, vy, vz</b>.  At most <b>NDIM</b> can be selected, if <b>NDIM</b> are selected, <i>orbwood</i>
-will attempt to label and identify the lines. Default: <b>x,y</b>. </dd>
+<dd>Variable(s)
+to select to fourier analyze. Valid names are: <b>x, y, z, vx, vy, vz</b>.  At most
+<b>NDIM</b> can be selected, if <b>NDIM</b> are selected, <i>orbwood</i> will attempt to label
+and identify the lines. Default: <b>x,y</b>. </dd>
 
-<dt><b>raw=</b><i>out_table</i>
-</dt>
-<dd>Output table raw spectrum, if desired. The table will contain 3 columns
-which contain the <i>angular frequency, amplitude</i>  and <i>phase</i> (degrees). Default:
-none. </dd>
+<dt><b>raw=</b><i>out_table</i> </dt>
+<dd>Output table raw spectrum,
+if desired. The table will contain 3 columns which contain the <i>angular frequency,
+amplitude</i>  and <i>phase</i> (degrees). Default: none. </dd>
 
 <dt><b>maxlin=</b> </dt>
-<dd>Maximum number of lines to search for.  [Default: <b>50</b>]. </dd>
+<dd>Maximum number of
+lines to search for.  [Default: <b>50</b>]. </dd>
 
-<dt><b>fund=</b><i>f1,f2,...</i>
+<dt><b>fund=</b><i>f1,f2,...</i> </dt>
+<dd>Override the fundamental
+frequencies assumed for this orbit. Note that the number of fundamental
+frequencies should be the same as number the number of variables in <b>var=</b>.
+Default: attempted to retrieve from the analyzed spectra. </dd>
+
+<dt><b>fundmax=</b><i>max_value</i>
 </dt>
-<dd>Override the fundamental frequencies assumed for this orbit. Note that the
-number of fundamental frequencies should be the same as number the number
-of variables in <b>var=</b>. Default: attempted to retrieve from the analyzed spectra.
-</dd>
-
-<dt><b>fundmax=</b><i>max_value</i> </dt>
-<dd>Maximum fundamental frequency to search for peaks in
-the auto- correlation spectrum. [Default: 20]  </dd>
+<dd>Maximum fundamental frequency to search for peaks in the auto- correlation
+spectrum. [Default: 20]  </dd>
 
 <dt><b>freqdiff=</b> </dt>
-<dd>Maximum frequency
-difference between two lines to consider them still the same line. This
-is used in counting occurences of peaks in the auto-correlation table. The
-output FREQ_DIFF will  contain the number of occurences and the frequency
-of the auto-correlation table. [Default: <b>0.005</b>]. </dd>
+<dd>Maximum frequency difference between
+two lines to consider them still the same line. This is used in counting
+occurences of peaks in the auto-correlation table. The output FREQ_DIFF will
+ contain the number of occurences and the frequency of the auto-correlation
+table. [Default: <b>0.005</b>]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here an example shows
-how to create and analyze  the loop orbit that is displayed in Figure 3
-of Binney and Spergel (1982): <br>
+Here an example shows how to create and analyze
+ the loop orbit that is displayed in Figure 3 of Binney and Spergel (1982):
+<br>
 <pre>&gt; mkorbit out=orb3 x=0.49 y=0.00 z=0 vx=1.4*sind(20) vy=1.4*cosd(20) vz=0 
         potname=log potpars=0,0.1,0.1,0.9
 &gt; orbint in=orb3 out=orb3.out &rsquo;nsteps=4096*10-1&rsquo; dt=0.01

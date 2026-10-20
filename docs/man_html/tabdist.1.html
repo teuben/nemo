@@ -24,13 +24,15 @@ each containing specified column(s) that represent a set of 1D, 2D or 3D
 points, it will compute the nearest neigbor(s) from each point in the first
 table to those from the second table.  <p>
 The output contains the same number
-of rows as the input number of rows in the first dataset. 
+of rows as the input number of rows in the first dataset. <p>
+There is also
+a hack to find the angular distance on the sky between two points. See examples
+below. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The
-following parameters are recognized in order; they may be given in any
-order if the keyword is also given. Use <b>--help</b> to confirm this man page is
-up to date.  
+ The following parameters are recognized in order; they
+may be given in any order if the keyword is also given. Use <b>--help</b> to confirm
+this man page is up to date.  
 <dl>
 
 <dt><b>in1=</b> </dt>
@@ -102,26 +104,36 @@ original list. Thus they must match one on one: <br>
 </pre>Currently it will display the line number, the coordinate(s) in table1,
 then the best matching line number and coordinates(s) from table2, and
 finally the distance. 
+<p> <p>
+To compute the angular distance between two points
+is a bit kludgy.  Put the two sources in two tables as follows:     $ tabdist
+tab1 tab2 2,3 2,3 radec=t dmin=9999<br>
+    VIIZW700 258.847083 57.431389 258.847 57.4314    NGC6338  258.845812 57.411185
+258.846 57.4112    72.7761<br>
+ 
+<p>    $ cat tab1 tab2<br>
+    VIIZW700 258.847083 57.431389 9539<br>
+    NGC6338  258.845812 57.411185 8185<br>
+  the two galaxies are 73 arcsec apart. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-Currently a brute force (quadratic in N) minimum
-distance is used. 
+Currently a brute force
+(quadratic in N) minimum distance is used. 
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabdms.1.html'>tabdms(1NEMO)</a>
-, comparecats(SIRTF.map2)
-<p>
+,
+comparecats(SIRTF.map2) <p>
 k-d Match: <a href='http://arxiv.org/abs/1304.0838'>http://arxiv.org/abs/1304.0838</a>
  
 <p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
-src/kernel/tab/tabdist.c 
+src/kernel/tab/tabdist.c
+
 <p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
-Peter
-
-<p>Teuben 
+Peter Teuben 
 <p> 
 <h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
