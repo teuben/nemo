@@ -8,10 +8,12 @@
 
 # from: man1 CGS.1 2005A&A...433...57T
 #   to: 
-# stem: https://ui.adsabs.harvard.edu/abs/
-
+# old stem: https://ui.adsabs.harvard.edu/abs/
+# new stem: https://scixplorer.org/abs/
+      
 BEGIN {
-    url = "https://ui.adsabs.harvard.edu/abs"
+    #url = "https://ui.adsabs.harvard.edu/abs"
+    url = "https://scixplorer.org/abs"
     printf("<TABLE BORDER>\n");
     printf("<td>   <B> NAME </B> </td>\n")
     printf("<td>   <B> BIBCODE </B> </td>\n")

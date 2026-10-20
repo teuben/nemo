@@ -8,7 +8,7 @@
 
 
 BEGIN {
-    url1 = "https://ui.adsabs.harvard.edu/abs"
+    url1 = "https://scixplorer.org/abs"
     url2 = "http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html"
     url3 = "https://astronemo.readthedocs.io"
 }
