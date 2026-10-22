@@ -1,0 +1,39 @@
+#! /bin/bash
+#
+#  SoFia-2 source finder
+#  See also their ESPLADA (ALMA based) pipeline#
+#
+#  Needs the wcslib library (optionally hdf5, ast)
+
+version=2.7.1
+wget=wgetc
+url=https://gitlab.com/SoFiA-Admin/SoFiA-2
+dir=SoFiA-2
+git=1
+
+for arg in $*; do
+  export $arg
+done
+
+set -x
+
+cd $NEMO/local
+
+if [ $git == 1 ]; then
+    if [ -d $dir ]; then
+        cd $dir
+        git pull
+    else
+	git clone $url
+	cd $dir
+    fi
+fi
+
+# make options:    OMP=true WCS=AST HDF5=true LANG=C++
+make clean
+make
+cp sofia $NEMO/opt/bin
+
+echo Installed version=$version
+
+echo $dir $version `date` >> $NEMO/opt/mknemo.log
