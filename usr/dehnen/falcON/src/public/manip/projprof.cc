@@ -127,7 +127,7 @@ namespace falcON { namespace Manipulate {
   };
   //////////////////////////////////////////////////////////////////////////////
   inline void projprof::print_line(bool V) const {
-    OUT  <<"#--------------------------------------------------";
+    OUT  <<"#-----------------------------------------------------------------";
     if(V)
       OUT<<"----------------------------------------------------";
     OUT  <<'\n';
@@ -171,6 +171,9 @@ namespace falcON { namespace Manipulate {
     else   OUT<<'\n';
     if(X0) OUT<<"# xcen    = "<<(*X0)<<'\n';
     if(V0) OUT<<"# vcen    = "<<(*V0)<<'\n';
+    OUT << "# Nb      = " << PP.Nb() << '\n';
+    OUT << "# N       = " << PP.N() << '\n';
+    OUT << "# Mtot    = " << PP.Mtot() << '\n';
     OUT  <<"#\n"
 	 <<"#     radius        Sigma";
     if(PP.has_vels())
