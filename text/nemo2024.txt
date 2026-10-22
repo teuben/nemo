@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+
+=======
 Projects for NEMO2024:
 
 1. images
@@ -9,3 +12,4 @@ Jadon
 Shubham Bhatnagar
 Anirudha Kumar
 Peter Teuben
+>>>>>>> upstream/master
