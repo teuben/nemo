@@ -118,7 +118,7 @@ GalPot_h		:= $(IACC)GalPot.cc $(IACC)GalPot.h \
 # -----------------------
 
 basic_cc		:= $(SLIB)basic.cc $(basic_h)
-body_cc			:= $(SLIB)body.cc $(body_h) $(nemopp_h) $(numerics) \
+body_cc			:= $(SLIB)body.cc $(body_h) $(bodyfunc_h) $(nemopp_h) $(numerics) \
 				$(heap_h)
 kernel_cc		:= $(SLIB)kernel.cc $(kernel_h) $(kernel_SSE_h)
 partner_cc		:= $(SLIB)partner.cc $(partner_h) $(interact_h)
@@ -388,7 +388,7 @@ ifneq ($(COMPILER),icc)
 $(BIN)addprop:		$(SEXE)addprop.cc $(LIBT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 endif
-$(BIN)density:		$(SEXE)density.cc $(BINT) $(main_h) $(neighbours_h) $(makefiles)
+$(BIN)density:		$(SEXE)density.cc $(BINT) $(main_h) $(neighbours_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 ifneq ($(DPRECISION),-DfalcON_DOUBLE)
 $(BIN)g2s:		$(SEXE)g2s.cc $(LIBT) $(main_h) $(makefiles)
@@ -421,13 +421,13 @@ $(BIN)mksingle:		$(SEXE)mksingle.cc $(BINT) $(main_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)mkWD99disc:	$(SEXE)mkWD99disc.cc $(main_h) $(WD99disc_h) $(LIB)WD99disc.o $(makefiles)
 			$(MAKE_EXE) $(LIB)WD99disc.o $(NEMO_EXE_FLGS)
-$(BIN)s2a:		$(SEXE)s2a.cc $(BINT) $(main_h) $(body_h) $(makefiles)
+$(BIN)s2a:		$(SEXE)s2a.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 ifneq ($(DPRECISION),-DfalcON_DOUBLE)
 $(BIN)s2g:		$(SEXE)s2g.cc $(LIBT) $(main_h) $(body_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 endif
-$(BIN)s2s:		$(SEXE)s2s.cc $(BINT) $(main_h) $(body_h) $(makefiles)
+$(BIN)s2s:		$(SEXE)s2s.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)scale_eps:	$(SEXE)scale_eps.cc $(BINT) $(main_h) $(body_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
