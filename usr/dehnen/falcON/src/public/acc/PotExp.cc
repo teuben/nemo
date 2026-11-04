@@ -187,48 +187,38 @@ namespace {
       falcON_ErrorN("PotExp: no snapshot in file %s\n",file);
     snap_in insnap(innemo);
     int N = insnap.Ntot();
-    // 2.1 read positions:
+    // 2.1 read positions. data_in::read() coerces the file's float or double
+    //     data into `real`, so always read into vect/real buffers and then
+    //     convert to the float arrays AddCoeffs() expects.
     vectf *x = falcON_NEW(vectf,N);
     if(insnap.has(nemo_io::pos)) {
       data_in indata(insnap,nemo_io::pos);
-      if(indata.type() == nemo_io::Single) 
-	indata.read(x);
-      else if(indata.type() == nemo_io::Double) {
-	vectd*_x = falcON_NEW(vectd,N);
-	indata.read(_x);
-        for(int i=0; i!=N; ++i) x[i] = _x[i];
-        falcON_DEL_A(_x);
-      } else
+      if(indata.type() != nemo_io::Single && indata.type() != nemo_io::Double)
 	falcON_ErrorN("PotExp: position not in float nor double\n");
+      vect*_x = falcON_NEW(vect,N);
+      indata.read(_x);
+      for(int i=0; i!=N; ++i) x[i] = _x[i];
+      falcON_DEL_A(_x);
     } else if(insnap.has(nemo_io::posvel)) {
       data_in indata(insnap,nemo_io::posvel);
-      if(indata.type() == nemo_io::Single) {
-	vectf*_x = falcON_NEW(vectf,2*N);
-	indata.read(_x);
-        for(int i=0,j=0; i!=N; ++i,j+=2) x[i] = _x[j];
-        falcON_DEL_A(_x);
-      } else if(indata.type() == nemo_io::Double) {
-	vectd*_x = falcON_NEW(vectd,2*N);
-	indata.read(_x);
-        for(int i=0,j=0; i!=N; ++i,j+=2) x[i] = _x[j];
-        falcON_DEL_A(_x);
-      } else
+      if(indata.type() != nemo_io::Single && indata.type() != nemo_io::Double)
 	falcON_ErrorN("PotExp: phases not in float nor double\n");
+      vect*_x = falcON_NEW(vect,2*N);
+      indata.read(_x);
+      for(int i=0,j=0; i!=N; ++i,j+=2) x[i] = _x[j];
+      falcON_DEL_A(_x);
     } else
       falcON_ErrorN("PotExp: no positions found in snapshot\n");
     // 2.2 read masses:
     float *m = falcON_NEW(float,N);
     if(insnap.has(nemo_io::mass)) {
       data_in indata(insnap,nemo_io::mass);
-      if(indata.type() == nemo_io::Single) 
-	indata.read(m);
-      else if(indata.type() == nemo_io::Double) {
-	double*_m = falcON_NEW(double,N);
-	indata.read(_m);
-        for(int i=0; i!=N; ++i) m[i] = _m[i];
-        falcON_DEL_A(_m);
-      } else
+      if(indata.type() != nemo_io::Single && indata.type() != nemo_io::Double)
 	falcON_ErrorN("PotExp: masses not in float nor double\n");
+      real*_m = falcON_NEW(real,N);
+      indata.read(_m);
+      for(int i=0; i!=N; ++i) m[i] = _m[i];
+      falcON_DEL_A(_m);
     } else
       falcON_ErrorN("PotExp: no masses found in snapshot\n");
     // 3 initializing coefficients
