@@ -63,17 +63,19 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct bf_type : public bf_type_base<T> {
     typedef T(*const bf_pter)(body const&, double, const real*);
+    // cast via void(*)(void) keeps -Wcast-function-type quiet
+    typedef void(*any_fn)(void);
     static T func(void(*const f)(body const&, double, const real*),
 		  body const&b, double t, const real*p) {
-      if (f) { f(b,t,p); }
-      return bf_type_base<T>::default_value();
+      return f? (reinterpret_cast<bf_pter>(reinterpret_cast<any_fn>(f)))(b,t,p)
+	      : bf_type_base<T>::default_value();
     }
     //--------------------------------------------------------------------------
     typedef T(*const Bf_pter)(bodies const&, double, const real*);
     static T func(void(*const f)(bodies const&, double, const real*),
 		  bodies const&b, double t, const real*p) {
-      if (f) { f(b,t,p); }
-      return bf_type_base<T>::default_value();
+      return f? (reinterpret_cast<Bf_pter>(reinterpret_cast<any_fn>(f)))(b,t,p)
+	      : bf_type_base<T>::default_value();
     }
   };
   // ///////////////////////////////////////////////////////////////////////////
